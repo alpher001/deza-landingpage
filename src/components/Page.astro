@@ -1,0 +1,929 @@
+---
+import Base from "../layouts/Base.astro";
+import ArewaPattern from "./ArewaPattern.astro";
+import PhoneMock from "./PhoneMock.astro";
+import Icon from "./Icon.astro";
+import { copy, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = copy[lang];
+const trustIcons = ["tag", "shield", "share", "banknote"] as const;
+// The waitlist endpoint is decided later. Until it is set, the form says
+// sign-ups open soon instead of pretending to save anything.
+const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
+---
+
+<Base lang={lang} title={t.meta.title} description={t.meta.description}>
+  <header class="top on-ink">
+    <div class="wrap bar">
+      <a class="logo" href={lang === "en" ? "/" : "/ha/"} aria-label="Deza">
+        <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true">
+          <path d="M20 16h12c9.9 0 16 6.4 16 16s-6.1 16-16 16H20z" fill="#FFC629"></path>
+          <path d="M28 24h4c4.6 0 8 3 8 8s-3.4 8-8 8h-4z" fill="#1E2329"></path>
+        </svg>
+        <span>Deza</span>
+      </a>
+      <nav aria-label="Main">
+        <a href="#how">{t.nav.how}</a>
+        <a href="#why">{t.nav.safety}</a>
+        <a href="#drive">{t.nav.drive}</a>
+        <a href="#delivery">{t.nav.delivery}</a>
+      </nav>
+      <div class="bar-end">
+        <a class="lang" href={t.nav.switchHref} hreflang={lang === "en" ? "ha" : "en"}>{t.nav.switchLabel}</a>
+        <a class="btn btn-gold btn-sm" href="#waitlist">{t.nav.cta}</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero on-ink">
+      <ArewaPattern id="arewa-hero" opacity={0.1} />
+      <div class="glow" aria-hidden="true"></div>
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <span class="kicker">{t.hero.eyebrow}</span>
+          <h1>
+            {t.hero.title}<br /><span class="accent">{t.hero.titleAccent}</span>
+          </h1>
+          <p class="lead">{t.hero.lead}</p>
+          <div class="actions">
+            <a class="btn btn-gold" href="#waitlist">{t.hero.cta}<Icon name="arrow" size={18} stroke={2.25} /></a>
+            <a class="btn btn-ghost" href="#how">{t.hero.secondary}</a>
+          </div>
+          <p class="note"><span class="live"></span>{t.hero.note}</p>
+        </div>
+        <div class="hero-phone">
+          <PhoneMock t={t.phone} />
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="how">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="kicker">{t.how.kicker}</span>
+          <h2>{t.how.title}</h2>
+        </div>
+        <ol class="steps">
+          {
+            t.how.steps.map((step, i) => (
+              <li>
+                <span class="num">0{i + 1}</span>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section id="why" class="why on-ink">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="kicker">{t.trust.kicker}</span>
+          <h2>{t.trust.title}</h2>
+        </div>
+        <ul class="trust">
+          {
+            t.trust.items.map((item, i) => (
+              <li>
+                <span class="ico">
+                  <Icon name={trustIcons[i]} size={26} />
+                </span>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="route-sec">
+      <div class="wrap route-grid">
+        <div class="section-head">
+          <span class="kicker">{t.route.kicker}</span>
+          <h2>{t.route.title}</h2>
+          <p class="body">{t.route.body}</p>
+        </div>
+        <figure class="city" aria-hidden="true">
+          <svg viewBox="0 0 560 400">
+            <g class="streets">
+              <path d="M0 70 C120 60 200 90 300 80 S480 50 560 66" />
+              <path d="M0 210 C140 200 220 230 330 214 S470 190 560 204" />
+              <path d="M0 330 C110 340 260 316 360 330 S500 350 560 336" />
+              <path d="M80 0 C90 120 70 260 96 400" />
+              <path d="M230 0 C220 140 250 250 226 400" />
+              <path d="M390 0 C400 110 376 280 404 400" />
+              <path d="M500 0 C490 130 516 260 494 400" />
+              <path d="M0 0 L560 400" class="thin" />
+              <path d="M300 0 C330 120 150 260 0 290" class="thin" />
+            </g>
+            <path class="trip-line" d="M96 330 C95 270 80 225 150 214 S300 222 318 214 S390 150 392 82 S440 70 494 66" pathLength="1" />
+            <g class="stop-a" transform="translate(96 330)">
+              <circle r="14" class="halo" />
+              <circle r="8" />
+            </g>
+            <g class="stop-b" transform="translate(494 66)">
+              <circle r="14" class="halo" />
+              <rect x="-7" y="-7" width="14" height="14" rx="2" />
+            </g>
+            <text x="116" y="356">{t.route.pickup}</text>
+            <text x="494" y="42" text-anchor="middle">{t.route.dropoff}</text>
+          </svg>
+        </figure>
+      </div>
+    </section>
+
+    <section id="drive" class="drive on-ink">
+      <ArewaPattern id="arewa-drive" opacity={0.08} size={64} />
+      <div class="wrap drive-grid">
+        <div>
+          <span class="kicker">{t.drive.kicker}</span>
+          <h2>{t.drive.title}</h2>
+        </div>
+        <div class="drive-body">
+          <p class="body">{t.drive.body}</p>
+          <ul class="ticks">
+            {
+              t.drive.points.map((p) => (
+                <li>
+                  <Icon name="check" size={18} stroke={2.5} />
+                  {p}
+                </li>
+              ))
+            }
+          </ul>
+          <a class="btn btn-gold" href="#waitlist" data-role="drive">{t.drive.cta}</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="delivery" class="delivery">
+      <div class="wrap delivery-card">
+        <span class="parcel"><Icon name="package" size={40} stroke={1.5} /></span>
+        <div>
+          <span class="kicker">{t.delivery.kicker}</span>
+          <h2>{t.delivery.title}</h2>
+          <p class="body">{t.delivery.body}</p>
+        </div>
+        <a class="btn btn-ink" href="#waitlist" data-role="send">{t.delivery.cta}</a>
+      </div>
+    </section>
+
+    <section class="about">
+      <div class="wrap about-grid">
+        <span class="kicker">{t.about.kicker}</span>
+        <h2>{t.about.title}</h2>
+        <p class="body">{t.about.body}</p>
+      </div>
+    </section>
+
+    <section id="waitlist" class="waitlist on-ink">
+      <ArewaPattern id="arewa-wait" opacity={0.09} />
+      <div class="wrap wait-grid">
+        <div>
+          <span class="kicker">{t.waitlist.kicker}</span>
+          <h2>{t.waitlist.title}</h2>
+          <p class="body">{t.waitlist.body}</p>
+        </div>
+        <form
+          class="form"
+          data-endpoint={waitlistUrl}
+          data-msg-success={t.waitlist.success}
+          data-msg-closed={t.waitlist.notOpen}
+          data-msg-error={t.waitlist.error}
+        >
+          <label>
+            <span>{t.waitlist.phone}</span>
+            <input
+              name="phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              required
+              pattern="[0-9+ ]{10,16}"
+              placeholder={t.waitlist.phonePlaceholder}
+            />
+          </label>
+          <label>
+            <span>{t.waitlist.area}</span>
+            <input name="area" type="text" autocomplete="address-level3" placeholder={t.waitlist.areaPlaceholder} />
+          </label>
+          <fieldset>
+            <legend>{t.waitlist.role}</legend>
+            <div class="chips">
+              <label><input type="radio" name="role" value="ride" checked /><span>{t.waitlist.roles.ride}</span></label>
+              <label><input type="radio" name="role" value="drive" /><span>{t.waitlist.roles.drive}</span></label>
+              <label><input type="radio" name="role" value="send" /><span>{t.waitlist.roles.send}</span></label>
+            </div>
+          </fieldset>
+          <input type="hidden" name="lang" value={lang} />
+          <button class="btn btn-gold" type="submit">{t.waitlist.submit}</button>
+          <p class="fine">{t.waitlist.privacy}</p>
+          <p class="status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-row">
+      <span class="logo small">
+        <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true">
+          <path d="M20 16h12c9.9 0 16 6.4 16 16s-6.1 16-16 16H20z" fill="#FFC629"></path>
+          <path d="M28 24h4c4.6 0 8 3 8 8s-3.4 8-8 8h-4z" fill="#1E2329"></path>
+        </svg>
+        Deza
+      </span>
+      <span>{t.footer.tagline}</span>
+      <span>© {new Date().getFullYear()} {t.footer.rights}</span>
+    </div>
+  </footer>
+</Base>
+
+<script>
+  // Buttons like "Register as a rider" pre-select the matching option.
+  document.querySelectorAll<HTMLAnchorElement>("a[data-role]").forEach((a) => {
+    a.addEventListener("click", () => {
+      const radio = document.querySelector<HTMLInputElement>(`input[name=role][value=${a.dataset.role}]`);
+      if (radio) radio.checked = true;
+    });
+  });
+
+  const form = document.querySelector<HTMLFormElement>("form.form");
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const status = form.querySelector<HTMLElement>(".status")!;
+    const button = form.querySelector<HTMLButtonElement>("button")!;
+    const { endpoint, msgSuccess, msgClosed, msgError } = form.dataset;
+    status.dataset.state = "";
+    if (!endpoint) {
+      status.textContent = msgClosed ?? "";
+      return;
+    }
+    button.disabled = true;
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      status.textContent = msgSuccess ?? "";
+      status.dataset.state = "ok";
+      form.reset();
+    } catch {
+      status.textContent = msgError ?? "";
+      status.dataset.state = "error";
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  /* Header */
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--ink) 92%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--paper-6);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--lg);
+    height: 68px;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 21px;
+    letter-spacing: -0.03em;
+    text-decoration: none;
+  }
+
+  nav {
+    display: flex;
+    gap: var(--lg);
+    margin-inline: auto;
+    font-size: 15px;
+  }
+
+  nav a,
+  .lang {
+    color: var(--paper-70);
+    text-decoration: none;
+    transition: color 150ms;
+  }
+
+  nav a:hover,
+  .lang:hover {
+    color: var(--paper);
+  }
+
+  .bar-end {
+    display: flex;
+    align-items: center;
+    gap: var(--md);
+  }
+
+  .lang {
+    font-size: 15px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--r-pill);
+    box-shadow: inset 0 0 0 1px var(--paper-12);
+  }
+
+  .btn-sm {
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .btn-ink {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .btn-ink:hover {
+    background: color-mix(in srgb, var(--ink) 88%, white);
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .glow {
+    position: absolute;
+    right: -10%;
+    top: 10%;
+    width: 60vw;
+    max-width: 760px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--gold) 22%, transparent), transparent 62%);
+    z-index: -1;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+    gap: var(--xxl);
+    padding-block: clamp(56px, 9vw, 120px) clamp(64px, 9vw, 112px);
+  }
+
+  .hero h1 {
+    margin-top: var(--lg);
+    font-size: clamp(46px, 8.2vw, 104px);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+  }
+
+  .accent {
+    color: var(--gold);
+  }
+
+  .lead {
+    margin-top: var(--lg);
+    max-width: 34ch;
+    font-size: clamp(18px, 1.7vw, 21px);
+    color: var(--paper-70);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: var(--xl);
+  }
+
+  .note {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: var(--lg);
+    font-size: 14px;
+    color: var(--paper-55);
+  }
+
+  .live {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 0 4px var(--gold-20);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    50% {
+      box-shadow: 0 0 0 8px transparent;
+    }
+  }
+
+  .hero-phone {
+    display: flex;
+    justify-content: center;
+    transform: rotate(-3deg);
+  }
+
+  /* Shared section bits */
+  section {
+    position: relative;
+  }
+
+  .how,
+  .why,
+  .route-sec,
+  .about {
+    padding-block: clamp(72px, 10vw, 136px);
+  }
+
+  .section-head {
+    display: grid;
+    gap: var(--md);
+    max-width: 760px;
+  }
+
+  h2 {
+    font-size: clamp(34px, 5vw, 60px);
+    font-weight: 800;
+  }
+
+  h3 {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+
+  .body {
+    font-size: 18px;
+    color: var(--ink-70);
+    max-width: 52ch;
+  }
+
+  .on-ink .body {
+    color: var(--paper-70);
+  }
+
+  /* How it works */
+  .steps {
+    list-style: none;
+    margin: var(--xxl) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1.5px solid var(--ink);
+  }
+
+  .steps li {
+    padding: var(--xl) var(--xl) 0 0;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  .steps li + li {
+    padding-left: var(--xl);
+    border-left: 1px solid var(--ink-10);
+  }
+
+  .num {
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-55);
+    margin-bottom: var(--md);
+  }
+
+  .steps p {
+    color: var(--ink-70);
+  }
+
+  /* Why */
+  .trust {
+    list-style: none;
+    padding: 0;
+    margin: var(--xxl) 0 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--paper-12);
+    border: 1px solid var(--paper-12);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+
+  .trust li {
+    background: var(--ink);
+    padding: var(--xl) var(--lg);
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  .ico {
+    color: var(--gold);
+    margin-bottom: var(--md);
+  }
+
+  .trust p {
+    color: var(--paper-70);
+    font-size: 16px;
+  }
+
+  /* Route */
+  .route-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: var(--xxl);
+    align-items: center;
+  }
+
+  .city {
+    margin: 0;
+    border-radius: var(--r-lg);
+    background: #fff;
+    box-shadow: 0 30px 60px -30px rgb(30 35 41 / 0.3);
+    overflow: hidden;
+  }
+
+  .streets path {
+    fill: none;
+    stroke: var(--ink-10);
+    stroke-width: 10;
+    stroke-linecap: round;
+  }
+
+  .streets .thin {
+    stroke-width: 5;
+    stroke: var(--ink-6);
+  }
+
+  .trip-line {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  @supports (animation-timeline: view()) {
+    .trip-line {
+      stroke-dashoffset: 1;
+      animation-name: trace;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 30% cover 55%;
+    }
+  }
+
+  @keyframes trace {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .stop-a circle,
+  .stop-b rect {
+    fill: var(--ink);
+  }
+
+  .stop-a .halo,
+  .stop-b .halo {
+    fill: var(--gold-20);
+  }
+
+  .city text {
+    font: 600 15px var(--font);
+    fill: var(--ink);
+  }
+
+  /* Drive */
+  .drive {
+    overflow: hidden;
+    padding-block: clamp(72px, 10vw, 136px);
+  }
+
+  .drive-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--xxl);
+    align-items: end;
+  }
+
+  .drive h2 {
+    margin-top: var(--md);
+    font-size: clamp(44px, 7vw, 88px);
+  }
+
+  .drive-body {
+    display: grid;
+    gap: var(--lg);
+    justify-items: start;
+  }
+
+  .ticks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  .ticks li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+  }
+
+  .ticks :global(svg) {
+    color: var(--gold);
+  }
+
+  /* Delivery */
+  .delivery {
+    padding-block: clamp(56px, 8vw, 96px) 0;
+  }
+
+  .delivery-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--xl);
+  }
+
+  .delivery-card > * {
+    min-width: 0;
+  }
+
+  .delivery-card {
+    padding-block: var(--xl);
+    border-top: 1.5px solid var(--ink);
+    border-bottom: 1px solid var(--ink-10);
+  }
+
+  .delivery h2 {
+    margin-block: 10px;
+    font-size: clamp(30px, 4vw, 44px);
+  }
+
+  .parcel {
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    border-radius: var(--r-lg);
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  /* About */
+  .about-grid {
+    display: grid;
+    gap: var(--md);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .about h2 {
+    font-size: clamp(40px, 6.5vw, 80px);
+  }
+
+  .about .body {
+    font-size: 20px;
+  }
+
+  /* Waitlist */
+  .waitlist {
+    overflow: hidden;
+    padding-block: clamp(72px, 10vw, 128px);
+  }
+
+  .wait-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--xxl);
+    align-items: start;
+  }
+
+  .wait-grid h2 {
+    margin-block: var(--md);
+    font-size: clamp(44px, 7vw, 88px);
+  }
+
+  .form {
+    display: grid;
+    gap: 18px;
+    padding: var(--xl);
+    border-radius: var(--r-lg);
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: var(--shadow-floating);
+  }
+
+  .form label > span,
+  legend {
+    display: block;
+    margin-bottom: var(--sm);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .form input[type="tel"],
+  .form input[type="text"] {
+    width: 100%;
+    height: 54px;
+    padding: 0 var(--md);
+    border-radius: var(--r-md);
+    border: 1.5px solid var(--ink-10);
+    background: #fff;
+    font: 500 17px var(--font);
+    color: var(--ink);
+  }
+
+  .form input:focus {
+    outline: none;
+    border-color: var(--ink);
+  }
+
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sm);
+  }
+
+  .chips input {
+    position: absolute;
+    opacity: 0;
+  }
+
+  .chips span {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: var(--r-pill);
+    box-shadow: inset 0 0 0 1.5px var(--ink-10);
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .chips input:checked + span {
+    background: var(--ink);
+    color: var(--paper);
+    box-shadow: none;
+  }
+
+  .chips input:focus-visible + span {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .form button {
+    width: 100%;
+    margin-top: var(--xs);
+  }
+
+  .form button:disabled {
+    opacity: 0.6;
+  }
+
+  .fine {
+    font-size: 13px;
+    color: var(--ink-55);
+  }
+
+  .status:empty {
+    display: none;
+  }
+
+  .status {
+    padding: 12px var(--md);
+    border-radius: var(--r-md);
+    background: var(--ink-6);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .status[data-state="ok"] {
+    background: var(--gold);
+  }
+
+  /* Footer */
+  .foot {
+    background: var(--ink);
+    color: var(--paper-55);
+    font-size: 14px;
+    border-top: 1px solid var(--paper-6);
+  }
+
+  .foot-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--md);
+    padding-block: var(--xl);
+  }
+
+  .logo.small {
+    font-size: 17px;
+    color: var(--paper);
+  }
+
+  /* Tablet */
+  @media (max-width: 980px) {
+    nav {
+      display: none;
+    }
+
+    .bar-end {
+      margin-left: auto;
+    }
+
+    .hero-grid,
+    .route-grid,
+    .drive-grid,
+    .wait-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-phone {
+      transform: none;
+    }
+
+    .trust {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* Phone */
+  @media (max-width: 640px) {
+    .bar-end .btn-sm {
+      display: none;
+    }
+
+    .steps {
+      grid-template-columns: 1fr;
+    }
+
+    .steps li,
+    .steps li + li {
+      padding: var(--lg) 0;
+      border-left: 0;
+    }
+
+    .steps li + li {
+      border-top: 1px solid var(--ink-10);
+    }
+
+    .trust {
+      grid-template-columns: 1fr;
+    }
+
+    .delivery-card {
+      grid-template-columns: 1fr;
+      justify-items: start;
+    }
+
+    .actions .btn {
+      flex: 1 1 100%;
+    }
+
+    .form {
+      padding: var(--lg);
+    }
+  }
+</style>

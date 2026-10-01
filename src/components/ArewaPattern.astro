@@ -1,0 +1,40 @@
+---
+// Line-art tile drawn after "Dagin Nuhu", the interlaced eight-point knot
+// found on Hausa wall reliefs and embroidery. Used sparingly as texture.
+interface Props {
+  id: string;
+  color?: string;
+  opacity?: number;
+  size?: number;
+}
+
+const { id, color = "var(--gold)", opacity = 0.14, size = 88 } = Astro.props;
+const c = size / 2;
+const s = size * 0.27; // half side of the inner square
+const r = s * Math.SQRT2; // rotated square reaches the same corners
+---
+
+<svg aria-hidden="true" class="arewa" width="100%" height="100%">
+  <defs>
+    <pattern id={id} width={size} height={size} patternUnits="userSpaceOnUse">
+      <g fill="none" stroke={color} stroke-width="1.25" stroke-linejoin="round" opacity={opacity}>
+        <rect x={c - s} y={c - s} width={s * 2} height={s * 2} />
+        <path d={`M${c} ${c - r} L${c + r} ${c} L${c} ${c + r} L${c - r} ${c} Z`} />
+        <circle cx={c} cy={c} r={s * 0.45} />
+        <path d={`M0 0 L${size * 0.12} 0 M0 0 L0 ${size * 0.12}`} />
+        <path d={`M${size} ${size} L${size * 0.88} ${size} M${size} ${size} L${size} ${size * 0.88}`} />
+        <path d={`M${size} 0 L${size * 0.88} 0 M${size} 0 L${size} ${size * 0.12}`} />
+        <path d={`M0 ${size} L${size * 0.12} ${size} M0 ${size} L0 ${size * 0.88}`} />
+      </g>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill={`url(#${id})`}></rect>
+</svg>
+
+<style>
+  .arewa {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+</style>
