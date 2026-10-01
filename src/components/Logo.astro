@@ -1,31 +1,44 @@
 ---
-// Almustafa's own mark and wordmark (public/brand/), drawn inline so they
-// take the colour of the text around them.
+// Almustafa's mark and wordmark (public/brand/), drawn inline so they take the
+// colour of the text around them. The wordmark is split into its four letters
+// so they can move on their own.
+//
+// motion="intro":  plays once on load (header).
+// motion="scroll": plays as it scrolls into view (footer).
 import fs from "node:fs";
 import path from "node:path";
 
 interface Props {
   height?: number;
+  motion?: "none" | "intro" | "scroll";
 }
 
-const { height = 24 } = Astro.props;
+const { height = 24, motion = "none" } = Astro.props;
+const read = (f: string) => fs.readFileSync(path.join(process.cwd(), "public/brand", f), "utf8");
 
-function inline(file: string) {
-  return fs
-    .readFileSync(path.join(process.cwd(), "public/brand", file), "utf8")
-    .replace(/<\?xml[^>]*>/, "")
-    .replace(/\s(width|height)="[^"]*"/g, "")
-    .replace(/fill="(black|#F2EEE3)"/gi, 'fill="currentColor"')
-    .replace("<svg", '<svg aria-hidden="true" focusable="false"');
-}
+// Mark: one shape (the file repeats it twice; keep the first).
+const markSvg = read("mark.svg");
+const markView = markSvg.match(/viewBox="([^"]+)"/)![1];
+const markPath = markSvg.match(/<path[^>]*\sd="([^"]+)"/)![1];
 
-const mark = inline("mark.svg");
-const word = inline("wordmark.svg");
+// Wordmark: one path made of subpaths. Group them by x position into D, E, Z, A.
+const wordSvg = read("wordmark.svg");
+const wordView = wordSvg.match(/viewBox="([^"]+)"/)![1];
+const wordD = wordSvg.match(/\sd="([^"]+)"/)![1];
+const subs = wordD.split(/(?=M)/).map((s) => s.trim()).filter(Boolean);
+const minX = (s: string) => Math.min(...[...s.matchAll(/(-?\d+\.?\d*),(-?\d+\.?\d*)/g)].map((m) => Number(m[1])));
+const bounds = [600, 1150, 1700, Infinity];
+const letters = bounds.map((b, i) => subs.filter((s) => minX(s) < b && minX(s) >= (bounds[i - 1] ?? -Infinity)).join(" "));
 ---
 
-<span class="logo" style={`--h:${height}px`}>
-  <span class="mark" set:html={mark} />
-  <span class="word" set:html={word} />
+<span class:list={["logo", motion !== "none" && `m-${motion}`]} style={`--h:${height}px`}>
+  <span class="mark">
+    <i class="streak" aria-hidden="true"></i><i class="streak s2" aria-hidden="true"></i>
+    <svg viewBox={markView} aria-hidden="true" focusable="false"><path d={markPath} fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+  </span>
+  <svg class="word" viewBox={wordView} aria-hidden="true" focusable="false">
+    {letters.map((d, i) => <path d={d} fill="currentColor" fill-rule="evenodd" style={`--i:${i}`} />)}
+  </svg>
   <span class="sr-only">Deza</span>
 </span>
 
@@ -37,13 +50,132 @@ const word = inline("wordmark.svg");
     line-height: 0;
   }
 
-  .mark :global(svg) {
+  .mark {
+    position: relative;
+    display: block;
+  }
+
+  .mark svg {
+    position: relative;
     height: calc(var(--h) * 1.3);
     width: auto;
   }
 
-  .word :global(svg) {
+  .word {
     height: var(--h);
     width: auto;
+    overflow: hidden;
+  }
+
+  .word path {
+    transform-box: fill-box;
+  }
+
+  /* Gold speed lines that trail the mark as it arrives. */
+  .streak {
+    position: absolute;
+    right: 70%;
+    top: 34%;
+    width: calc(var(--h) * 2.6);
+    height: max(2px, calc(var(--h) * 0.09));
+    border-radius: 9px;
+    background: linear-gradient(90deg, transparent, var(--gold));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .streak.s2 {
+    top: 62%;
+    width: calc(var(--h) * 1.7);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Intro: the mark drives in, the letters rise one by one. */
+    .m-intro .mark svg {
+      animation: drive 0.9s cubic-bezier(0.2, 0.9, 0.2, 1.08) 0.15s both;
+    }
+
+    .m-intro .streak {
+      animation: streak 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both;
+    }
+
+    .m-intro .streak.s2 {
+      animation-delay: 0.22s;
+    }
+
+    .m-intro .word path {
+      animation: letter 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      animation-delay: calc(0.45s + var(--i) * 0.07s);
+    }
+
+    .m-intro:hover .mark svg {
+      animation: nudge 0.6s cubic-bezier(0.3, 0.7, 0.2, 1.2);
+    }
+
+    /* Scroll: the same moves, driven by scrolling into view. */
+    @supports (animation-timeline: view()) {
+      .m-scroll .mark svg,
+      .m-scroll .word path,
+      .m-scroll .streak {
+        animation-fill-mode: both;
+        animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+        animation-timeline: view();
+      }
+
+      .m-scroll .mark svg {
+        animation-name: drive;
+        animation-range: entry 10% cover 40%;
+      }
+
+      .m-scroll .streak {
+        animation-name: streak;
+        animation-range: entry 10% cover 45%;
+      }
+
+      .m-scroll .word path {
+        animation-name: letter;
+        animation-range: entry calc(20% + var(--i) * 8%) cover calc(35% + var(--i) * 6%);
+      }
+    }
+  }
+
+  @keyframes drive {
+    0% {
+      opacity: 0;
+      transform: translateX(-90%) skewX(-14deg);
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  @keyframes streak {
+    0% {
+      opacity: 0;
+      transform: translateX(-40%) scaleX(0.4);
+      transform-origin: right;
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(10%) scaleX(1);
+    }
+  }
+
+  @keyframes letter {
+    from {
+      transform: translateY(110%);
+    }
+  }
+
+  @keyframes nudge {
+    40% {
+      transform: translateX(8%) skewX(-8deg);
+    }
   }
 </style>

@@ -105,13 +105,6 @@ p {
   text-transform: uppercase;
 }
 
-.kicker::before {
-  content: "";
-  width: 22px;
-  height: 2px;
-  background: currentColor;
-  border-radius: 2px;
-}
 
 .on-ink .kicker {
   color: var(--gold);

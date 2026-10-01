@@ -2,7 +2,7 @@
 // Lucide shapes (https://lucide.dev, ISC licence), copied in like the rider app
 // does in apps/rider-app/components/icons.tsx. Outline only, stroke 1.75.
 interface Props {
-  name: "home" | "wallet" | "user" | "tag" | "shield" | "share" | "banknote" | "arrow" | "package" | "check" | "pin";
+  name: "home" | "wallet" | "user" | "tag" | "shield" | "share" | "banknote" | "arrow" | "package" | "check" | "pin" | "phone" | "message" | "clock" | "search" | "menu" | "locate" | "store" | "bolt" | "doc" | "bag" | "x";
   size?: number;
   stroke?: number;
 }
@@ -101,4 +101,61 @@ const { name, size = 24, stroke = 1.75 } = Astro.props;
       </>
     )
   }
+  {name === "phone" && <path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384" />}
+  {name === "message" && <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />}
+  {
+    name === "clock" && (
+      <>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 6v6l4 2" />
+      </>
+    )
+  }
+  {
+    name === "search" && (
+      <>
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </>
+    )
+  }
+  {name === "menu" && <path d="M4 7h16M4 12h16M4 17h10" />}
+  {
+    name === "locate" && (
+      <>
+        <path d="M2 12h3M19 12h3M12 2v3M12 19v3" />
+        <circle cx="12" cy="12" r="7" />
+        <circle cx="12" cy="12" r="3" />
+      </>
+    )
+  }
+  {
+    name === "store" && (
+      <>
+        <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7" />
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+        <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
+        <path d="M2 7h20" />
+        <path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7" />
+      </>
+    )
+  }
+  {name === "bolt" && <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />}
+  {
+    name === "doc" && (
+      <>
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+        <path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8" />
+      </>
+    )
+  }
+  {
+    name === "bag" && (
+      <>
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+        <path d="M3 6h18M16 10a4 4 0 0 1-8 0" />
+      </>
+    )
+  }
+  {name === "x" && <path d="M18 6 6 18M6 6l12 12" />}
 </svg>

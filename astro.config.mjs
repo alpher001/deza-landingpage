@@ -2,8 +2,10 @@
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  // Set to the real .ng domain once it is pointed at Cloudflare.
-  // site: "https://example.ng",
+  // The live address. Canonical links, the sitemap, robots.txt and share
+  // previews are all built from it. Change it here if the domain differs.
+  site: process.env.SITE_URL ?? "https://deza.ng",
+  trailingSlash: "ignore",
   i18n: {
     defaultLocale: "en",
     locales: ["en", "ha"],

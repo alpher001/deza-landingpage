@@ -8,30 +8,87 @@ interface Props {
   lang: Lang;
   title: string;
   description: string;
+  ogAlt: string;
+  faq: readonly { q: string; a: string }[];
 }
 
-const { lang, title, description } = Astro.props;
-const alternate = lang === "en" ? "/ha/" : "/";
-// Absolute once `site` is set in astro.config.mjs (WhatsApp needs a full URL).
-const ogImage = Astro.site ? new URL("/og.jpg", Astro.site).href : "/og.jpg";
+const { lang, title, description, ogAlt, faq } = Astro.props;
+// `site` lives in astro.config.mjs. Every absolute URL below comes from it.
+const site = Astro.site!;
+const url = (p: string) => new URL(p, site).href;
+const here = url(lang === "en" ? "/" : "/ha/");
+const inLanguage = lang === "en" ? "en-NG" : "ha-NG";
+const kano = { "@type": "City", name: "Kano", containedInPlace: { "@type": "State", name: "Kano State, Nigeria" } };
+
+// Structured data so search engines know what Deza is and where it works.
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": url("/#org"),
+      name: "Deza",
+      url: url("/"),
+      logo: url("/icon-512.png"),
+      description,
+      areaServed: kano,
+      foundingLocation: kano,
+    },
+    { "@type": "WebSite", "@id": url("/#site"), url: url("/"), name: "Deza", inLanguage: ["en-NG", "ha-NG"], publisher: { "@id": url("/#org") } },
+    {
+      "@type": "Service",
+      name: lang === "en" ? "Deza Ride: keke napep rides in Kano" : "Deza Ride: hawan keke napep a Kano",
+      serviceType: "Keke napep ride-hailing",
+      provider: { "@id": url("/#org") },
+      areaServed: kano,
+    },
+    {
+      "@type": "Service",
+      name: lang === "en" ? "Deza Delivery: parcel delivery in Kano" : "Deza Delivery: aika kaya a Kano",
+      serviceType: "Same-day parcel delivery",
+      provider: { "@id": url("/#org") },
+      areaServed: kano,
+    },
+    {
+      "@type": "FAQPage",
+      inLanguage,
+      mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+    },
+  ],
+};
 ---
 
 <!doctype html>
 <html lang={lang}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#1E2329" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={here} />
+    <link rel="alternate" hreflang="en" href={url("/")} />
+    <link rel="alternate" hreflang="ha" href={url("/ha/")} />
+    <link rel="alternate" hreflang="x-default" href={url("/")} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" hreflang={lang === "en" ? "ha" : "en"} href={alternate} />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:site_name" content="Deza" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content={ogImage} />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:url" content={here} />
+    <meta property="og:image" content={url("/og.jpg")} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogAlt} />
     <meta property="og:locale" content={lang === "en" ? "en_NG" : "ha_NG"} />
+    <meta property="og:locale:alternate" content={lang === "en" ? "ha_NG" : "en_NG"} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="geo.region" content="NG-KN" />
+    <meta name="geo.placename" content="Kano" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
     <slot />

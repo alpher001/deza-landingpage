@@ -1,282 +1,1070 @@
 ---
-// The app screen laid over the black phone in phone-in-hand.webp. Sizes use
-// container units so it scales with the photo. Three states follow the
-// "How it works" steps through the parent's data-step attribute.
+// A Deza app screen drawn in HTML on top of the Kano street map. It follows
+// the rider app in deza-monorepo (ui-kit colours, 14/22 radii, the floating
+// charcoal tab bar). Sizes use container units, so the screen scales with
+// whatever holds it (1cqw is about 4pt on a real phone).
+//
+// mode "ride": three states that follow the "How it works" steps through the
+//   nearest [data-step] attribute.
+// mode "delivery": a parcel being tracked, with the courier moving on the map.
+import Icon from "./Icon.astro";
+import map from "../generated/kano-map.json";
+import type { copy } from "../i18n";
+
+type Lang = keyof typeof copy;
+
 interface Props {
-  t: {
-    tabs: readonly string[];
-    from: string;
-    fromValue: string;
-    to: string;
-    toValue: string;
-    fare: string;
-    button: string;
-    eta: string;
-    plate: string;
-  };
+  t: (typeof copy)[Lang]["screen"];
+  mode?: "ride" | "delivery";
 }
 
-const { t } = Astro.props;
+const { t, mode = "ride" } = Astro.props;
+const [rideA, rideB] = map.rideEnds;
+const [delA, delB] = map.deliveryEnds;
 ---
 
-<div class="scr" aria-hidden="true">
-  <div class="status"><span>9:41</span><span class="island"></span><span>4G</span></div>
-
-  <svg class="map" viewBox="22 0 200 300" preserveAspectRatio="xMidYMid slice">
-    <g class="blocks">
-      <rect x="10" y="10" width="80" height="60" rx="8"></rect>
-      <rect x="104" y="10" width="92" height="60" rx="8"></rect>
-      <rect x="210" y="10" width="80" height="104" rx="8"></rect>
-      <rect x="10" y="84" width="130" height="78" rx="8"></rect>
-      <rect x="154" y="84" width="42" height="78" rx="8"></rect>
-      <rect x="210" y="128" width="80" height="92" rx="8"></rect>
-      <rect x="10" y="176" width="60" height="114" rx="8"></rect>
-      <rect x="84" y="176" width="112" height="44" rx="8"></rect>
-      <rect x="84" y="234" width="206" height="56" rx="8"></rect>
+<div class="scr" data-mode={mode} aria-hidden="true">
+  <svg class="map" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMin slice">
+    <g class="cam">
+      <use href="#kano-map" width="400" height="1000"></use>
+      {
+        mode === "ride" ? (
+          <>
+            <path class="route-case" d={map.ride} pathLength="1" />
+            <path class="route" d={map.ride} pathLength="1" />
+            <path class="approach" d={map.approach} data-track />
+            <g class="pin-me" transform={`translate(${rideA[0]} ${rideA[1]})`}>
+              <circle class="halo" r="16" />
+              <circle r="8.5" class="ring" />
+              <circle r="4" class="core" />
+            </g>
+            <g class="pin-to" transform={`translate(${rideB[0]} ${rideB[1]})`}>
+              <rect x="-8" y="-8" width="16" height="16" rx="3" />
+              <rect x="-3.5" y="-3.5" width="7" height="7" rx="1" class="in" />
+            </g>
+            <g class="tag tag-to" transform={`translate(${rideB[0] - 108} ${rideB[1] - 16})`}>
+              <rect width="94" height="32" rx="9" />
+              <text x="12" y="13.5" class="t1">{t.toValue}</text>
+              <text x="12" y="25.5" class="t2">{t.tripTime}</text>
+            </g>
+            <g class="mover keke" data-mover>
+              <g class="spin">
+                <ellipse cx="1.5" cy="2" rx="9" ry="14" class="shadow" />
+                <rect x="-8" y="-13" width="16" height="26" rx="6" class="body" />
+                <rect x="-6" y="-6" width="12" height="15" rx="3.5" class="roof" />
+                <rect x="-5" y="-12" width="10" height="4" rx="2" class="glass" />
+              </g>
+            </g>
+          </>
+        ) : (
+          <>
+            <path class="route-case" d={map.delivery} pathLength="1" />
+            <path class="route" d={map.delivery} pathLength="1" data-track />
+            <g class="pin-from" transform={`translate(${delA[0]} ${delA[1]})`}>
+              <circle r="8.5" class="ring" />
+              <circle r="4" class="core" />
+            </g>
+            <g class="pin-to" transform={`translate(${delB[0]} ${delB[1]})`}>
+              <rect x="-8" y="-8" width="16" height="16" rx="3" />
+              <rect x="-3.5" y="-3.5" width="7" height="7" rx="1" class="in" />
+            </g>
+            <g class="mover courier" data-mover>
+              <circle r="20" class="halo" />
+              <circle r="12" class="disc" />
+              <path d="M-5 -3.5 0 -6 5 -3.5V3.5L0 6 -5 3.5Z M-5 -3.5 0 -1 5 -3.5 M0 -1V6" class="box" />
+            </g>
+          </>
+        )
+      }
     </g>
-    <path class="route" d="M40 272 V169 H147 V77 H203 V40" pathLength="1"></path>
-    <circle class="pin-a" cx="40" cy="272" r="9"></circle>
-    <g class="pin-b" transform="translate(203 40)"><circle r="11"></circle><rect x="-4" y="-4" width="8" height="8" rx="1.5"></rect></g>
-    <g class="keke"><rect x="-13" y="-9" width="26" height="18" rx="6"></rect><circle cx="-6" r="2"></circle><circle cx="6" r="2"></circle></g>
   </svg>
 
-  <div class="sheet">
-    <div class="modes"><span class="on">{t.tabs[0]}</span><span>{t.tabs[1]}</span></div>
-
-    <div class="state s1">
-      <div class="stop"><i class="dot a"></i><div><small>{t.from}</small><b>{t.fromValue}</b></div></div>
-      <div class="stop"><i class="dot b"></i><div><small>{t.to}</small><b>{t.toValue}</b></div></div>
-    </div>
-
-    <div class="state s2">
-      <div class="fare"><small>{t.fare}</small><b>₦600</b></div>
-      <div class="cta">{t.button}</div>
-    </div>
-
-    <div class="state s3">
-      <div class="driver">
-        <i class="avatar"></i>
-        <div><b>{t.eta}</b><small>{t.plate}</small></div>
-      </div>
-    </div>
+  <div class="status">
+    <span>9:41</span>
+    <span class="island"></span>
+    <span class="sig"><i></i><i></i><i></i><i></i></span>
   </div>
+
+  {
+    mode === "ride" ? (
+      <>
+        <div class="float-top">
+          <span class="round">
+            <Icon name="menu" size={18} stroke={2} />
+          </span>
+          <span class="round">
+            <Icon name="locate" size={18} stroke={2} />
+          </span>
+        </div>
+
+        <div class="sheet">
+          <span class="grab" />
+
+          <div class="state s1">
+            <p class="hello">{t.greet}</p>
+            <div class="trip">
+              <div class="trip-row">
+                <i class="dot a" />
+                <div>
+                  <small>{t.from}</small>
+                  <b>{t.fromValue}</b>
+                </div>
+              </div>
+              <div class="trip-row typing">
+                <i class="dot b" />
+                <div>
+                  <small>{t.to}</small>
+                  <b>
+                    {t.toValue}
+                    <span class="caret" />
+                  </b>
+                </div>
+              </div>
+            </div>
+            <ul class="recent">
+              {t.recent.map(([place, area]) => (
+                <li>
+                  <span class="ico">
+                    <Icon name="clock" size={14} stroke={2} />
+                  </span>
+                  <div>
+                    <b>{place}</b>
+                    <small>{area}</small>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="state s2">
+            <p class="h">{t.choose}</p>
+            <div class="option on">
+              <span class="veh">
+                <svg viewBox="0 0 40 28">
+                  <path d="M6 20V11a6 6 0 0 1 6-6h12l7 6h3a2 2 0 0 1 2 2v7" class="v-body" />
+                  <path d="M12 5h12v8H9v-2a6 6 0 0 1 3-6" class="v-roof" />
+                  <circle cx="11" cy="21" r="3.6" class="v-wheel" />
+                  <circle cx="31" cy="21" r="3.6" class="v-wheel" />
+                </svg>
+              </span>
+              <div>
+                <b>{t.keke}</b>
+                <small>{t.kekeSub}</small>
+              </div>
+              <b class="price">₦600</b>
+            </div>
+            <div class="option off">
+              <span class="veh">
+                <Icon name="package" size={18} stroke={1.75} />
+              </span>
+              <div>
+                <b>{t.parcel}</b>
+                <small>{t.parcelSub}</small>
+              </div>
+              <span class="soon">{t.soon}</span>
+            </div>
+            <div class="pay">
+              <Icon name="banknote" size={16} stroke={2} />
+              <b>{t.cash}</b>
+              <span>{t.change}</span>
+            </div>
+            <div class="cta">{t.button}</div>
+          </div>
+
+          <div class="state s3">
+            <div class="eta-row">
+              <div>
+                <p class="h">{t.eta}</p>
+                <small>{t.meet}</small>
+              </div>
+              <span class="mins">
+                3<small>{t.min}</small>
+              </span>
+            </div>
+            <div class="driver">
+              <img src="/images/app/driver-face.webp" alt="" width="72" height="72" loading="lazy" decoding="async" />
+              <div>
+                <b>{t.driver}</b>
+                <small>{t.vehicle}</small>
+              </div>
+              <span class="plate">{t.plate}</span>
+            </div>
+            <div class="acts">
+              <span>
+                <i>
+                  <Icon name="phone" size={16} stroke={2} />
+                </i>
+                {t.call}
+              </span>
+              <span>
+                <i>
+                  <Icon name="message" size={16} stroke={2} />
+                </i>
+                {t.chat}
+              </span>
+              <span>
+                <i>
+                  <Icon name="share" size={16} stroke={2} />
+                </i>
+                {t.share}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabbar">
+          <span class="on">
+            <Icon name="home" size={20} />
+            <i />
+          </span>
+          <span>
+            <Icon name="wallet" size={20} />
+            <i />
+          </span>
+          <span>
+            <Icon name="user" size={20} />
+            <i />
+          </span>
+        </div>
+      </>
+    ) : (
+      <div class="sheet dsheet">
+        <span class="grab" />
+        <div class="eta-row">
+          <div>
+            <p class="h">{t.dTitle}</p>
+            <small>{t.dEta}</small>
+          </div>
+          <span class="mins">
+            12<small>{t.min}</small>
+          </span>
+        </div>
+        <ol class="progress">
+          {t.dSteps.map((s, i) => (
+            <li class:list={[{ done: i === 0, now: i === 1 }]}>
+              <i />
+              {s}
+            </li>
+          ))}
+        </ol>
+        <div class="driver">
+          <span class="avatar">
+            <Icon name="package" size={18} stroke={1.75} />
+          </span>
+          <div>
+            <b>{t.dCourier}</b>
+            <small>{t.dItem}</small>
+          </div>
+          <span class="plate">{t.dPlate}</span>
+        </div>
+        <div class="code">
+          <div>
+            <small>{t.dCode}</small>
+            <span class="hint">{t.dCodeHint}</span>
+          </div>
+          <b>4827</b>
+        </div>
+      </div>
+    )
+  }
 </div>
+
+<script>
+  // Moves the keke or courier marker along its route, turning to face the road.
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  document.querySelectorAll<HTMLElement>(".scr").forEach((scr) => {
+    const path = scr.querySelector<SVGPathElement>("[data-track]");
+    const mover = scr.querySelector<SVGGElement>("[data-mover]");
+    const spin = mover?.querySelector<SVGGElement>(".spin");
+    if (!path || !mover) return;
+    const len = path.getTotalLength();
+    const ride = scr.dataset.mode === "ride";
+
+    const place = (k: number) => {
+      const a = path.getPointAtLength(k * len);
+      const b = path.getPointAtLength(Math.min(len, k * len + 2));
+      mover.setAttribute("transform", `translate(${a.x.toFixed(1)} ${a.y.toFixed(1)})`);
+      if (spin && (b.x !== a.x || b.y !== a.y)) {
+        const deg = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI + 90;
+        spin.setAttribute("transform", `rotate(${deg.toFixed(1)})`);
+      }
+    };
+
+    // Ride: the keke drives toward the pickup and stops just short of it.
+    // Delivery: the courier loops along the whole route.
+    const dur = ride ? 7000 : 14000;
+    const end = ride ? 0.94 : 1;
+    let start = 0;
+    let raf = 0;
+    let visible = false;
+    const ease = (x: number) => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+
+    const frame = (now: number) => {
+      if (!start) start = now;
+      const k = Math.min(1, (now - start) / dur);
+      place(ease(k) * end);
+      if (k < 1) raf = requestAnimationFrame(frame);
+      else if (!ride) {
+        setTimeout(() => {
+          start = 0;
+          if (visible) raf = requestAnimationFrame(frame);
+        }, 1200);
+      }
+    };
+
+    const play = () => {
+      cancelAnimationFrame(raf);
+      start = 0;
+      if (reduce) return place(end * 0.7);
+      raf = requestAnimationFrame(frame);
+    };
+
+    place(ride ? 0 : 0.35);
+
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (!ride) visible ? play() : cancelAnimationFrame(raf);
+    }).observe(scr);
+
+    // The ride screen restarts the keke each time step 3 comes up.
+    const host = scr.closest<HTMLElement>("[data-step]");
+    if (ride && host) {
+      new MutationObserver(() => {
+        if (host.dataset.step === "3") play();
+      }).observe(host, { attributes: true, attributeFilter: ["data-step"] });
+    }
+  });
+</script>
 
 <style>
   .scr {
     container-type: inline-size;
     position: absolute;
     inset: 0;
-    display: flex;
-    flex-direction: column;
     overflow: hidden;
     border-radius: 9% / 4.2%;
-    background: #faf6ec;
+    background: #efe9da;
     color: #1e2329;
+    font-family: var(--font);
+    line-height: 1.25;
+  }
+
+  /* Map and camera */
+  .map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     font-family: var(--font);
   }
 
-  .status {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4cqw 8cqw 1.5cqw;
-    font-size: 4.2cqw;
-    font-weight: 600;
+  .cam {
+    transition: transform 1.3s cubic-bezier(0.6, 0, 0.2, 1);
+    transform: translate(-193px, -58px) scale(1.5);
   }
 
-  .island {
-    width: 28cqw;
-    height: 7.5cqw;
-    border-radius: 99px;
-    background: #111;
+  :global([data-step="2"]) [data-mode="ride"] .cam {
+    transform: translate(0, -96px) scale(1);
   }
 
-  .map {
-    flex: 1;
-    min-height: 0;
-    width: 100%;
+  :global([data-step="3"]) [data-mode="ride"] .cam {
+    transform: translate(-72px, -84px) scale(1.36);
   }
 
-  .blocks rect {
-    fill: rgb(30 35 41 / 0.06);
+  [data-mode="delivery"] .cam {
+    transform: translate(-8px, -52px) scale(1.02);
+  }
+
+  .route-case {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .route {
     fill: none;
     stroke: #1e2329;
-    stroke-width: 5;
+    stroke-width: 5.5;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  [data-mode="ride"] .route,
+  [data-mode="ride"] .route-case {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    transition: stroke-dashoffset 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+    transition: stroke-dashoffset 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.3s;
   }
 
-  .pin-a {
-    fill: #ffc629;
+  :global([data-step="2"]) [data-mode="ride"] .route,
+  :global([data-step="2"]) [data-mode="ride"] .route-case {
+    stroke-dashoffset: 0;
+  }
+
+  .approach {
+    fill: none;
     stroke: #1e2329;
-    stroke-width: 3;
+    stroke-width: 3.5;
+    stroke-dasharray: 0.1 7;
+    stroke-linecap: round;
+    opacity: 0;
+    transition: opacity 0.4s;
   }
 
-  .pin-b circle {
+  :global([data-step="3"]) [data-mode="ride"] .approach {
+    opacity: 0.7;
+  }
+
+  .ring {
     fill: #1e2329;
   }
 
-  .pin-b rect {
+  .core {
+    fill: #faf6ec;
+  }
+
+  .pin-me .halo {
     fill: #ffc629;
+    opacity: 0.35;
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: halo 2.2s ease-out infinite;
+  }
+
+  .pin-me .core {
+    fill: #ffc629;
+  }
+
+  @keyframes halo {
+    from {
+      transform: scale(0.5);
+      opacity: 0.6;
+    }
+    to {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  .pin-to rect {
+    fill: #1e2329;
+  }
+
+  .pin-to .in {
+    fill: #ffc629;
+  }
+
+  [data-mode="ride"] .pin-to,
+  .tag-to {
+    opacity: 0;
+    transition: opacity 0.4s 1.2s;
+  }
+
+  :global([data-step="2"]) [data-mode="ride"] .pin-to,
+  :global([data-step="2"]) [data-mode="ride"] .tag-to,
+  :global([data-step="3"]) [data-mode="ride"] .pin-to {
+    opacity: 1;
+  }
+
+  .tag rect {
+    fill: #1e2329;
+  }
+
+  .tag .t1 {
+    fill: #faf6ec;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .tag .t2 {
+    fill: #ffc629;
+    font-size: 8.5px;
+    font-weight: 600;
   }
 
   .keke {
     opacity: 0;
-    transform: translate(40px, 230px);
-    transition:
-      transform 2.4s cubic-bezier(0.45, 0, 0.2, 1),
-      opacity 0.4s;
+    transition: opacity 0.3s;
   }
 
-  .keke rect {
+  :global([data-step="3"]) [data-mode="ride"] .keke {
+    opacity: 1;
+  }
+
+  .keke .shadow {
+    fill: #1e2329;
+    opacity: 0.18;
+  }
+
+  .keke .body {
     fill: #ffc629;
     stroke: #1e2329;
-    stroke-width: 2.5;
+    stroke-width: 1.6;
   }
 
-  .keke circle {
+  .keke .roof {
     fill: #1e2329;
   }
 
-  .sheet {
-    position: relative;
-    margin: 0 3cqw 4cqw;
-    padding: 4cqw;
-    border-radius: 7cqw;
-    background: #fff;
-    box-shadow: 0 3cqw 9cqw -3cqw rgb(30 35 41 / 0.3);
-    display: grid;
-    gap: 3cqw;
+  .keke .glass {
+    fill: #faf6ec;
+    opacity: 0.85;
   }
 
-  .modes {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 1cqw;
-    border-radius: 99px;
-    background: rgb(30 35 41 / 0.06);
-    font-size: 4cqw;
+  .courier .halo {
+    fill: #ffc629;
+    opacity: 0.3;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: halo 2s ease-out infinite;
+  }
+
+  .courier .disc {
+    fill: #1e2329;
+    stroke: #fff;
+    stroke-width: 2.5;
+  }
+
+  .courier .box {
+    fill: none;
+    stroke: #ffc629;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+  }
+
+  /* Phone chrome */
+  .status {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3.6cqw 7.5cqw 0;
+    font-size: 3.9cqw;
     font-weight: 700;
-    text-align: center;
+    letter-spacing: -0.01em;
   }
 
-  .modes span {
-    padding: 2cqw 0;
+  .island {
+    width: 27cqw;
+    height: 7.6cqw;
     border-radius: 99px;
-    color: rgb(30 35 41 / 0.55);
+    background: #0d0f12;
   }
 
-  .modes .on {
-    background: #1e2329;
-    color: #faf6ec;
+  .sig {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.6cqw;
+    height: 3cqw;
+  }
+
+  .sig i {
+    width: 0.9cqw;
+    border-radius: 1px;
+    background: currentColor;
+  }
+
+  .sig i:nth-child(1) {
+    height: 35%;
+  }
+  .sig i:nth-child(2) {
+    height: 55%;
+  }
+  .sig i:nth-child(3) {
+    height: 78%;
+  }
+  .sig i:nth-child(4) {
+    height: 100%;
+  }
+
+  .float-top {
+    position: absolute;
+    top: 15cqw;
+    left: 5cqw;
+    right: 5cqw;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .round {
+    display: grid;
+    place-items: center;
+    width: 10.5cqw;
+    height: 10.5cqw;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1cqw 3cqw rgb(30 35 41 / 0.18);
+  }
+
+  .round :global(svg),
+  .ico :global(svg),
+  .veh :global(svg),
+  .pay :global(svg),
+  .acts :global(svg),
+  .avatar :global(svg),
+  .tabbar :global(svg) {
+    width: 4.6cqw;
+    height: 4.6cqw;
+  }
+
+  /* Bottom sheet (ui-kit radius.lg = 22pt) */
+  .sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    display: grid;
+    padding: 2.4cqw 5.5cqw 6cqw;
+    border-radius: 6cqw 6cqw 0 0;
+    background: #fff;
+    box-shadow: 0 -2cqw 8cqw rgb(30 35 41 / 0.14);
+    transition: padding-bottom 0.5s;
+  }
+
+  [data-mode="ride"] .sheet {
+    padding-bottom: 25cqw;
+  }
+
+  :global([data-step="2"]) [data-mode="ride"] .sheet,
+  :global([data-step="3"]) [data-mode="ride"] .sheet {
+    padding-bottom: 7cqw;
+  }
+
+  .grab {
+    justify-self: center;
+    width: 10cqw;
+    height: 1.2cqw;
+    margin-bottom: 3cqw;
+    border-radius: 9px;
+    background: rgb(30 35 41 / 0.15);
   }
 
   .state {
     display: none;
     gap: 3cqw;
-    animation: in 0.5s ease both;
+    animation: in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  :global([data-step="1"]) [data-mode="ride"] .s1,
+  :global([data-step="2"]) [data-mode="ride"] .s2,
+  :global([data-step="3"]) [data-mode="ride"] .s3 {
+    display: grid;
   }
 
   @keyframes in {
     from {
       opacity: 0;
-      transform: translateY(3cqw);
+      transform: translateY(4cqw);
     }
-  }
-
-  .stop {
-    display: flex;
-    align-items: center;
-    gap: 3.5cqw;
   }
 
   small {
     display: block;
-    font-size: 3.4cqw;
+    font-size: 3.2cqw;
     color: rgb(30 35 41 / 0.55);
-    line-height: 1.2;
+    font-weight: 500;
   }
 
   b {
     display: block;
-    font-size: 4.6cqw;
-    line-height: 1.25;
+    font-size: 3.9cqw;
+    font-weight: 650;
+  }
+
+  .hello,
+  .h {
+    margin: 0;
+    font-size: 5cqw;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .trip {
+    display: grid;
+    border-radius: 3.6cqw;
+    background: rgb(30 35 41 / 0.05);
+    padding: 1cqw 3.6cqw;
+  }
+
+  .trip-row {
+    display: flex;
+    align-items: center;
+    gap: 3.2cqw;
+    padding: 2.2cqw 0;
+  }
+
+  .trip-row + .trip-row {
+    border-top: 1px solid rgb(30 35 41 / 0.08);
+  }
+
+  .typing b {
+    display: flex;
+    align-items: center;
+  }
+
+  .caret {
+    width: 0.5cqw;
+    height: 4.4cqw;
+    margin-left: 0.6cqw;
+    background: #1e2329;
+    animation: blink 1s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
   }
 
   .dot {
     flex: none;
-    width: 3.4cqw;
-    height: 3.4cqw;
+    width: 2.8cqw;
+    height: 2.8cqw;
   }
 
   .dot.a {
     border-radius: 50%;
     background: #ffc629;
-    box-shadow: 0 0 0 0.8cqw #1e2329;
+    box-shadow: 0 0 0 0.9cqw #1e2329;
   }
 
   .dot.b {
-    border-radius: 0.8cqw;
+    border-radius: 0.6cqw;
     background: #1e2329;
   }
 
-  .fare {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+  .recent {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
   }
 
-  .fare b {
-    font-size: 8cqw;
-    letter-spacing: -0.02em;
+  .recent li {
+    display: flex;
+    align-items: center;
+    gap: 3.2cqw;
+    padding: 2cqw 0;
+  }
+
+  .ico,
+  .veh,
+  .avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 8.6cqw;
+    height: 8.6cqw;
+    border-radius: 50%;
+    background: rgb(30 35 41 / 0.06);
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 3cqw;
+    padding: 2.6cqw 3cqw;
+    border-radius: 3.6cqw;
+    box-shadow: inset 0 0 0 1.5px rgb(30 35 41 / 0.08);
+  }
+
+  .option > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .option.on {
+    box-shadow: inset 0 0 0 0.6cqw #1e2329;
+  }
+
+  .option.on .veh {
+    background: #ffc629;
+  }
+
+  .veh svg {
+    width: 6.4cqw !important;
+    height: auto !important;
+  }
+
+  .v-body {
+    fill: #ffc629;
+    stroke: #1e2329;
+    stroke-width: 2.2;
+    stroke-linejoin: round;
+  }
+
+  .v-roof {
+    fill: #1e2329;
+  }
+
+  .v-wheel {
+    fill: #1e2329;
+    stroke: #fff;
+    stroke-width: 1.4;
+  }
+
+  .option.off {
+    opacity: 0.55;
+  }
+
+  .price {
+    font-size: 4.4cqw;
+    font-weight: 750;
+  }
+
+  .soon {
+    font-size: 2.8cqw;
+    font-weight: 700;
+    padding: 1cqw 2.2cqw;
+    border-radius: 99px;
+    background: rgb(30 35 41 / 0.08);
+  }
+
+  .pay {
+    display: flex;
+    align-items: center;
+    gap: 2.4cqw;
+    font-size: 3.5cqw;
+  }
+
+  .pay b {
+    font-size: 3.6cqw;
+  }
+
+  .pay span {
+    margin-left: auto;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.6cqw;
   }
 
   .cta {
     display: grid;
     place-items: center;
-    height: 13cqw;
-    border-radius: 4.5cqw;
+    height: 12.5cqw;
+    border-radius: 3.6cqw;
     background: #ffc629;
-    font-weight: 700;
-    font-size: 4.8cqw;
+    font-weight: 750;
+    font-size: 4.2cqw;
+  }
+
+  .eta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3cqw;
+  }
+
+  .mins {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 13cqw;
+    height: 13cqw;
+    border-radius: 3.6cqw;
+    background: #1e2329;
+    color: #ffc629;
+    font-size: 5.2cqw;
+    font-weight: 800;
+    line-height: 0.9;
+  }
+
+  .mins small {
+    color: #faf6ec;
+    font-size: 2.6cqw;
   }
 
   .driver {
     display: flex;
     align-items: center;
-    gap: 3.5cqw;
+    gap: 3cqw;
+    padding: 2.6cqw 0;
+    border-block: 1px solid rgb(30 35 41 / 0.08);
+  }
+
+  .driver > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .driver img {
+    width: 11cqw;
+    height: 11cqw;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 0 0.7cqw #ffc629;
   }
 
   .avatar {
-    flex: none;
-    width: 12cqw;
-    height: 12cqw;
-    border-radius: 50%;
-    background: radial-gradient(circle at 50% 38%, #8a6a4f 0 28%, transparent 29%), radial-gradient(circle at 50% 100%, #f2eee3 0 46%, transparent 47%), #e9e2d0;
-    box-shadow: 0 0 0 0.8cqw #ffc629;
+    width: 11cqw;
+    height: 11cqw;
+    background: #ffc629;
   }
 
-  /* States follow the step the reader is on. */
-  :global([data-step="1"]) .s1,
-  :global([data-step="2"]) .s2,
-  :global([data-step="3"]) .s3 {
+  .plate {
+    font-size: 3cqw;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 1.2cqw 2cqw;
+    border-radius: 1.6cqw;
+    box-shadow: inset 0 0 0 1.5px #1e2329;
+    white-space: nowrap;
+  }
+
+  .acts {
     display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2cqw;
+    text-align: center;
+    font-size: 3cqw;
+    font-weight: 600;
   }
 
-  :global([data-step="2"]) .route,
-  :global([data-step="3"]) .route {
-    stroke-dashoffset: 0;
+  .acts span {
+    display: grid;
+    justify-items: center;
+    gap: 1.4cqw;
   }
 
-  :global([data-step="3"]) .keke {
-    opacity: 1;
-    transform: translate(147px, 120px);
+  .acts i {
+    display: grid;
+    place-items: center;
+    width: 10.5cqw;
+    height: 10.5cqw;
+    border-radius: 50%;
+    background: rgb(30 35 41 / 0.06);
+  }
+
+  /* The rider app's floating tab bar (FloatingTabBar.tsx) */
+  .tabbar {
+    position: absolute;
+    left: 7cqw;
+    right: 7cqw;
+    bottom: 4.5cqw;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    height: 17cqw;
+    border-radius: 99px;
+    background: #1e2329;
+    color: rgb(250 246 236 / 0.55);
+    box-shadow: 0 2cqw 4.6cqw rgb(0 0 0 / 0.22);
+    transition:
+      transform 0.5s cubic-bezier(0.6, 0, 0.2, 1),
+      opacity 0.3s;
+  }
+
+  .tabbar span {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 0.6cqw;
+  }
+
+  .tabbar i {
+    width: 1.5cqw;
+    height: 1.5cqw;
+    border-radius: 50%;
+  }
+
+  .tabbar .on {
+    color: #ffc629;
+  }
+
+  .tabbar .on i {
+    background: #ffc629;
+  }
+
+  :global([data-step="2"]) [data-mode="ride"] .tabbar,
+  :global([data-step="3"]) [data-mode="ride"] .tabbar {
+    transform: translateY(30cqw);
+    opacity: 0;
+  }
+
+  /* Delivery tracking */
+  .dsheet {
+    gap: 3.2cqw;
+  }
+
+  .progress {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.6cqw;
+    font-size: 2.9cqw;
+    font-weight: 600;
+    color: rgb(30 35 41 / 0.5);
+  }
+
+  .progress li {
+    display: grid;
+    gap: 1.6cqw;
+  }
+
+  .progress i {
+    height: 1.3cqw;
+    border-radius: 9px;
+    background: rgb(30 35 41 / 0.1);
+    overflow: hidden;
+  }
+
+  .progress .done,
+  .progress .now {
+    color: #1e2329;
+  }
+
+  .progress .done i {
+    background: #1e2329;
+  }
+
+  .progress .now i {
+    background: linear-gradient(90deg, #1e2329 0 50%, transparent 50%) 0 0 / 200% 100%;
+    animation: load 2.6s ease-in-out infinite;
+  }
+
+  @keyframes load {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: 0 0;
+    }
+  }
+
+  .code {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3cqw;
+    padding: 3cqw 3.6cqw;
+    border-radius: 3.6cqw;
+    background: #1e2329;
+    color: #faf6ec;
+  }
+
+  .code small {
+    color: #faf6ec;
+    font-weight: 700;
+  }
+
+  .code .hint {
+    font-size: 2.8cqw;
+    opacity: 0.6;
+  }
+
+  .code b {
+    font-size: 6.4cqw;
+    letter-spacing: 0.14em;
+    color: #ffc629;
+    font-variant-numeric: tabular-nums;
   }
 </style>
