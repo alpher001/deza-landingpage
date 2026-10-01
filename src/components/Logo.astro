@@ -1,6 +1,6 @@
 ---
-// Uses Almustafa's own files when present: public/brand/wordmark.svg (or
-// logo.svg). Until then the name is set in the display face.
+// Almustafa's own mark and wordmark (public/brand/), drawn inline so they
+// take the colour of the text around them.
 import fs from "node:fs";
 import path from "node:path";
 
@@ -8,23 +8,42 @@ interface Props {
   height?: number;
 }
 
-const { height = 26 } = Astro.props;
-const file = ["wordmark.svg", "logo.svg"].find((f) => fs.existsSync(path.join(process.cwd(), "public/brand", f)));
----
+const { height = 24 } = Astro.props;
 
-{
-  file ? (
-    <img class="logo-img" src={`/brand/${file}`} alt="Deza" height={height} style={`height:${height}px;width:auto`} />
-  ) : (
-    <span class="logo-text" style={`font-size:${height}px`}>deza</span>
-  )
+function inline(file: string) {
+  return fs
+    .readFileSync(path.join(process.cwd(), "public/brand", file), "utf8")
+    .replace(/<\?xml[^>]*>/, "")
+    .replace(/\s(width|height)="[^"]*"/g, "")
+    .replace(/fill="(black|#F2EEE3)"/gi, 'fill="currentColor"')
+    .replace("<svg", '<svg aria-hidden="true" focusable="false"');
 }
 
+const mark = inline("mark.svg");
+const word = inline("wordmark.svg");
+---
+
+<span class="logo" style={`--h:${height}px`}>
+  <span class="mark" set:html={mark} />
+  <span class="word" set:html={word} />
+  <span class="sr-only">Deza</span>
+</span>
+
 <style>
-  .logo-text {
-    font-family: var(--display);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1;
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--h) * 0.42);
+    line-height: 0;
+  }
+
+  .mark :global(svg) {
+    height: calc(var(--h) * 1.3);
+    width: auto;
+  }
+
+  .word :global(svg) {
+    height: var(--h);
+    width: auto;
   }
 </style>

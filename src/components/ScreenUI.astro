@@ -1,0 +1,282 @@
+---
+// The app screen laid over the black phone in phone-in-hand.webp. Sizes use
+// container units so it scales with the photo. Three states follow the
+// "How it works" steps through the parent's data-step attribute.
+interface Props {
+  t: {
+    tabs: readonly string[];
+    from: string;
+    fromValue: string;
+    to: string;
+    toValue: string;
+    fare: string;
+    button: string;
+    eta: string;
+    plate: string;
+  };
+}
+
+const { t } = Astro.props;
+---
+
+<div class="scr" aria-hidden="true">
+  <div class="status"><span>9:41</span><span class="island"></span><span>4G</span></div>
+
+  <svg class="map" viewBox="22 0 200 300" preserveAspectRatio="xMidYMid slice">
+    <g class="blocks">
+      <rect x="10" y="10" width="80" height="60" rx="8"></rect>
+      <rect x="104" y="10" width="92" height="60" rx="8"></rect>
+      <rect x="210" y="10" width="80" height="104" rx="8"></rect>
+      <rect x="10" y="84" width="130" height="78" rx="8"></rect>
+      <rect x="154" y="84" width="42" height="78" rx="8"></rect>
+      <rect x="210" y="128" width="80" height="92" rx="8"></rect>
+      <rect x="10" y="176" width="60" height="114" rx="8"></rect>
+      <rect x="84" y="176" width="112" height="44" rx="8"></rect>
+      <rect x="84" y="234" width="206" height="56" rx="8"></rect>
+    </g>
+    <path class="route" d="M40 272 V169 H147 V77 H203 V40" pathLength="1"></path>
+    <circle class="pin-a" cx="40" cy="272" r="9"></circle>
+    <g class="pin-b" transform="translate(203 40)"><circle r="11"></circle><rect x="-4" y="-4" width="8" height="8" rx="1.5"></rect></g>
+    <g class="keke"><rect x="-13" y="-9" width="26" height="18" rx="6"></rect><circle cx="-6" r="2"></circle><circle cx="6" r="2"></circle></g>
+  </svg>
+
+  <div class="sheet">
+    <div class="modes"><span class="on">{t.tabs[0]}</span><span>{t.tabs[1]}</span></div>
+
+    <div class="state s1">
+      <div class="stop"><i class="dot a"></i><div><small>{t.from}</small><b>{t.fromValue}</b></div></div>
+      <div class="stop"><i class="dot b"></i><div><small>{t.to}</small><b>{t.toValue}</b></div></div>
+    </div>
+
+    <div class="state s2">
+      <div class="fare"><small>{t.fare}</small><b>₦600</b></div>
+      <div class="cta">{t.button}</div>
+    </div>
+
+    <div class="state s3">
+      <div class="driver">
+        <i class="avatar"></i>
+        <div><b>{t.eta}</b><small>{t.plate}</small></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .scr {
+    container-type: inline-size;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 9% / 4.2%;
+    background: #faf6ec;
+    color: #1e2329;
+    font-family: var(--font);
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4cqw 8cqw 1.5cqw;
+    font-size: 4.2cqw;
+    font-weight: 600;
+  }
+
+  .island {
+    width: 28cqw;
+    height: 7.5cqw;
+    border-radius: 99px;
+    background: #111;
+  }
+
+  .map {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+  }
+
+  .blocks rect {
+    fill: rgb(30 35 41 / 0.06);
+  }
+
+  .route {
+    fill: none;
+    stroke: #1e2329;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .pin-a {
+    fill: #ffc629;
+    stroke: #1e2329;
+    stroke-width: 3;
+  }
+
+  .pin-b circle {
+    fill: #1e2329;
+  }
+
+  .pin-b rect {
+    fill: #ffc629;
+  }
+
+  .keke {
+    opacity: 0;
+    transform: translate(40px, 230px);
+    transition:
+      transform 2.4s cubic-bezier(0.45, 0, 0.2, 1),
+      opacity 0.4s;
+  }
+
+  .keke rect {
+    fill: #ffc629;
+    stroke: #1e2329;
+    stroke-width: 2.5;
+  }
+
+  .keke circle {
+    fill: #1e2329;
+  }
+
+  .sheet {
+    position: relative;
+    margin: 0 3cqw 4cqw;
+    padding: 4cqw;
+    border-radius: 7cqw;
+    background: #fff;
+    box-shadow: 0 3cqw 9cqw -3cqw rgb(30 35 41 / 0.3);
+    display: grid;
+    gap: 3cqw;
+  }
+
+  .modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 1cqw;
+    border-radius: 99px;
+    background: rgb(30 35 41 / 0.06);
+    font-size: 4cqw;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .modes span {
+    padding: 2cqw 0;
+    border-radius: 99px;
+    color: rgb(30 35 41 / 0.55);
+  }
+
+  .modes .on {
+    background: #1e2329;
+    color: #faf6ec;
+  }
+
+  .state {
+    display: none;
+    gap: 3cqw;
+    animation: in 0.5s ease both;
+  }
+
+  @keyframes in {
+    from {
+      opacity: 0;
+      transform: translateY(3cqw);
+    }
+  }
+
+  .stop {
+    display: flex;
+    align-items: center;
+    gap: 3.5cqw;
+  }
+
+  small {
+    display: block;
+    font-size: 3.4cqw;
+    color: rgb(30 35 41 / 0.55);
+    line-height: 1.2;
+  }
+
+  b {
+    display: block;
+    font-size: 4.6cqw;
+    line-height: 1.25;
+  }
+
+  .dot {
+    flex: none;
+    width: 3.4cqw;
+    height: 3.4cqw;
+  }
+
+  .dot.a {
+    border-radius: 50%;
+    background: #ffc629;
+    box-shadow: 0 0 0 0.8cqw #1e2329;
+  }
+
+  .dot.b {
+    border-radius: 0.8cqw;
+    background: #1e2329;
+  }
+
+  .fare {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .fare b {
+    font-size: 8cqw;
+    letter-spacing: -0.02em;
+  }
+
+  .cta {
+    display: grid;
+    place-items: center;
+    height: 13cqw;
+    border-radius: 4.5cqw;
+    background: #ffc629;
+    font-weight: 700;
+    font-size: 4.8cqw;
+  }
+
+  .driver {
+    display: flex;
+    align-items: center;
+    gap: 3.5cqw;
+  }
+
+  .avatar {
+    flex: none;
+    width: 12cqw;
+    height: 12cqw;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 38%, #8a6a4f 0 28%, transparent 29%), radial-gradient(circle at 50% 100%, #f2eee3 0 46%, transparent 47%), #e9e2d0;
+    box-shadow: 0 0 0 0.8cqw #ffc629;
+  }
+
+  /* States follow the step the reader is on. */
+  :global([data-step="1"]) .s1,
+  :global([data-step="2"]) .s2,
+  :global([data-step="3"]) .s3 {
+    display: grid;
+  }
+
+  :global([data-step="2"]) .route,
+  :global([data-step="3"]) .route {
+    stroke-dashoffset: 0;
+  }
+
+  :global([data-step="3"]) .keke {
+    opacity: 1;
+    transform: translate(147px, 120px);
+  }
+</style>

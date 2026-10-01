@@ -1,85 +1,63 @@
 ---
-// "Coming soon" store buttons. Apple and Google only allow their official
-// badges once an app is live and linked, so these name the stores in text.
-// Swap for the official badges on launch day.
+// Official App Store and Google Play badges, shown unchanged with a
+// "coming soon" tag beside them. Link them to the store listings on launch.
 interface Props {
   label: string;
-  tone?: "light" | "dark";
 }
 
-const { label, tone = "light" } = Astro.props;
+const { label } = Astro.props;
 ---
 
-<ul class:list={["stores", tone]} aria-label={`${label} App Store, Google Play`}>
-  <li>
-    <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg>
-    <span><small>{label}</small>App Store</span>
-  </li>
-  <li>
-    <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5v17l14-8.5z"></path></svg>
-    <span><small>{label}</small>Google Play</span>
-  </li>
-</ul>
+<div class="stores">
+  <span class="soon">{label}</span>
+  <div class="badges">
+    <img src="/badges/app-store.svg" alt={`App Store, ${label}`} width="132" height="44" />
+    <img src="/badges/google-play.png" alt={`Google Play, ${label}`} width="126" height="44" />
+  </div>
+</div>
 
 <style>
   .stores {
-    list-style: none;
-    margin: 0;
-    padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .stores li {
-    display: flex;
     align-items: center;
-    gap: 10px;
-    min-height: 52px;
-    padding: 0 18px 0 14px;
-    border-radius: 12px;
+    gap: 10px 14px;
+  }
+
+  .soon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
     font-weight: 700;
-    font-size: 16px;
-    line-height: 1.1;
-  }
-
-  .stores small {
-    display: block;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    opacity: 0.7;
   }
 
-  .light li {
-    background: rgb(250 246 236 / 0.08);
-    box-shadow: inset 0 0 0 1px rgb(250 246 236 / 0.22);
-    color: #faf6ec;
-    backdrop-filter: blur(8px);
+  .soon::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ffc629;
+    box-shadow: 0 0 0 4px rgb(255 198 41 / 0.25);
+    animation: ping 2.4s ease-in-out infinite;
   }
 
-  @media (max-width: 720px) {
-    .stores {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      width: 100%;
-    }
-
-    .stores li {
-      padding: 0 10px;
-      gap: 8px;
-      font-size: 15px;
-    }
-
-    .stores small {
-      font-size: 9px;
-      letter-spacing: 0.04em;
+  @keyframes ping {
+    50% {
+      box-shadow: 0 0 0 7px rgb(255 198 41 / 0);
     }
   }
 
-  .dark li {
-    background: #1e2329;
-    color: #faf6ec;
+  .badges {
+    display: flex;
+    gap: 10px;
+  }
+
+  .badges img {
+    height: 44px;
+    width: auto;
+    display: block;
   }
 </style>

@@ -12,6 +12,8 @@ interface Props {
 
 const { lang, title, description } = Astro.props;
 const alternate = lang === "en" ? "/ha/" : "/";
+// Absolute once `site` is set in astro.config.mjs (WhatsApp needs a full URL).
+const ogImage = Astro.site ? new URL("/og.jpg", Astro.site).href : "/og.jpg";
 ---
 
 <!doctype html>
@@ -27,6 +29,8 @@ const alternate = lang === "en" ? "/ha/" : "/";
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta property="og:locale" content={lang === "en" ? "en_NG" : "ha_NG"} />
   </head>
   <body>

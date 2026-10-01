@@ -1,10 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
-import ArewaPattern from "./ArewaPattern.astro";
-import PhoneMock from "./PhoneMock.astro";
 import Photo from "./Photo.astro";
 import Logo from "./Logo.astro";
 import StoreBadges from "./StoreBadges.astro";
+import ScreenUI from "./ScreenUI.astro";
 import Icon from "./Icon.astro";
 import { copy, type Lang } from "../i18n";
 
@@ -15,87 +14,93 @@ interface Props {
 const { lang } = Astro.props;
 const t = copy[lang];
 const home = lang === "en" ? "/" : "/ha/";
+const words = t.manifesto.split(" ");
 // The waitlist endpoint is decided later. Until it is set, the form says
 // sign-ups open soon instead of pretending to save anything.
 const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
 ---
 
 <Base lang={lang} title={t.meta.title} description={t.meta.description}>
-  <header class="top">
+  <header class="top" data-top>
     <div class="wrap bar">
-      <a class="brand" href={home} aria-label="Deza"><Logo height={24} /></a>
+      <a class="brand" href={home}><Logo height={20} /></a>
       <nav aria-label="Main">
-        <a href="#services">{t.nav.services}</a>
+        <a href="#products">{t.nav.products}</a>
         <a href="#how">{t.nav.how}</a>
-        <a href="#drive">{t.nav.drive}</a>
-        <a href="#app">{t.nav.app}</a>
+        <a href="#safety">{t.nav.safety}</a>
+        <a href="#earn">{t.nav.earn}</a>
       </nav>
       <div class="bar-end">
         <a class="lang" href={t.nav.switchHref} hreflang={lang === "en" ? "ha" : "en"}>{t.nav.switchLabel}</a>
-        <a class="btn btn-gold btn-sm" href="#app">{t.nav.cta}</a>
+        <a class="btn btn-gold btn-sm" href="#join">{t.nav.cta}</a>
       </div>
     </div>
   </header>
 
   <main>
-    <!-- Hero: the keke photo is the page's first impression -->
+    <!-- Hero: Kano in motion -->
     <section class="hero">
-      <Photo name="hero-keke" mobile="hero-keke-mobile" alt={t.hero.photoAlt} class="hero-photo" position="70% 50%" eager />
+      <div class="hero-media">
+        <Photo name="city-band" mobile="city-band-mobile" alt={t.hero.photoAlt} class="hero-photo" eager />
+      </div>
       <div class="hero-shade" aria-hidden="true"></div>
       <div class="wrap hero-inner">
-        <span class="kicker">{t.hero.eyebrow}</span>
+        <span class="kicker load" style="--d:0">{t.hero.eyebrow}</span>
         <h1>
-          <span>{t.hero.title[0]}</span>
-          <span>{t.hero.title[1]}</span>
-          <span class="gold">{t.hero.title[2]}</span>
+          {t.hero.title.map((w, i) => <span class:list={["load", { gold: i === 2 }]} style={`--d:${i + 1}`}>{w}</span>)}
         </h1>
-        <p class="lead">{t.hero.lead}</p>
-        <div class="hero-actions">
-          <a class="btn btn-gold" href="#app">{t.hero.cta}<Icon name="arrow" size={18} stroke={2.25} /></a>
+        <p class="lead load" style="--d:4">{t.hero.lead}</p>
+        <div class="hero-actions load" style="--d:5">
+          <a class="btn btn-gold" href="#join">{t.hero.cta}<Icon name="arrow" size={18} stroke={2.25} /></a>
           <StoreBadges label={t.hero.soon} />
-        </div>
-      </div>
-      <div class="ticker">
-        <div class="wrap ticker-row">
-          {
-            t.hero.ticker.map(([name, state], i) => (
-              <div class:list={["tick", { first: i === 0 }]}>
-                <strong>{name}</strong>
-                <span>{state}</span>
-              </div>
-            ))
-          }
         </div>
       </div>
     </section>
 
-    <!-- Services: ride now, delivery next -->
-    <section id="services" class="services">
+    <!-- Kano neighbourhoods -->
+    <div class="marquee" aria-hidden="true">
+      <div class="track">
+        {
+          [0, 1].map(() => (
+            <div class="run">
+              {t.marquee.map((m) => (
+                <span>
+                  {m}
+                  <i />
+                </span>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Manifesto: words light up as you read -->
+    <section class="manifesto">
       <div class="wrap">
-        <div class="head">
-          <span class="kicker">{t.services.kicker}</span>
-          <h2>{t.services.title}</h2>
+        <p class="say" data-say>
+          {words.map((w) => <span>{w} </span>)}
+        </p>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section id="products" class="products">
+      <div class="wrap">
+        <div class="head reveal">
+          <span class="kicker dark">{t.products.kicker}</span>
+          <h2>{t.products.title}</h2>
         </div>
-        <div class="service-grid">
+        <div class="cards">
           {
-            t.services.items.map((s, i) => (
-              <article class:list={["service", { next: i === 1 }]}>
-                <Photo name={s.photo} alt={s.photoAlt} class="service-photo" />
-                <div class="service-body">
-                  <div class="service-top">
-                    <h3>{s.name}</h3>
-                    <span class="status">{s.status}</span>
-                  </div>
-                  <p>{s.body}</p>
-                  <ul class="ticks">
-                    {s.points.map((p) => (
-                      <li>
-                        <Icon name="check" size={16} stroke={2.5} />
-                        {p}
-                      </li>
-                    ))}
-                  </ul>
+            t.products.items.map((p, i) => (
+              <article class="card reveal" style={`--i:${i}`}>
+                <div class="card-media">
+                  <Photo name={p.photo} alt={p.photoAlt} class="card-photo" />
+                  <span class:list={["status", { first: i === 0 }]}>{p.status}</span>
                 </div>
+                <h3>{p.name}</h3>
+                <p>{p.body}</p>
               </article>
             ))
           }
@@ -103,54 +108,114 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
       </div>
     </section>
 
-    <!-- Full-width city band -->
-    <section class="band">
-      <Photo name="city-band" alt={t.band.photoAlt} class="band-photo" />
-      <div class="band-shade" aria-hidden="true"></div>
-      <div class="wrap band-inner">
-        <h2>{t.band.title}</h2>
-        <p>{t.band.body}</p>
-      </div>
-    </section>
-
-    <!-- How a ride works -->
-    <section id="how" class="how">
-      <ArewaPattern id="arewa-how" opacity={0.07} />
+    <!-- How it works: sticky phone, screen follows the steps -->
+    <section id="how" class="how" data-steps data-step="1">
       <div class="wrap how-grid">
         <div class="how-copy">
-          <span class="kicker">{t.how.kicker}</span>
-          <h2>{t.how.title}</h2>
+          <div class="head">
+            <span class="kicker">{t.how.kicker}</span>
+            <h2>{t.how.title}</h2>
+          </div>
           <ol class="steps">
             {
-              t.how.steps.map((step, i) => (
-                <li>
+              t.how.steps.map((s, i) => (
+                <li data-step-item={i + 1}>
                   <span class="num">{i + 1}</span>
                   <div>
-                    <h3>{step.title}</h3>
-                    <p>{step.body}</p>
+                    <h3>{s.title}</h3>
+                    <p>{s.body}</p>
                   </div>
                 </li>
               ))
             }
           </ol>
         </div>
-        <div class="how-phone">
-          <PhoneMock t={t.phone} />
+        <div class="how-visual">
+          <div class="phone-shot">
+            <Photo name="phone-in-hand" alt={t.how.photoAlt} class="phone-photo" />
+            <div class="screen-slot"><ScreenUI t={t.screen} /></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Drivers -->
-    <section id="drive" class="drive">
-      <div class="wrap drive-grid">
-        <Photo name="driver-portrait" alt={t.drive.photoAlt} class="drive-photo" />
-        <div class="drive-copy">
-          <span class="kicker">{t.drive.kicker}</span>
-          <h2>{t.drive.title}</h2>
-          <p class="body">{t.drive.body}</p>
-          <ul class="ticks big">
+    <!-- Honest numbers -->
+    <section class="stats">
+      <div class="wrap stat-row">
+        {
+          t.stats.map((s) => (
+            <div class="stat reveal">
+              <b>
+                {s.prefix}
+                <span data-count={s.value}>{s.value}</span>
+                {s.suffix}
+              </b>
+              <span>{s.label}</span>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Safety, at night -->
+    <section id="safety" class="safety">
+      <div class="parallax">
+        <Photo name="night-ride" alt={t.safety.photoAlt} class="safety-photo" position="50% 60%" />
+      </div>
+      <div class="safety-shade" aria-hidden="true"></div>
+      <div class="wrap safety-inner">
+        <div class="head reveal">
+          <span class="kicker">{t.safety.kicker}</span>
+          <h2>{t.safety.title}</h2>
+        </div>
+        <ul class="safety-list">
+          {
+            t.safety.items.map((s, i) => (
+              <li class="reveal" style={`--i:${i}`}>
+                <Icon name={(["shield", "share", "tag"] as const)[i]} size={26} />
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section class="road">
+      <div class="wrap">
+        <div class="head reveal">
+          <span class="kicker dark">{t.road.kicker}</span>
+          <h2>{t.road.title}</h2>
+        </div>
+        <ol class="road-line">
+          {
+            t.road.steps.map((s, i) => (
+              <li class:list={["reveal", { now: i === 0 }]} style={`--i:${i}`}>
+                <span class="tag">{s.tag}</span>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <!-- Earn -->
+    <section id="earn" class="earn">
+      <div class="wrap earn-grid">
+        <div class="earn-media reveal">
+          <Photo name="driver-portrait" alt={t.earn.photoAlt} class="earn-photo" position="50% 35%" />
+        </div>
+        <div class="earn-copy reveal">
+          <span class="kicker dark">{t.earn.kicker}</span>
+          <h2>{t.earn.title}</h2>
+          <p class="body">{t.earn.body}</p>
+          <ul class="ticks">
             {
-              t.drive.points.map((p) => (
+              t.earn.points.map((p) => (
                 <li>
                   <Icon name="check" size={18} stroke={2.5} />
                   {p}
@@ -158,31 +223,32 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
               ))
             }
           </ul>
-          <a class="btn btn-ink" href="#app" data-role="drive">{t.drive.cta}</a>
+          <a class="btn btn-ink" href="#join" data-role="drive">{t.earn.cta}</a>
         </div>
       </div>
     </section>
 
-    <!-- App coming soon + waitlist -->
-    <section id="app" class="app">
-      <ArewaPattern id="arewa-app" color="var(--ink)" opacity={0.08} />
-      <div class="wrap app-grid">
-        <div class="app-copy">
+    <!-- Join -->
+    <section id="join" class="join">
+      <Photo name="hero-keke" mobile="hero-keke-mobile" alt="" class="join-photo" position="75% 50%" />
+      <div class="join-shade" aria-hidden="true"></div>
+      <div class="wrap join-grid">
+        <div class="join-copy reveal">
           <span class="kicker">{t.app.kicker}</span>
           <h2>{t.app.title}</h2>
           <p class="body">{t.app.body}</p>
-          <StoreBadges label={t.hero.soon} tone="dark" />
+          <StoreBadges label={t.hero.soon} />
         </div>
         <form
-          class="form"
+          class="form reveal"
           data-endpoint={waitlistUrl}
           data-msg-success={t.waitlist.success}
           data-msg-closed={t.waitlist.notOpen}
           data-msg-error={t.waitlist.error}
         >
-          <label for="wl-phone">{t.waitlist.phone}</label>
+          <label for={`wl-phone-${lang}`}>{t.waitlist.phone}</label>
           <input
-            id="wl-phone"
+            id={`wl-phone-${lang}`}
             name="phone"
             type="tel"
             inputmode="tel"
@@ -191,8 +257,8 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
             pattern="[0-9+ ]{10,16}"
             placeholder={t.waitlist.phonePlaceholder}
           />
-          <label for="wl-area">{t.waitlist.area}</label>
-          <input id="wl-area" name="area" type="text" autocomplete="address-level3" placeholder={t.waitlist.areaPlaceholder} />
+          <label for={`wl-area-${lang}`}>{t.waitlist.area}</label>
+          <input id={`wl-area-${lang}`} name="area" type="text" autocomplete="address-level3" placeholder={t.waitlist.areaPlaceholder} />
           <fieldset>
             <legend>{t.waitlist.role}</legend>
             <div class="chips">
@@ -204,22 +270,86 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
           <input type="hidden" name="lang" value={lang} />
           <button class="btn btn-gold" type="submit">{t.waitlist.submit}</button>
           <p class="fine">{t.waitlist.privacy}</p>
-          <p class="status" role="status" aria-live="polite"></p>
+          <p class="status-msg" role="status" aria-live="polite"></p>
         </form>
       </div>
     </section>
   </main>
 
   <footer class="foot">
-    <div class="wrap foot-row">
-      <Logo height={20} />
-      <span>{t.footer.tagline}</span>
-      <span>© {new Date().getFullYear()} {t.footer.rights}</span>
+    <div class="wrap">
+      <div class="foot-row">
+        <span>{t.footer.tagline}</span>
+        <span>© {new Date().getFullYear()} {t.footer.rights}</span>
+      </div>
+      <div class="foot-mark"><Logo height={120} /></div>
     </div>
   </footer>
 </Base>
 
 <script>
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Header turns solid once you scroll past the hero.
+  const top = document.querySelector<HTMLElement>("[data-top]");
+  const onScroll = () => top?.classList.toggle("solid", scrollY > 40);
+  addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // Manifesto: each word brightens as the paragraph moves up the screen.
+  const say = document.querySelector<HTMLElement>("[data-say]");
+  const sayWords = say ? [...say.querySelectorAll("span")] : [];
+  const paint = () => {
+    if (!say) return;
+    const r = say.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.35)));
+    const lit = Math.round(p * sayWords.length);
+    sayWords.forEach((w, i) => w.classList.toggle("lit", reduce || i < lit));
+  };
+  addEventListener("scroll", paint, { passive: true });
+  paint();
+
+  // How it works: the screen follows whichever step is in the middle.
+  const how = document.querySelector<HTMLElement>("[data-steps]");
+  const items = [...document.querySelectorAll<HTMLElement>("[data-step-item]")];
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting && how) {
+          how.dataset.step = (e.target as HTMLElement).dataset.stepItem;
+          items.forEach((it) => it.classList.toggle("active", it === e.target));
+        }
+      }
+    },
+    { rootMargin: "-45% 0px -45% 0px" },
+  );
+  items.forEach((it) => io.observe(it));
+  items[0]?.classList.add("active");
+
+  // Numbers count up once when they come into view.
+  const counters = document.querySelectorAll<HTMLElement>("[data-count]");
+  const co = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        const el = e.target as HTMLElement;
+        co.unobserve(el);
+        const end = Number(el.dataset.count);
+        if (reduce || end === 0) continue;
+        const start = performance.now();
+        const tick = (now: number) => {
+          const k = Math.min(1, (now - start) / 900);
+          el.textContent = String(Math.round(end * (1 - Math.pow(1 - k, 3))));
+          if (k < 1) requestAnimationFrame(tick);
+        };
+        el.textContent = "0";
+        requestAnimationFrame(tick);
+      }
+    },
+    { threshold: 0.6 },
+  );
+  counters.forEach((c) => co.observe(c));
+
   // Buttons like "Register as a rider" pre-select the matching option.
   document.querySelectorAll<HTMLAnchorElement>("a[data-role]").forEach((a) => {
     a.addEventListener("click", () => {
@@ -231,7 +361,7 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
   const form = document.querySelector<HTMLFormElement>("form.form");
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const status = form.querySelector<HTMLElement>(".status")!;
+    const status = form.querySelector<HTMLElement>(".status-msg")!;
     const button = form.querySelector<HTMLButtonElement>("button")!;
     const { endpoint, msgSuccess, msgClosed, msgError } = form.dataset;
     status.dataset.state = "";
@@ -268,13 +398,84 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
     letter-spacing: -0.035em;
   }
 
-  /* Header: floats over the hero photo */
+  h2 {
+    font-size: clamp(32px, 4.8vw, 64px);
+    line-height: 1.02;
+  }
+
+  .head {
+    display: grid;
+    gap: var(--md);
+    max-width: 860px;
+  }
+
+  .kicker {
+    color: var(--gold);
+  }
+
+  .kicker.dark {
+    color: var(--ink);
+  }
+
+  .body {
+    font-size: 18px;
+    max-width: 46ch;
+  }
+
+  .btn-sm {
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .btn-ink {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .btn-ink:hover {
+    background: color-mix(in srgb, var(--ink) 85%, white);
+  }
+
+  /* Reveal on scroll. Resting state is fully visible; only browsers with
+     scroll-driven animations get the rise-in. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+    .reveal {
+      animation-name: rise;
+      animation-fill-mode: both;
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+      animation-timeline: view();
+      animation-range: entry calc(var(--i, 0) * 4%) entry calc(45% + var(--i, 0) * 4%);
+    }
+  }
+
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(48px);
+    }
+  }
+
+  /* Header */
   .top {
     position: fixed;
     inset: 0 0 auto;
     z-index: 30;
     color: var(--paper);
-    background: linear-gradient(to bottom, rgb(20 23 27 / 0.7), transparent);
+    background: linear-gradient(to bottom, rgb(16 19 23 / 0.55), transparent);
+    transition:
+      background-color 250ms,
+      box-shadow 250ms;
+  }
+
+  .top.solid {
+    background: color-mix(in srgb, var(--ink) 94%, transparent);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 var(--paper-6);
   }
 
   .bar {
@@ -285,8 +486,8 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
   }
 
   .brand {
-    text-decoration: none;
     color: var(--paper);
+    text-decoration: none;
   }
 
   nav {
@@ -323,41 +524,34 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
     box-shadow: inset 0 0 0 1px var(--paper-12);
   }
 
-  .btn-sm {
-    min-height: 40px;
-    padding: 0 16px;
-    font-size: 14px;
-    border-radius: 10px;
-  }
-
-  .btn-ink {
-    background: var(--ink);
-    color: var(--paper);
-  }
-
-  .btn-ink:hover {
-    background: color-mix(in srgb, var(--ink) 85%, white);
-  }
-
-  .kicker {
-    color: var(--gold);
-  }
-
   /* Hero */
   .hero {
     position: relative;
-    min-height: clamp(640px, 100svh, 960px);
+    min-height: clamp(640px, 100svh, 980px);
     display: grid;
-    grid-template-rows: 1fr auto;
+    align-items: end;
     color: var(--paper);
     background: var(--ink);
+    overflow: hidden;
     isolation: isolate;
   }
 
-  .hero :global(.hero-photo) {
+  .hero-media {
     position: absolute;
     inset: 0;
     z-index: -2;
+    animation: drift 18s ease-out both;
+  }
+
+  .hero-media :global(.hero-photo) {
+    width: 100%;
+    height: 100%;
+  }
+
+  @keyframes drift {
+    from {
+      transform: scale(1.12);
+    }
   }
 
   .hero-shade {
@@ -365,38 +559,48 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(90deg, rgb(20 23 27 / 0.88) 0%, rgb(20 23 27 / 0.55) 42%, rgb(20 23 27 / 0) 70%),
-      linear-gradient(0deg, rgb(20 23 27 / 0.85) 0%, rgb(20 23 27 / 0) 35%);
+      linear-gradient(0deg, rgb(16 19 23 / 0.95) 0%, rgb(16 19 23 / 0.55) 40%, rgb(16 19 23 / 0.1) 70%),
+      linear-gradient(90deg, rgb(16 19 23 / 0.6) 0%, transparent 60%);
   }
 
   .hero-inner {
-    align-self: end;
     display: grid;
     justify-items: start;
     gap: var(--lg);
-    padding-top: 120px;
-    padding-bottom: clamp(40px, 6vw, 72px);
+    padding-top: 140px;
+    padding-bottom: clamp(48px, 7vw, 88px);
   }
 
   .hero h1 {
-    display: grid;
-    font-size: clamp(44px, 7.4vw, 108px);
-    line-height: 0.98;
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.28em;
+    max-width: 13ch;
+    font-size: clamp(48px, 9vw, 140px);
+    line-height: 0.95;
     font-weight: 700;
-    letter-spacing: -0.045em;
-  }
-
-  .hero h1 span:nth-child(2) {
-    font-weight: 300;
+    letter-spacing: -0.05em;
   }
 
   .gold {
     color: var(--gold);
   }
 
+  .load {
+    animation: up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--d) * 90ms + 150ms);
+  }
+
+  @keyframes up {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+  }
+
   .lead {
-    max-width: 40ch;
-    font-size: clamp(17px, 1.6vw, 20px);
+    max-width: 44ch;
+    font-size: clamp(17px, 1.5vw, 20px);
     color: var(--paper-70);
   }
 
@@ -404,233 +608,176 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
+    gap: 16px 22px;
   }
 
-  .ticker {
-    border-top: 1px solid var(--paper-12);
-    background: rgb(20 23 27 / 0.55);
-    backdrop-filter: blur(8px);
+  /* Marquee */
+  .marquee {
+    overflow: hidden;
+    background: var(--gold);
+    color: var(--ink);
+    padding-block: 16px;
   }
 
-  .ticker-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+  .track {
+    display: flex;
+    width: max-content;
+    animation: slide 40s linear infinite;
   }
 
-  .tick {
-    display: grid;
-    gap: 2px;
-    padding: 18px 0 18px 24px;
-    border-left: 1px solid var(--paper-12);
+  .run {
+    display: flex;
   }
 
-  .tick.first {
-    padding-left: 0;
-    border-left: 0;
-  }
-
-  .tick strong {
+  .run span {
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+    padding-right: 28px;
     font-family: var(--display);
     font-weight: 600;
-    font-size: 15px;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
   }
 
-  .tick span {
-    font-size: 13px;
-    color: var(--paper-55);
+  .run i {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+    transform: rotate(45deg);
   }
 
-  .tick.first span {
-    color: var(--gold);
+  @keyframes slide {
+    to {
+      transform: translateX(-50%);
+    }
   }
 
-  /* Shared */
-  .head {
-    display: grid;
-    gap: var(--md);
-    max-width: 820px;
+  /* Manifesto */
+  .manifesto {
+    padding-block: clamp(96px, 14vw, 200px);
   }
 
-  h2 {
-    font-size: clamp(32px, 4.6vw, 60px);
-    line-height: 1.02;
+  .say {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(28px, 4.2vw, 58px);
+    line-height: 1.18;
+    letter-spacing: -0.03em;
+    max-width: 22ch;
+    max-width: 1000px;
   }
 
-  .body {
-    font-size: 18px;
-    max-width: 46ch;
+  .say span {
+    color: color-mix(in srgb, var(--ink) 18%, transparent);
+    transition: color 300ms;
   }
 
-  .ticks {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 8px;
-  }
-
-  .ticks li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-    font-size: 15px;
-  }
-
-  .ticks.big li {
-    font-size: 17px;
-  }
-
-  /* Services */
-  .services {
-    padding-block: clamp(80px, 11vw, 150px);
-  }
-
-  .services .kicker {
+  .say span:global(.lit) {
     color: var(--ink);
   }
 
-  .service-grid {
-    display: grid;
-    grid-template-columns: 1.15fr 1fr;
-    gap: var(--lg);
-    margin-top: var(--xxl);
-    align-items: start;
+  /* Products */
+  .products {
+    padding-bottom: clamp(96px, 12vw, 160px);
   }
 
-  .service {
+  .cards {
     display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--lg);
+    margin-top: var(--xxl);
+  }
+
+  .card {
+    display: grid;
+    gap: 12px;
+    align-content: start;
     min-width: 0;
   }
 
-  .service.next {
-    margin-top: clamp(0px, 8vw, 120px);
-  }
-
-  .service :global(.service-photo) {
-    aspect-ratio: 4 / 5;
+  .card-media {
+    position: relative;
+    overflow: hidden;
     border-radius: var(--r-lg);
+    margin-bottom: 8px;
   }
 
-  .service-body {
-    display: grid;
-    gap: 14px;
-    padding-right: var(--lg);
+  .card-media :global(.card-photo) {
+    aspect-ratio: 4 / 5;
+    transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  .service-top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .service h3 {
-    font-size: clamp(24px, 2.4vw, 32px);
+  .card:hover .card-media :global(.card-photo) {
+    transform: scale(1.05);
   }
 
   .status {
-    padding: 5px 12px;
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    padding: 6px 12px;
     border-radius: var(--r-pill);
-    background: var(--gold);
+    background: rgb(250 246 236 / 0.92);
+    color: var(--ink);
     font-size: 13px;
     font-weight: 700;
   }
 
-  .next .status {
-    background: transparent;
-    box-shadow: inset 0 0 0 1.5px var(--ink);
+  .status.first {
+    background: var(--gold);
   }
 
-  .service p {
+  .card h3 {
+    font-size: clamp(22px, 2vw, 28px);
+  }
+
+  .card p {
     color: var(--ink-70);
-    max-width: 44ch;
+    max-width: 40ch;
   }
 
-  .ticks :global(svg) {
-    color: var(--ink);
-    flex: none;
-  }
-
-  /* City band */
-  .band {
-    position: relative;
-    min-height: clamp(420px, 52vw, 680px);
-    display: grid;
-    align-items: end;
-    color: var(--paper);
-    isolation: isolate;
-  }
-
-  .band :global(.band-photo) {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-  }
-
-  .band-shade {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(0deg, rgb(20 23 27 / 0.9) 0%, rgb(20 23 27 / 0.2) 60%, rgb(20 23 27 / 0) 100%);
-  }
-
-  .band-inner {
-    display: grid;
-    gap: var(--md);
-    padding-block: clamp(48px, 7vw, 96px);
-  }
-
-  .band h2 {
-    font-size: clamp(36px, 6.4vw, 92px);
-    font-weight: 700;
-    max-width: 14ch;
-  }
-
-  .band p {
-    max-width: 48ch;
-    font-size: 18px;
-    color: var(--paper-70);
-  }
-
-  /* How */
+  /* How it works */
   .how {
-    position: relative;
     background: var(--ink);
     color: var(--paper);
-    overflow: hidden;
-    padding-block: clamp(80px, 11vw, 150px);
+    padding-block: clamp(96px, 12vw, 160px);
   }
 
   .how-grid {
-    position: relative;
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: var(--xxl);
-    align-items: center;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 6vw, 96px);
+    align-items: start;
   }
 
   .how-copy {
-    display: grid;
-    gap: var(--md);
     min-width: 0;
   }
 
   .steps {
     list-style: none;
-    margin: var(--lg) 0 0;
+    margin: var(--xxl) 0 0;
     padding: 0;
-    display: grid;
   }
 
   .steps li {
     display: grid;
-    grid-template-columns: 56px 1fr;
+    grid-template-columns: 52px 1fr;
     gap: var(--md);
-    padding-block: var(--lg);
-    border-top: 1px solid var(--paper-12);
+    padding-block: clamp(48px, 18vh, 180px) var(--lg);
+    opacity: 0.35;
+    transition: opacity 400ms;
+  }
+
+  .steps li:first-child {
+    padding-top: var(--lg);
+  }
+
+  .steps li:global(.active) {
+    opacity: 1;
   }
 
   .num {
@@ -639,98 +786,343 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: var(--gold);
-    color: var(--ink);
+    box-shadow: inset 0 0 0 1.5px var(--paper-55);
     font-family: var(--display);
     font-weight: 700;
+    transition:
+      background-color 300ms,
+      color 300ms;
+  }
+
+  .steps li:global(.active) .num {
+    background: var(--gold);
+    color: var(--ink);
+    box-shadow: none;
   }
 
   .steps h3 {
-    font-size: 20px;
-    margin-bottom: 6px;
+    font-size: clamp(22px, 2.2vw, 30px);
+    margin-bottom: 8px;
   }
 
   .steps p {
     color: var(--paper-70);
+    font-size: 17px;
+    max-width: 40ch;
   }
 
-  .how-phone {
-    display: flex;
-    justify-content: center;
+  .how-visual {
+    position: sticky;
+    top: 96px;
   }
 
-  /* Drive */
-  .drive {
-    padding-block: clamp(80px, 11vw, 150px);
+  .phone-shot {
+    position: relative;
+    aspect-ratio: 1000 / 1252;
+    max-width: 100%;
+    border-radius: var(--r-lg);
+    overflow: hidden;
   }
 
-  .drive .kicker {
+  .phone-shot :global(.phone-photo) {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Matches the black screen in phone-in-hand.webp */
+  .screen-slot {
+    position: absolute;
+    left: 31.6%;
+    top: 23.1%;
+    width: 36.8%;
+    height: 64.6%;
+  }
+
+  /* Stats */
+  .stats {
+    background: var(--gold);
     color: var(--ink);
+    padding-block: clamp(56px, 7vw, 88px);
   }
 
-  .drive-grid {
+  .stat-row {
     display: grid;
-    grid-template-columns: 0.9fr 1.1fr;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--lg);
+  }
+
+  .stat {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding-left: var(--md);
+    border-left: 1.5px solid var(--ink);
+  }
+
+  .stat b {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(48px, 6vw, 88px);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat > span {
+    font-size: 15px;
+    font-weight: 600;
+    max-width: 22ch;
+  }
+
+  /* Safety */
+  .safety {
+    position: relative;
+    color: var(--paper);
+    overflow: hidden;
+    isolation: isolate;
+    padding-block: clamp(120px, 16vw, 220px) clamp(64px, 8vw, 112px);
+  }
+
+  .parallax {
+    position: absolute;
+    inset: -12% 0;
+    z-index: -2;
+  }
+
+  .parallax :global(.safety-photo) {
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+    .parallax {
+      animation: pan linear both;
+      animation-timeline: view();
+    }
+  }
+
+  }
+
+  @keyframes pan {
+    from {
+      transform: translateY(-8%);
+    }
+    to {
+      transform: translateY(8%);
+    }
+  }
+
+  .safety-shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(0deg, rgb(16 19 23 / 0.95) 10%, rgb(16 19 23 / 0.35) 60%, rgb(16 19 23 / 0.2));
+  }
+
+  .safety-inner {
+    display: grid;
+    gap: var(--xxl);
+  }
+
+  .safety-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--lg);
+  }
+
+  .safety-list li {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    padding: var(--lg);
+    border-radius: var(--r-lg);
+    background: rgb(250 246 236 / 0.07);
+    box-shadow: inset 0 0 0 1px var(--paper-12);
+    backdrop-filter: blur(10px);
+  }
+
+  .safety-list :global(svg) {
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .safety-list h3 {
+    font-size: 20px;
+  }
+
+  .safety-list p {
+    color: var(--paper-70);
+    font-size: 16px;
+  }
+
+  /* Roadmap */
+  .road {
+    padding-block: clamp(96px, 12vw, 160px);
+  }
+
+  .road-line {
+    position: relative;
+    list-style: none;
+    margin: var(--xxl) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--lg);
+  }
+
+  .road-line::before {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--ink-10);
+  }
+
+  .road-line li {
+    position: relative;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    padding-top: 52px;
+  }
+
+  .road-line li::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 2px var(--ink);
+  }
+
+  .road-line li.now::before {
+    background: var(--gold);
+    box-shadow:
+      inset 0 0 0 2px var(--ink),
+      0 0 0 6px rgb(255 198 41 / 0.35);
+  }
+
+  .tag {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+
+  .road-line h3 {
+    font-size: 21px;
+  }
+
+  .road-line p {
+    color: var(--ink-70);
+    font-size: 16px;
+  }
+
+  /* Earn */
+  .earn {
+    padding-bottom: clamp(96px, 12vw, 160px);
+  }
+
+  .earn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: clamp(32px, 6vw, 96px);
     align-items: center;
   }
 
-  .drive :global(.drive-photo) {
-    aspect-ratio: 4 / 5;
+  .earn-media {
     border-radius: var(--r-lg);
+    overflow: hidden;
   }
 
-  .drive-copy {
+  .earn-media :global(.earn-photo) {
+    aspect-ratio: 4 / 5;
+  }
+
+  .earn-copy {
     display: grid;
     gap: var(--lg);
     justify-items: start;
     min-width: 0;
   }
 
-  .drive h2 {
-    font-size: clamp(40px, 6vw, 84px);
-    font-weight: 700;
+  .earn h2 {
+    font-size: clamp(34px, 4.4vw, 60px);
   }
 
-  .drive .body {
+  .earn .body {
     color: var(--ink-70);
   }
 
-  /* App + waitlist: the one gold surface on the page */
-  .app {
-    position: relative;
-    overflow: hidden;
-    background: var(--gold);
-    color: var(--ink);
-    padding-block: clamp(80px, 10vw, 136px);
-  }
-
-  .app .kicker {
-    color: var(--ink);
-  }
-
-  .app-grid {
-    position: relative;
+  .ticks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ticks li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    font-size: 17px;
+  }
+
+  /* Join */
+  .join {
+    position: relative;
+    color: var(--paper);
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: clamp(96px, 12vw, 160px);
+  }
+
+  .join :global(.join-photo) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+
+  .join-shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgb(16 19 23 / 0.92) 0%, rgb(16 19 23 / 0.75) 45%, rgb(16 19 23 / 0.35) 100%);
+  }
+
+  .join-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
     gap: var(--xxl);
     align-items: center;
   }
 
-  .app-copy {
+  .join-copy {
     display: grid;
     gap: var(--lg);
     justify-items: start;
     min-width: 0;
   }
 
-  .app h2 {
-    font-size: clamp(38px, 5.6vw, 76px);
+  .join h2 {
+    font-size: clamp(38px, 5.6vw, 80px);
     font-weight: 700;
   }
 
-  .app .body {
-    color: var(--ink-70);
+  .join .body {
+    color: var(--paper-70);
   }
 
   .form {
@@ -738,16 +1130,15 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
     gap: 10px;
     padding: var(--xl);
     border-radius: var(--r-lg);
-    background: var(--ink);
-    color: var(--paper);
-    box-shadow: 0 40px 80px -40px rgb(30 35 41 / 0.6);
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.6);
   }
 
   .form > label,
   legend {
     font-size: 14px;
     font-weight: 600;
-    color: var(--paper-70);
   }
 
   .form input[type="tel"],
@@ -757,19 +1148,15 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
     margin-bottom: 10px;
     padding: 0 var(--md);
     border-radius: var(--r-md);
-    border: 1.5px solid var(--paper-12);
-    background: var(--paper-6);
+    border: 1.5px solid var(--ink-10);
+    background: #fff;
     font: 500 17px var(--font);
-    color: var(--paper);
-  }
-
-  .form input::placeholder {
-    color: var(--paper-55);
+    color: var(--ink);
   }
 
   .form input:focus {
     outline: none;
-    border-color: var(--gold);
+    border-color: var(--ink);
   }
 
   fieldset {
@@ -797,15 +1184,15 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
     display: inline-block;
     padding: 10px 18px;
     border-radius: var(--r-pill);
-    box-shadow: inset 0 0 0 1.5px var(--paper-12);
+    box-shadow: inset 0 0 0 1.5px var(--ink-10);
     font-weight: 600;
     font-size: 15px;
     cursor: pointer;
   }
 
   .chips input:checked + span {
-    background: var(--paper);
-    color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
     box-shadow: none;
   }
 
@@ -824,24 +1211,23 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
 
   .fine {
     font-size: 13px;
-    color: var(--paper-55);
+    color: var(--ink-55);
   }
 
-  .status:empty {
+  .status-msg:empty {
     display: none;
   }
 
-  .status {
+  .status-msg {
     padding: 12px var(--md);
     border-radius: var(--r-md);
-    background: var(--paper-12);
+    background: var(--ink-6);
     font-weight: 600;
     font-size: 15px;
   }
 
-  .status[data-state="ok"] {
+  .status-msg[data-state="ok"] {
     background: var(--gold);
-    color: var(--ink);
   }
 
   /* Footer */
@@ -849,19 +1235,26 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
     background: var(--ink);
     color: var(--paper-55);
     font-size: 14px;
-  }
-
-  .foot :global(.logo-text) {
-    color: var(--paper);
+    overflow: hidden;
   }
 
   .foot-row {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
     justify-content: space-between;
     gap: var(--md);
     padding-block: var(--xl);
+    border-bottom: 1px solid var(--paper-6);
+  }
+
+  .foot-mark {
+    color: var(--paper);
+    padding-block: clamp(32px, 6vw, 72px);
+    opacity: 0.95;
+  }
+
+  .foot-mark :global(.logo) {
+    --h: clamp(48px, 13vw, 190px) !important;
   }
 
   /* Tablet */
@@ -874,15 +1267,24 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
       margin-left: auto;
     }
 
-    .how-grid,
-    .drive-grid,
-    .app-grid {
-      grid-template-columns: 1fr;
+    .cards {
+      grid-template-columns: 1fr 1fr;
     }
 
-    .drive :global(.drive-photo) {
-      max-width: 520px;
-      width: 100%;
+    .stat-row,
+    .road-line {
+      grid-template-columns: 1fr 1fr;
+      row-gap: var(--xl);
+    }
+
+    .road-line::before {
+      display: none;
+    }
+
+    .safety-list,
+    .earn-grid,
+    .join-grid {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -892,45 +1294,48 @@ const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
       display: none;
     }
 
-    .hero-shade {
-      background: linear-gradient(0deg, rgb(20 23 27 / 0.92) 0%, rgb(20 23 27 / 0.6) 45%, rgb(20 23 27 / 0.15) 75%);
-    }
-
     .hero-actions .btn {
       width: 100%;
     }
 
-    .ticker-row {
-      grid-template-columns: 1fr;
-    }
-
-    .tick,
-    .tick.first {
-      grid-template-columns: 1fr auto;
-      align-items: baseline;
-      padding: 12px 0;
-      border-left: 0;
-    }
-
-    .tick + .tick {
-      border-top: 1px solid var(--paper-12);
-    }
-
-    .service-grid {
+    .cards {
       grid-template-columns: 1fr;
       gap: var(--xxl);
     }
 
-    .service.next {
-      margin-top: 0;
+    .how-grid {
+      grid-template-columns: 1fr;
     }
 
-    .service-body {
-      padding-right: 0;
+    /* On phones the photo sits on top and sticks while steps scroll under it. */
+    .how-visual {
+      order: -1;
+      top: 72px;
+      z-index: 2;
+      margin-inline: calc(var(--gutter) * -1);
+      padding: 8px var(--gutter) 16px;
+      background: var(--ink);
+    }
+
+    .phone-shot {
+      max-width: 260px;
+      margin-inline: auto;
+    }
+
+    .steps {
+      margin-top: var(--lg);
     }
 
     .steps li {
-      grid-template-columns: 44px 1fr;
+      padding-block: 18vh var(--md);
+    }
+
+    .stat b {
+      font-size: 56px;
+    }
+
+    .join-shade {
+      background: linear-gradient(0deg, rgb(16 19 23 / 0.95) 30%, rgb(16 19 23 / 0.55));
     }
 
     .form {
