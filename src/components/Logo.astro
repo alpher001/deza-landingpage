@@ -1,0 +1,30 @@
+---
+// Uses Almustafa's own files when present: public/brand/wordmark.svg (or
+// logo.svg). Until then the name is set in the display face.
+import fs from "node:fs";
+import path from "node:path";
+
+interface Props {
+  height?: number;
+}
+
+const { height = 26 } = Astro.props;
+const file = ["wordmark.svg", "logo.svg"].find((f) => fs.existsSync(path.join(process.cwd(), "public/brand", f)));
+---
+
+{
+  file ? (
+    <img class="logo-img" src={`/brand/${file}`} alt="Deza" height={height} style={`height:${height}px;width:auto`} />
+  ) : (
+    <span class="logo-text" style={`font-size:${height}px`}>deza</span>
+  )
+}
+
+<style>
+  .logo-text {
+    font-family: var(--display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+</style>
