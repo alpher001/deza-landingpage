@@ -1,6 +1,6 @@
 ---
-// Official App Store and Google Play badges, shown unchanged with a
-// "coming soon" tag beside them. Link them to the store listings on launch.
+// Official App Store and Google Play badges, shown unchanged under a quiet
+// "coming soon" line. Link them to the store listings on launch.
 interface Props {
   label: string;
 }
@@ -11,43 +11,23 @@ const { label } = Astro.props;
 <div class="stores">
   <span class="soon">{label}</span>
   <div class="badges">
-    <img src="/badges/app-store.svg" alt={`App Store, ${label}`} width="132" height="44" />
-    <img src="/badges/google-play.png" alt={`Google Play, ${label}`} width="126" height="44" />
+    <img src="/badges/app-store.svg" alt={`App Store, ${label}`} width="132" height="44" draggable="false" />
+    <img src="/badges/google-play.png" alt={`Google Play, ${label}`} width="126" height="44" draggable="false" />
   </div>
 </div>
 
 <style>
   .stores {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 14px;
+    display: grid;
+    justify-items: inherit;
+    gap: 10px;
   }
 
   .soon {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .soon::before {
-    content: "";
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #ffc629;
-    box-shadow: 0 0 0 4px rgb(255 198 41 / 0.25);
-    animation: ping 2.4s ease-in-out infinite;
-  }
-
-  @keyframes ping {
-    50% {
-      box-shadow: 0 0 0 7px rgb(255 198 41 / 0);
-    }
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    opacity: 0.7;
   }
 
   .badges {

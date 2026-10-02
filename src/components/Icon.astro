@@ -2,7 +2,7 @@
 // Lucide shapes (https://lucide.dev, ISC licence), copied in like the rider app
 // does in apps/rider-app/components/icons.tsx. Outline only, stroke 1.75.
 interface Props {
-  name: "home" | "wallet" | "user" | "tag" | "shield" | "share" | "banknote" | "arrow" | "package" | "check" | "pin" | "phone" | "message" | "clock" | "search" | "menu" | "locate" | "store" | "bolt" | "doc" | "bag" | "x";
+  name: "home" | "wallet" | "user" | "tag" | "shield" | "share" | "banknote" | "arrow" | "package" | "check" | "pin" | "phone" | "message" | "clock" | "search" | "menu" | "locate" | "store" | "bolt" | "doc" | "bag" | "x" | "wheel";
   size?: number;
   stroke?: number;
 }
@@ -12,6 +12,7 @@ const { name, size = 24, stroke = 1.75 } = Astro.props;
 
 <svg
   aria-hidden="true"
+  focusable="false"
   width={size}
   height={size}
   viewBox="0 0 24 24"
@@ -158,4 +159,15 @@ const { name, size = 24, stroke = 1.75 } = Astro.props;
     )
   }
   {name === "x" && <path d="M18 6 6 18M6 6l12 12" />}
+  {
+    name === "wheel" && (
+      <>
+        <circle cx="12" cy="12" r="9.5" />
+        <circle cx="12" cy="12" r="2.2" />
+        <path d="M12 14.2v7.3" />
+        <path d="M9.8 12H2.5" />
+        <path d="M14.2 12h7.3" />
+      </>
+    )
+  }
 </svg>

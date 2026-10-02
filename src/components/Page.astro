@@ -41,7 +41,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 <Base lang={lang} title={t.meta.title} description={t.meta.description} ogAlt={t.meta.ogAlt} faq={t.faq.items}>
   {heroStill && <link slot="head" rel="preload" as="image" type="image/avif" imagesrcset={heroStill.avif} imagesizes="100vw" fetchpriority="high" />}
   <header class="top" data-top>
-    <div class="wrap bar">
+    <div class="wrap top-bar">
       <a class="brand" href={home} aria-label="Deza"><Logo height={19} motion="intro" /></a>
       <nav aria-label="Main">
         <a href="#ride">{t.nav.ride}</a>
@@ -62,7 +62,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
         {
           heroVideo ? (
             <>
-              <Photo name="posters/hero" alt={t.hero.rideAlt} class="hero-poster" eager sizes="100vw" widths={heroWidths} />
+              <Photo name="posters/hero" alt={t.hero.rideAlt} class="hero-poster" position="78% 50%" eager sizes="100vw" widths={heroWidths} />
               <video
                 class="bg-video"
                 muted
@@ -114,13 +114,13 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           }
         </div>
 
-        <div class="leads load" style="--d:5">
-          {t.hero.modes.map((m, i) => <p class:list={["lead", { on: i === 0 }]} data-lead={i}>{m.lead}</p>)}
-        </div>
+          <div class="leads load" style="--d:5">
+            {t.hero.modes.map((m, i) => <p class:list={["lead", { on: i === 0 }]} data-lead={i} aria-hidden={i === 0 ? undefined : "true"}>{m.lead}</p>)}
+          </div>
+          <a class="btn btn-gold hero-cta load" style="--d:6" href="#join">{t.hero.cta}<Icon name="arrow" size={18} stroke={2.25} /></a>
         </div>
 
-        <div class="hero-actions load" style="--d:6">
-          <a class="btn btn-gold" href="#join">{t.hero.cta}<Icon name="arrow" size={18} stroke={2.25} /></a>
+        <div class="hero-stores load" style="--d:7">
           <StoreBadges label={t.hero.soon} />
         </div>
       </div>
@@ -144,7 +144,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
                       <span class="step-title">{s.title}</span>
                       <span class="step-body">{s.body}</span>
                     </span>
-                    <i class="bar" aria-hidden="true" />
+                    <i class="step-timer" aria-hidden="true" />
                   </button>
                 </li>
               ))
@@ -157,6 +157,18 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
               <Photo name="phone-in-hand" alt={t.how.photoAlt} class="phone-photo" sizes="(max-width: 900px) 100vw, 46vw" widths={[480, 720, 1000]} />
               <div class="screen-slot"><ScreenUI t={t.screen} /></div>
             </div>
+          </div>
+          <!-- Phones: the open step's words sit right under the phone, so the
+               screen and what it means are on screen together. -->
+          <div class="step-captions" aria-hidden="true">
+            {
+              t.how.steps.map((s, i) => (
+                <p data-cap={i + 1}>
+                  <b>{s.title}</b>
+                  {s.body}
+                </p>
+              ))
+            }
           </div>
         </div>
       </div>
@@ -220,25 +232,19 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
       <div class="wrap">
         <div class="biz">
-          <div>
-            <h3>{t.delivery.bizTitle}</h3>
-            <p>{t.delivery.bizBody}</p>
-          </div>
-          <a class="btn btn-gold" href="#join" data-role="send">{t.delivery.cta}<Icon name="arrow" size={18} stroke={2.25} /></a>
+          <h3>{t.delivery.bizTitle}</h3>
+          <p>{t.delivery.bizBody}</p>
         </div>
       </div>
     </section>
 
+    <!-- Earn: the keke and the dispatch rider drive past, then the pitch -->
     <Cruise places={t.footer.areas} />
 
-    <!-- Earn -->
     <section id="earn" class="earn">
       <div class="wrap earn-grid">
-        <div class="earn-media reveal">
-          <Photo name="driver-portrait" alt={t.earn.photoAlt} class="earn-photo" position="50% 35%" sizes="(max-width: 900px) 100vw, 46vw" widths={[480, 720, 960, 1280, 1600]} />
-        </div>
+        <h2 class="reveal">{t.earn.title}</h2>
         <div class="earn-copy reveal">
-          <h2>{t.earn.title}</h2>
           <p class="body">{t.earn.body}</p>
           <ul class="ticks">
             {
@@ -250,7 +256,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
               ))
             }
           </ul>
-          <a class="btn btn-ink" href="#join" data-role="drive">{t.earn.cta}</a>
+          <a class="text-link" href="#join" data-role="drive">{t.earn.cta}<Icon name="arrow" size={18} stroke={2.25} /></a>
         </div>
       </div>
     </section>
@@ -289,7 +295,6 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           <Mark3D size={200} />
           <h2>{t.app.title}</h2>
           <p class="body">{t.app.body}</p>
-          <StoreBadges label={t.hero.soon} />
         </div>
         <form
           class="form reveal"
@@ -314,9 +319,9 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           <fieldset>
             <legend>{t.waitlist.role}</legend>
             <div class="chips">
-              <label><input type="radio" name="role" value="ride" checked /><span>{t.waitlist.roles.ride}</span></label>
-              <label><input type="radio" name="role" value="send" /><span>{t.waitlist.roles.send}</span></label>
-              <label><input type="radio" name="role" value="drive" /><span>{t.waitlist.roles.drive}</span></label>
+              <label><input type="radio" name="role" value="ride" checked /><span><Icon name="pin" size={16} stroke={2} />{t.waitlist.roles.ride}</span></label>
+              <label><input type="radio" name="role" value="send" /><span><Icon name="package" size={16} stroke={2} />{t.waitlist.roles.send}</span></label>
+              <label><input type="radio" name="role" value="drive" /><span><Icon name="wheel" size={16} stroke={2} />{t.waitlist.roles.drive}</span></label>
             </div>
           </fieldset>
           <input type="hidden" name="lang" value={lang} />
@@ -353,6 +358,23 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // Things that animate as they come into view (blocks rising in, the footer
+  // logo). Uses IntersectionObserver rather than CSS scroll timelines so it
+  // runs the same in every browser, including iPhones and in-app browsers.
+  if (!reduce) {
+    document.documentElement.classList.add("motion-ok");
+    const seen = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          e.target.classList.add("is-in");
+          seen.unobserve(e.target);
+        }),
+      { rootMargin: "0px 0px -10% 0px" },
+    );
+    document.querySelectorAll(".reveal, [data-inview]").forEach((el) => seen.observe(el));
+  }
+
   // Header turns solid once you scroll past the top.
   const top = document.querySelector<HTMLElement>("[data-top]");
   const onScroll = () => top?.classList.toggle("solid", scrollY > 40);
@@ -382,8 +404,22 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           if (!hero.classList.contains("picked")) set((i + 1) % btns.length);
         }),
       );
-      // Pause the turn-taking while the hero is off screen.
-      new IntersectionObserver(([e]) => hero.classList.toggle("paused", !e.isIntersecting)).observe(hero);
+      // Pause the turn-taking while the hero is off screen, and while the
+      // pointer rests on the tabs and line (so a line is never pulled away
+      // mid-read). A tap or click picks a tab and stops the turn-taking for
+      // good: the visitor has chosen, so the page stops choosing for them.
+      let offscreen = false;
+      let hovering = false;
+      const sync = () => hero.classList.toggle("paused", offscreen || hovering);
+      new IntersectionObserver(([e]) => {
+        offscreen = !e.isIntersecting;
+        sync();
+      }).observe(hero);
+      const pick = hero.querySelector<HTMLElement>(".hero-pick");
+      pick?.addEventListener("pointerenter", (e) => {
+        if (e.pointerType === "mouse") (hovering = true), sync();
+      });
+      pick?.addEventListener("pointerleave", () => ((hovering = false), sync()));
     }
   }
 
@@ -436,7 +472,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
         how.classList.add("picked");
         show(k + 1);
       });
-      b.querySelector(".bar")?.addEventListener("animationend", () => {
+      b.querySelector(".step-timer")?.addEventListener("animationend", () => {
         if (!how.classList.contains("picked")) show((k + 1) % stepBtns.length + 1);
       });
     });
@@ -523,15 +559,6 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     border-radius: 10px;
   }
 
-  .btn-ink {
-    background: var(--ink);
-    color: var(--paper);
-  }
-
-  .btn-ink:hover {
-    background: color-mix(in srgb, var(--ink) 85%, white);
-  }
-
   .chip {
     display: inline-flex;
     align-items: center;
@@ -549,24 +576,20 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     background: var(--gold);
   }
 
-  /* Reveal on scroll. Resting state is fully visible; only browsers with
-     scroll-driven animations get the rise-in. */
+  /* Reveal: blocks rise in once as they come into view. The page script
+     adds .motion-ok and .is-in, so without it (or with motion turned off)
+     everything simply shows. */
   @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .reveal {
-        animation-name: rise;
-        animation-fill-mode: both;
-        animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
-        animation-timeline: view();
-        animation-range: entry calc(var(--i, 0) * 5%) entry calc(50% + var(--i, 0) * 5%);
-      }
+    :global(.motion-ok) .reveal {
+      transition:
+        opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+        transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+      transition-delay: calc(var(--i, 0) * 90ms);
     }
-  }
 
-  @keyframes rise {
-    from {
+    :global(.motion-ok) .reveal:not(.is-in) {
       opacity: 0;
-      transform: translateY(40px);
+      transform: translateY(28px);
     }
   }
 
@@ -588,7 +611,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     box-shadow: 0 1px 0 var(--paper-6);
   }
 
-  .bar {
+  .top-bar {
     display: flex;
     align-items: center;
     gap: var(--lg);
@@ -612,12 +635,45 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
   .lang {
     color: var(--paper-70);
     text-decoration: none;
-    transition: color 150ms;
+    transition:
+      color 200ms ease,
+      background-color 200ms ease;
   }
 
-  nav a:hover,
-  .lang:hover {
-    color: var(--paper);
+  /* Nav links: a thin line draws in from the left under the hovered link. */
+  nav a {
+    position: relative;
+    padding-block: 6px;
+  }
+
+  nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1.5px;
+    border-radius: 2px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @media (hover: hover) {
+    nav a:hover,
+    .lang:hover {
+      color: var(--paper);
+    }
+
+    nav a:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .lang:hover {
+      background: var(--paper-6);
+    }
   }
 
   .bar-end {
@@ -666,6 +722,11 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
   .bg-video {
     opacity: 0;
     transition: opacity 0.6s ease;
+  }
+
+  /* Keep the keke and the rider in frame however the film is cropped. */
+  .hero-media .bg-video {
+    object-position: 78% 50%;
   }
 
   .bg-video.on {
@@ -821,6 +882,22 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     background: var(--paper);
   }
 
+  @media (hover: hover) {
+    .modes button[aria-selected="false"]:hover {
+      color: var(--paper);
+    }
+
+    .steps button[aria-pressed="false"]:hover {
+      background: color-mix(in srgb, var(--paper) 3%, transparent);
+    }
+  }
+
+  .modes button:focus-visible,
+  .steps button:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
   /* The fill is the timer: when it reaches the end, the other tab takes over. */
   .fill {
     position: absolute;
@@ -863,23 +940,18 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     font-size: clamp(17px, 1.5vw, 20px);
     color: var(--paper-70);
     opacity: 0;
-    transform: translateY(8px);
-    transition:
-      opacity 500ms,
-      transform 500ms;
+    transition: opacity 200ms ease;
   }
 
+  /* Switching tabs: the old line fades out, then the new one fades in. No
+     movement, so the text never wobbles. */
   .lead.on {
     opacity: 1;
-    transform: none;
+    transition: opacity 360ms ease 160ms;
   }
 
-  .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px 22px;
-    margin-top: 4px;
+  .hero-cta {
+    margin-top: 6px;
   }
 
   /* Hero with the video. Desktop: headline at the top, the rest along the
@@ -890,9 +962,14 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       linear-gradient(90deg, rgb(var(--ink-rgb) / 0.35) 0%, transparent 45%);
   }
 
+  /* Desktop: the headline across the top; along the bottom, two groups:
+     the tabs, line and main button on the left, the app stores on the right. */
   .has-video .hero-inner {
     min-height: min(100svh, 1100px);
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "title title"
+      "pick stores";
     align-content: space-between;
     align-items: end;
     gap: 24px 48px;
@@ -900,22 +977,26 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
   }
 
   .has-video h1 {
-    grid-column: 1 / -1;
+    grid-area: title;
   }
 
   .has-video .title {
     max-width: none;
-    font-size: clamp(50px, 7.6vw, 124px);
+    font-size: clamp(50px, min(7.6vw, 15svh), 124px);
   }
 
   .hero-pick {
+    grid-area: pick;
     display: grid;
     gap: 16px;
     justify-items: start;
   }
 
-  .has-video .hero-actions {
-    justify-content: flex-end;
+  .hero-stores {
+    grid-area: stores;
+    justify-self: end;
+    justify-items: end;
+    color: var(--paper);
   }
 
   /* Deza Ride */
@@ -1015,7 +1096,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
   }
 
   /* The bar under the open step is its timer. */
-  .bar {
+  .step-timer {
     position: absolute;
     left: 18px;
     right: 18px;
@@ -1027,17 +1108,21 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     opacity: 0;
   }
 
-  .how.running:not(.picked) [aria-pressed="true"] .bar {
+  .how.running:not(.picked) [aria-pressed="true"] .step-timer {
     opacity: 1;
     animation: fill var(--dur, 6s) linear forwards;
   }
 
-  .steps li:last-child .bar {
+  .steps li:last-child .step-timer {
     --dur: 8s;
   }
 
   .how-visual {
     min-width: 0;
+  }
+
+  .step-captions {
+    display: none;
   }
 
   .phone-shot {
@@ -1252,11 +1337,8 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
   }
 
   .biz {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--lg);
+    display: grid;
+    gap: 8px;
     margin-top: clamp(48px, 6vw, 80px);
     padding: clamp(24px, 3vw, 36px);
     border-radius: var(--r-lg);
@@ -1266,7 +1348,6 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
   .biz h3 {
     font-size: 20px;
-    margin-bottom: 6px;
   }
 
   .biz p {
@@ -1275,25 +1356,37 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     max-width: 56ch;
   }
 
-  /* Earn */
-  .earn {
-    padding-block: clamp(88px, 11vw, 160px);
+  /* Wider screens: the question on the left, the answer on the right. */
+  @media (min-width: 900px) {
+    .biz {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 48px;
+      padding: 40px 48px;
+    }
+
+    .biz h3 {
+      font-size: clamp(22px, 2.2vw, 30px);
+      max-width: 16ch;
+    }
+
+    .biz p {
+      font-size: 16px;
+    }
   }
 
+  /* Earn */
+  .earn {
+    padding-block: clamp(40px, 5vw, 72px) clamp(88px, 11vw, 160px);
+  }
+
+  /* The keke and rider band above does the picture work; this is the pitch:
+     the headline on the left, the detail on the right. */
   .earn-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: clamp(32px, 6vw, 96px);
-    align-items: center;
-  }
-
-  .earn-media {
-    border-radius: var(--r-lg);
-    overflow: hidden;
-  }
-
-  .earn-media :global(.earn-photo) {
-    aspect-ratio: 4 / 5;
+    gap: clamp(24px, 6vw, 96px);
+    align-items: start;
   }
 
   .earn-copy {
@@ -1370,6 +1463,21 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     height: 28px;
     border-radius: 50%;
     background: var(--ink-6);
+    transition:
+      background-color 200ms ease,
+      transform 300ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @media (hover: hover) {
+    summary:hover i {
+      background: var(--gold);
+    }
+  }
+
+  summary:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+    border-radius: 4px;
   }
 
   summary i::before,
@@ -1506,13 +1614,25 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
   }
 
   .chips span {
-    display: inline-block;
-    padding: 10px 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 16px;
     border-radius: var(--r-pill);
     box-shadow: inset 0 0 0 1.5px var(--ink-10);
     font-weight: 600;
     font-size: 15px;
     cursor: pointer;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease,
+      box-shadow 200ms ease;
+  }
+
+  @media (hover: hover) {
+    .chips input:not(:checked) + span:hover {
+      box-shadow: inset 0 0 0 1.5px rgb(var(--ink-rgb) / 0.3);
+    }
   }
 
   .chips input:checked + span {
@@ -1568,6 +1688,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     grid-template-columns: 1fr auto;
     gap: var(--lg) var(--xxl);
     padding-top: clamp(56px, 7vw, 88px);
+    border-top: 1px solid var(--paper-12);
   }
 
   .foot-tag {
@@ -1638,7 +1759,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
   /* Phone */
   @media (max-width: 720px) {
-    .bar {
+    .top-bar {
       height: 60px;
       gap: var(--md);
     }
@@ -1673,7 +1794,8 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       font-size: 16px;
     }
 
-    /* Phones: headline, then the whole video frame, then the rest. */
+    /* Phones: the headline, then the film edge to edge, melting into the
+       page above and below so it reads as one scene, not a pasted box. */
     .hero.has-video {
       min-height: 0;
       max-height: none;
@@ -1687,8 +1809,10 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       inset: auto;
       align-self: stretch;
       z-index: 0;
-      aspect-ratio: 16 / 10;
-      margin-top: 18px;
+      aspect-ratio: 5 / 4;
+      margin-top: -8px;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 74%, transparent 100%);
+      mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 74%, transparent 100%);
     }
 
     .has-video .hero-shade {
@@ -1701,7 +1825,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
     .has-video h1,
     .has-video .hero-pick,
-    .has-video .hero-actions {
+    .has-video .hero-stores {
       padding-inline: var(--gutter);
     }
 
@@ -1712,25 +1836,28 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
     .has-video .hero-pick {
       order: 3;
-      padding-top: 20px;
+      position: relative;
+      margin-top: -34px;
+      justify-items: stretch;
     }
 
-    .has-video .hero-actions {
+    .has-video .hero-pick .modes {
+      justify-self: start;
+    }
+
+    .has-video .hero-stores {
       order: 4;
-      justify-content: flex-start;
-      padding-top: 20px;
-      padding-bottom: 36px;
+      align-self: stretch;
+      justify-items: start;
+      padding-top: 28px;
+      padding-bottom: 40px;
     }
 
     .has-video .title {
       font-size: clamp(44px, 13vw, 60px);
     }
 
-    .hero-actions {
-      width: 100%;
-    }
-
-    .hero-actions .btn {
+    .hero-cta {
       width: 100%;
     }
 
@@ -1748,28 +1875,111 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       order: 1;
     }
 
-    .how-visual {
+    /* Phones: three thin progress tracks above the phone (tap one to jump),
+       the phone, then the open step's words. All of it fits on one screen,
+       so you never read a step without seeing its screen. */
+    .steps {
       order: 2;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: -6px;
     }
 
-    .steps {
+    .how-visual {
       order: 3;
     }
 
-    .steps button {
-      padding: 14px 14px 16px;
-      grid-template-columns: 36px 1fr;
-      gap: 12px;
+    .steps button,
+    .steps button[aria-pressed="true"] {
+      display: block;
+      height: 36px;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
     }
 
-    .bar {
-      left: 14px;
-      right: 14px;
+    .steps .num {
+      width: auto;
+      height: auto;
+      display: block;
+      background: none;
+      box-shadow: none;
+      color: var(--paper-55);
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .steps [aria-pressed="true"] .num {
+      background: none;
+      color: var(--paper);
+    }
+
+    .steps .step-text {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .steps button::before,
+    .step-timer {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 6px;
+      height: 3px;
+      border-radius: 2px;
+    }
+
+    .steps button::before {
+      background: var(--paper-12);
+    }
+
+    /* Steps already seen stay full; a tapped step shows full too. */
+    .how[data-step="2"] .steps li:nth-child(1) .step-timer,
+    .how[data-step="3"] .steps li:nth-child(-n + 2) .step-timer,
+    .how.picked [aria-pressed="true"] .step-timer,
+    .how:not(.running) [aria-pressed="true"] .step-timer {
+      opacity: 1;
+      transform: none;
+    }
+
+    .step-captions {
+      display: grid;
+      margin-top: 18px;
+    }
+
+    .step-captions p {
+      grid-area: 1 / 1;
+      display: grid;
+      gap: 6px;
+      color: var(--paper-70);
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 200ms ease;
+    }
+
+    .step-captions b {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+      color: var(--paper);
+    }
+
+    .how[data-step="1"] [data-cap="1"],
+    .how[data-step="2"] [data-cap="2"],
+    .how[data-step="3"] [data-cap="3"] {
+      opacity: 1;
+      transition: opacity 320ms ease 120ms;
     }
 
     /* Crop in on the phone so the app screen is big enough to read. */
     .phone-shot {
-      --ph: min(56svh, 460px);
+      --ph: min(50svh, 420px);
       height: var(--ph);
       aspect-ratio: auto;
       max-width: 420px;
@@ -1817,14 +2027,6 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       width: 50%;
     }
 
-    .biz .btn {
-      width: 100%;
-    }
-
-    .earn-media :global(.earn-photo) {
-      aspect-ratio: 4 / 3;
-    }
-
     /* Phones: the city video sits as a band behind the top of the section
        (shown whole, not zoomed in), then fades into ink behind the form. */
     .join {
@@ -1850,12 +2052,24 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       padding: 18px 0;
     }
 
+    .join {
+      padding-bottom: 64px;
+    }
+
     .foot-top {
       grid-template-columns: 1fr;
+      padding-top: 40px;
+    }
+
+    /* Two tidy columns of links, each a comfortable thumb-sized target. */
+    .foot-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 24px;
     }
 
     .foot-nav a {
-      padding-block: 6px;
+      padding-block: 11px;
     }
   }
 </style>
