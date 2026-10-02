@@ -1799,36 +1799,40 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       font-size: 16px;
     }
 
-    /* Phones: the headline, then the film edge to edge, melting into the
-       page above and below so it reads as one scene, not a pasted box. */
+    /* Phones: the film fills the top of the screen like on desktop, with
+       the headline over its sky, then melts into ink under the riders where
+       the tabs and button sit. */
     .hero.has-video {
+      --film: min(136vw, 74svh);
       min-height: 0;
       max-height: none;
       display: flex;
       flex-direction: column;
     }
 
+    /* The film starts under the header, so it shows wide enough for both
+       riders; its sky rises behind the headline and fades into the ink. */
     .has-video .hero-media {
-      position: relative;
-      order: 2;
-      inset: auto;
-      align-self: stretch;
-      z-index: 0;
-      aspect-ratio: 5 / 4;
-      margin-top: -8px;
-      -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 74%, transparent 100%);
-      mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 74%, transparent 100%);
+      position: absolute;
+      inset: 120px 0 auto;
+      height: calc(var(--film) - 120px);
+      z-index: -2;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 26%, #000 78%, transparent 100%);
+      mask-image: linear-gradient(180deg, transparent 0, #000 26%, #000 78%, transparent 100%);
     }
 
-    /* The phone crop is narrower: frame it so the whole dispatch rider,
-       box included, stays in shot for the full loop. */
+    /* The phone crop is narrower: frame it on the keke and the dispatch rider. */
     .has-video .hero-media :global(.hero-poster img),
     .has-video .hero-media .bg-video {
-      object-position: 95% 50% !important;
+      object-position: 74% 50% !important;
     }
 
+    /* Ink behind the header and headline, clear over the riders. */
     .has-video .hero-shade {
-      display: none;
+      display: block;
+      inset: 120px 0 auto;
+      height: calc(var(--film) - 120px);
+      background: linear-gradient(180deg, rgb(var(--ink-rgb) / 0.5) 0%, rgb(var(--ink-rgb) / 0.25) 30%, rgb(var(--ink-rgb) / 0) 48%);
     }
 
     .has-video .hero-inner {
@@ -1843,13 +1847,15 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
     .has-video h1 {
       order: 1;
-      padding-top: 92px;
+      box-sizing: border-box;
+      min-height: calc(var(--film) - 40px);
+      padding-top: 88px;
+      align-content: start;
     }
 
     .has-video .hero-pick {
       order: 3;
       position: relative;
-      margin-top: -34px;
       justify-items: stretch;
     }
 
