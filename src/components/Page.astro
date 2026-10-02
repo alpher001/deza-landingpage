@@ -30,7 +30,6 @@ const stillOf = (n: string) => ["webp", "jpg"].map((e) => `/images/${n}.${e}`).f
 const heroVideo = has("video/hero.mp4") ? "/video/hero.mp4" : null;
 const heroVideoMobile = has("video/hero-mobile.mp4") ? "/video/hero-mobile.mp4" : null;
 const heroPoster = stillOf("hero-still") ?? "/images/hero-keke.webp";
-const heroPosterMobile = stillOf("hero-still-mobile") ?? stillOf("hero-keke-mobile");
 const courierPhoto = firstOf("courier-city", "delivery-hand")!;
 const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 ---
@@ -56,14 +55,17 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
   <main>
     <!-- Hero: rides and deliveries, switching on their own -->
-    <section class="hero" data-hero data-mode="0">
+    <section class:list={["hero", { "has-video": heroVideo }]} data-hero data-mode="0">
       <div class="hero-media">
         {
           heroVideo ? (
-            <video class="hero-video" autoplay muted loop playsinline preload="auto" poster={heroPoster} aria-hidden="true">
-              {heroVideoMobile && <source media="(max-width: 720px)" src={heroVideoMobile} type="video/mp4" />}
-              <source src={heroVideo} type="video/mp4" />
-            </video>
+            <>
+              <video class="hero-video" autoplay muted loop playsinline preload="auto" poster={heroPoster} aria-label={t.hero.rideAlt} data-hero-video>
+                {heroVideoMobile && <source media="(max-width: 720px)" src={heroVideoMobile} type="video/mp4" />}
+                <source src={heroVideo} type="video/mp4" />
+              </video>
+              <i class="loop-fade" aria-hidden="true" />
+            </>
           ) : (
             <>
               <div class="layer l0">
@@ -76,7 +78,6 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           )
         }
       </div>
-      {heroPosterMobile && heroVideo && <link rel="preload" as="image" href={heroPosterMobile} media="(max-width: 720px)" />}
       <div class="hero-shade" aria-hidden="true"></div>
 
       <div class="wrap hero-inner">
@@ -91,6 +92,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           </span>
         </h1>
 
+        <div class="hero-pick">
         <div class="modes load" style="--d:4" role="tablist" aria-label="Deza">
           {
             t.hero.modes.map((m, i) => (
@@ -105,6 +107,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
         <div class="leads load" style="--d:5">
           {t.hero.modes.map((m, i) => <p class:list={["lead", { on: i === 0 }]} data-lead={i}>{m.lead}</p>)}
+        </div>
         </div>
 
         <div class="hero-actions load" style="--d:6">
@@ -123,7 +126,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           {
             t.lanes.items.map((l, i) => (
               <a class="lane reveal" href={l.href} style={`--i:${i}`}>
-                <Photo name={l.photo} alt={l.alt} class="lane-photo" position={i === 0 ? "50% 30%" : "50% 50%"} />
+                <Photo name={l.photo} alt={l.alt} class="lane-photo" position={i === 0 ? "50% 30%" : "68% 55%"} />
                 <span class="lane-shade" aria-hidden="true" />
                 <span class:list={["chip", { "chip-gold": i === 0 }]}>{l.status}</span>
                 <span class="lane-copy">
@@ -414,6 +417,22 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       );
       // Pause the turn-taking while the hero is off screen.
       new IntersectionObserver(([e]) => hero.classList.toggle("paused", !e.isIntersecting)).observe(hero);
+    }
+  }
+
+  // Hero video: a short fade hides the jump when the clip loops. It pauses
+  // off screen, and does not play at all for people who turn motion off.
+  const video = document.querySelector<HTMLVideoElement>("[data-hero-video]");
+  if (video && hero) {
+    if (reduce) {
+      video.removeAttribute("autoplay");
+      video.pause();
+    } else {
+      video.addEventListener("timeupdate", () => {
+        const left = video.duration - video.currentTime;
+        hero.classList.toggle("fading", left < 0.55 || video.currentTime < 0.15);
+      });
+      new IntersectionObserver(([e]) => (e.isIntersecting ? video.play().catch(() => {}) : video.pause())).observe(hero);
     }
   }
 
@@ -855,6 +874,55 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     align-items: center;
     gap: 16px 22px;
     margin-top: 4px;
+  }
+
+  /* Hero with the video. Desktop: headline at the top, the rest along the
+     bottom, so the keke and courier crossing the middle stay in view. */
+  .loop-fade {
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    pointer-events: none;
+  }
+
+  .hero.fading .loop-fade {
+    opacity: 0.85;
+  }
+
+  .has-video .hero-shade {
+    background:
+      linear-gradient(180deg, rgb(16 19 23 / 0.75) 0%, rgb(16 19 23 / 0.15) 34%, rgb(16 19 23 / 0) 55%, rgb(16 19 23 / 0.85) 100%),
+      linear-gradient(90deg, rgb(16 19 23 / 0.35) 0%, transparent 45%);
+  }
+
+  .has-video .hero-inner {
+    min-height: min(100svh, 1100px);
+    grid-template-columns: 1fr auto;
+    align-content: space-between;
+    align-items: end;
+    gap: 24px 48px;
+    padding-top: 108px;
+  }
+
+  .has-video h1 {
+    grid-column: 1 / -1;
+  }
+
+  .has-video .title {
+    max-width: none;
+    font-size: clamp(50px, 7.6vw, 124px);
+  }
+
+  .hero-pick {
+    display: grid;
+    gap: 16px;
+    justify-items: start;
+  }
+
+  .has-video .hero-actions {
+    justify-content: flex-end;
   }
 
   /* Intro and the two products */
@@ -1709,6 +1777,58 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
     .lead {
       font-size: 16px;
+    }
+
+    /* Phones: headline, then the whole video frame, then the rest. */
+    .hero.has-video {
+      min-height: 0;
+      max-height: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .has-video .hero-media {
+      position: relative;
+      order: 2;
+      inset: auto;
+      z-index: 0;
+      aspect-ratio: 16 / 10;
+      margin-top: 18px;
+    }
+
+    .has-video .hero-shade {
+      display: none;
+    }
+
+    .has-video .hero-inner {
+      display: contents;
+    }
+
+    .has-video h1,
+    .has-video .hero-pick,
+    .has-video .hero-actions {
+      padding-inline: var(--gutter);
+    }
+
+    .has-video h1 {
+      order: 1;
+      padding-top: 92px;
+    }
+
+    .has-video .hero-pick {
+      order: 3;
+      padding-top: 20px;
+    }
+
+    .has-video .hero-actions {
+      order: 4;
+      justify-content: flex-start;
+      padding-top: 20px;
+      padding-bottom: 36px;
+    }
+
+    .has-video .title {
+      font-size: clamp(44px, 13vw, 60px);
     }
 
     .hero-actions {

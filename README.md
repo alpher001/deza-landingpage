@@ -22,7 +22,7 @@ Node 22.12 or newer.
 - `src/components/ScreenUI.astro`: the Deza app screens (ride booking in three steps, and parcel tracking), styled after the rider app in the monorepo and drawn over a Kano street map.
 - `scripts/make-map.mjs`: draws that street map into `src/generated/kano-map.json`. Run `node scripts/make-map.mjs` after changing roads or routes. The streets are drawn for the page, not traced from a real map.
 - `src/components/Cruise.astro`: the keke and courier that drive across the page. It appears once `public/images/cutouts/keke.webp` and `courier.webp` (transparent, facing right) exist.
-- Hero video: drop `public/video/hero.mp4` (and `hero-mobile.mp4`, plus `public/images/hero-still.jpg` as the poster) and the hero uses it instead of the two photos.
+- Hero video: `public/video/hero.mp4` (720p, 2 MB, no sound) with `public/images/hero-still.webp` as its poster. On phones the headline sits above the full video frame so the keke and courier stay in view. Without the video file the hero falls back to the keke and courier photos.
 - `src/components/Logo.astro`: Almustafa's mark and wordmark from `public/brand/`.
 - `src/components/StoreBadges.astro`: official App Store and Google Play badges from `public/badges/`.
 - `src/styles/global.css`: colours and spacing, copied from `deza-monorepo/packages/ui-kit`.
