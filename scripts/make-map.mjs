@@ -126,7 +126,6 @@ const markets = [
 
 const labelsDistrict = [
   ["FAGGE", 52, 214],
-  ["SABON GARI", 210, 60],
   ["BOMPAI", 352, 300],
   ["GWAGWARWA", 196, 352],
   ["TARAUNI", 52, 640],

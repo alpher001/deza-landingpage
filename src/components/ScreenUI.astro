@@ -46,34 +46,16 @@ const riderArms =
 ---
 
 <div class="scr" data-mode={mode} aria-hidden="true">
-  <svg class="map" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMin slice">
-    <defs>
-      <filter id={`dz-soft-${mode}`} x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="1.3" />
-      </filter>
-      {
-        mode === "ride" ? (
-          <g id="dz-keke" transform={kekeFit}>
-            <rect x="-1.7" y="-20.4" width="3.4" height="7" rx="1.7" />
-            <rect x="-10.6" y="5" width="21.2" height="6.6" rx="2" />
-            <path d={kekeBody} />
-          </g>
-        ) : (
-          <g id="dz-bike" transform={bikeFit}>
-            <rect x="-2" y="-23.4" width="4" height="10" rx="2" />
-            <rect x="-2" y="16" width="4" height="8" rx="2" />
-            <path d={bikeNose} />
-            <rect x="-10" y="-12.4" width="20" height="2.6" rx="1.3" />
-            <ellipse cy="-6.2" rx="3.6" ry="5.2" />
-            <path d={riderArms} />
-            <rect x="-7.4" y="-3.6" width="14.8" height="8.8" rx="4.2" />
-            <rect x="-8.6" y="3.6" width="17.2" height="16.2" rx="2.6" />
-          </g>
-        )
-      }
-    </defs>
-    <g class="cam">
+  <!-- The camera pans and zooms this whole box (a composited transform). It
+       holds three layers: the street map, which never changes after it is
+       drawn; the routes and pins over it; and the vehicle, an HTML layer the
+       compositor moves along the route. One unit of the 400 x 1000 map is
+       0.25cqw, so the box is 100cqw by 250cqw. -->
+  <div class="cam">
+    <svg class="streets" viewBox="0 0 400 1000">
       <use href="/map.svg#kano-map" width="400" height="1000"></use>
+    </svg>
+    <svg class="overlay" viewBox="0 0 400 1000">
       {
         mode === "ride" ? (
           <>
@@ -94,22 +76,6 @@ const riderArms =
               <text x="12" y="13.5" class="t1">{t.toValue}</text>
               <text x="12" y="25.5" class="t2">{t.tripTime}</text>
             </g>
-            <g class="mover keke" data-mover>
-              <g transform="translate(1.4 2.4)">
-                <use href="#dz-keke" class="shade" filter="url(#dz-soft-ride)" data-spin />
-              </g>
-              <g data-spin>
-                <use href="#dz-keke" class="keyline" />
-                <g transform={kekeFit}>
-                  <rect x="-1.7" y="-20.4" width="3.4" height="7" rx="1.7" class="ink" />
-                  <rect x="-10.6" y="5" width="21.2" height="6.6" rx="2" class="ink" />
-                  <path d={kekeBody} class="ink" />
-                  <path d={kekeCanopy} class="canopy" />
-                  <path d={kekeLip} class="lip" />
-                  <ellipse cy="-15.4" rx="1.9" ry="1.05" class="lamp" />
-                </g>
-              </g>
-            </g>
           </>
         ) : (
           <>
@@ -123,33 +89,79 @@ const riderArms =
               <rect x="-8" y="-8" width="16" height="16" rx="3" />
               <rect x="-3.5" y="-3.5" width="7" height="7" rx="1" class="in" />
             </g>
-            <g class="mover courier" data-mover>
-              <g transform="translate(1.4 2.4)">
-                <use href="#dz-bike" class="shade" filter="url(#dz-soft-delivery)" data-spin />
-              </g>
-              <g data-spin>
-                <use href="#dz-bike" class="keyline" />
-                <g transform={bikeFit}>
-                  <rect x="-2" y="-23.4" width="4" height="10" rx="2" class="ink" />
-                  <rect x="-2" y="16" width="4" height="8" rx="2" class="ink" />
-                  <path d={bikeNose} class="ink" />
-                  <ellipse cy="-14.6" rx="1.7" ry="0.9" class="lamp" />
-                  <rect x="-10" y="-12.4" width="20" height="2.6" rx="1.3" class="ink" />
-                  <ellipse cy="-6.2" rx="3.6" ry="5.2" class="ink" />
-                  <path d={riderArms} class="ink" />
-                  <rect x="-7.4" y="-3.6" width="14.8" height="8.8" rx="4.2" class="ink" />
-                  <circle cy="-1.4" r="4.5" class="helmet" />
-                  <path d="M-2.9 -4.8Q0 -6.5 2.9 -4.8" class="visor" />
-                  <rect x="-8.6" y="3.6" width="17.2" height="16.2" rx="2.6" class="box" />
-                  <rect x="-8.6" y="9.4" width="17.2" height="5" class="band" />
-                </g>
-              </g>
-            </g>
           </>
         )
       }
-    </g>
-  </svg>
+    </svg>
+    {
+      mode === "ride" ? (
+        <div class="mover keke" data-mover>
+          <svg class="sprite" viewBox="-36 -36 72 72" data-shade>
+            <defs>
+              <filter id="dz-soft-ride" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="1.3" />
+              </filter>
+              <g id="dz-keke" transform={kekeFit}>
+                <rect x="-1.7" y="-20.4" width="3.4" height="7" rx="1.7" />
+                <rect x="-10.6" y="5" width="21.2" height="6.6" rx="2" />
+                <path d={kekeBody} />
+              </g>
+            </defs>
+            <use href="#dz-keke" class="shade" filter="url(#dz-soft-ride)" />
+          </svg>
+          <svg class="sprite" viewBox="-36 -36 72 72" data-body>
+            <use href="#dz-keke" class="keyline" />
+            <g transform={kekeFit}>
+              <rect x="-1.7" y="-20.4" width="3.4" height="7" rx="1.7" class="ink" />
+              <rect x="-10.6" y="5" width="21.2" height="6.6" rx="2" class="ink" />
+              <path d={kekeBody} class="ink" />
+              <path d={kekeCanopy} class="canopy" />
+              <path d={kekeLip} class="lip" />
+              <ellipse cy="-15.4" rx="1.9" ry="1.05" class="lamp" />
+            </g>
+          </svg>
+        </div>
+      ) : (
+        <div class="mover courier" data-mover>
+          <svg class="sprite" viewBox="-36 -36 72 72" data-shade>
+            <defs>
+              <filter id="dz-soft-delivery" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="1.3" />
+              </filter>
+              <g id="dz-bike" transform={bikeFit}>
+                <rect x="-2" y="-23.4" width="4" height="10" rx="2" />
+                <rect x="-2" y="16" width="4" height="8" rx="2" />
+                <path d={bikeNose} />
+                <rect x="-10" y="-12.4" width="20" height="2.6" rx="1.3" />
+                <ellipse cy="-6.2" rx="3.6" ry="5.2" />
+                <path d={riderArms} />
+                <rect x="-7.4" y="-3.6" width="14.8" height="8.8" rx="4.2" />
+                <rect x="-8.6" y="3.6" width="17.2" height="16.2" rx="2.6" />
+              </g>
+            </defs>
+            <use href="#dz-bike" class="shade" filter="url(#dz-soft-delivery)" />
+          </svg>
+          <svg class="sprite" viewBox="-36 -36 72 72" data-body>
+            <use href="#dz-bike" class="keyline" />
+            <g transform={bikeFit}>
+              <rect x="-2" y="-23.4" width="4" height="10" rx="2" class="ink" />
+              <rect x="-2" y="16" width="4" height="8" rx="2" class="ink" />
+              <path d={bikeNose} class="ink" />
+              <ellipse cy="-14.6" rx="1.7" ry="0.9" class="lamp" />
+              <rect x="-10" y="-12.4" width="20" height="2.6" rx="1.3" class="ink" />
+              <ellipse cy="-6.2" rx="3.6" ry="5.2" class="ink" />
+              <path d={riderArms} class="ink" />
+              <rect x="-7.4" y="-3.6" width="14.8" height="8.8" rx="4.2" class="ink" />
+              <circle cy="-1.4" r="4.5" class="helmet" />
+              <path d="M-2.9 -4.8Q0 -6.5 2.9 -4.8" class="visor" />
+              <rect x="-8.6" y="3.6" width="17.2" height="16.2" rx="2.6" class="box" />
+              <rect x="-8.6" y="9.4" width="17.2" height="5" class="band" />
+            </g>
+          </svg>
+        </div>
+      )
+    }
+  </div>
 
   <div class="status">
     <span>9:41</span>
@@ -342,28 +354,32 @@ const riderArms =
 </div>
 
 <script>
-  // Moves the keke or dispatch rider along its route, facing the road.
+  // Moves the keke or dispatch rider along its route, facing the road. The
+  // whole drive is worked out once and handed to the compositor as a Web
+  // Animation, so nothing runs on the main thread (or repaints the map)
+  // while the vehicle moves.
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   document.querySelectorAll<HTMLElement>(".scr").forEach((scr) => {
     const path = scr.querySelector<SVGPathElement>("[data-track]");
-    const mover = scr.querySelector<SVGGElement>("[data-mover]");
-    if (!path || !mover) return;
-    const spins = mover.querySelectorAll<SVGElement>("[data-spin]");
+    const mover = scr.querySelector<HTMLElement>("[data-mover]");
+    const shade = mover?.querySelector<SVGSVGElement>("[data-shade]");
+    const body = mover?.querySelector<SVGSVGElement>("[data-body]");
+    if (!path || !mover || !shade || !body) return;
     const len = path.getTotalLength();
     const ride = scr.dataset.mode === "ride";
 
-    // Heading along the route, sampled every STEP map units. The routes are
-    // polylines of short segments, so the raw direction kicks at every vertex
-    // and snaps round corners. Smoothing the unwrapped angle over REACH
-    // samples either side (about 12 units, a third of a vehicle) spreads each
-    // turn evenly across that stretch, so the vehicle steers through a corner,
-    // even a hairpin, instead of jittering or flicking round. Built on first
-    // use, so it costs nothing until the screen is on view.
+    // Points and heading along the route, sampled every STEP map units. The
+    // routes are polylines of short segments, so the raw direction kicks at
+    // every vertex and snaps round corners. Smoothing the unwrapped angle over
+    // REACH samples either side (about 12 units, a third of a vehicle) spreads
+    // each turn evenly across that stretch, so the vehicle steers through a
+    // corner, even a hairpin, instead of jittering or flicking round. Built on
+    // first use, so it costs nothing until the screen is on view.
     const STEP = 3;
     const REACH = 4;
     const n = Math.max(2, Math.ceil(len / STEP) + 1);
-    let heading: Float64Array | undefined;
+    let track: { pts: DOMPoint[]; heading: Float64Array } | undefined;
 
     const build = () => {
       const pts = Array.from({ length: n }, (_, i) => path.getPointAtLength(Math.min(len, i * STEP)));
@@ -381,82 +397,102 @@ const riderArms =
         raw[i] = dir; // a repeated point keeps the direction before it
       }
       raw.fill(first < 0 ? -Math.PI / 2 : raw[first], 0, Math.max(0, first));
-      const out = new Float64Array(n);
+      const heading = new Float64Array(n);
       for (let i = 0; i < n; i++) {
         let sum = 0;
         for (let j = -REACH; j <= REACH; j++) {
           sum += raw[Math.min(n - 1, Math.max(0, i + j))] * (REACH + 1 - Math.abs(j));
         }
-        out[i] = sum / ((REACH + 1) * (REACH + 1));
+        heading[i] = sum / ((REACH + 1) * (REACH + 1));
       }
-      return out;
+      return { pts, heading };
     };
 
-    const place = (k: number) => {
-      heading ??= build();
+    // The vehicle's transforms at fraction k of the route: the body, and its
+    // soft shadow, which sits a little down and right in map space however
+    // the vehicle turns. One map unit is 0.25cqw.
+    const at = (k: number) => {
+      track ??= build();
+      const { pts, heading } = track;
       const s = Math.min(len, Math.max(0, k * len));
-      const a = path.getPointAtLength(s);
       const f = Math.min(n - 1, s / STEP);
       const i = Math.min(n - 2, Math.floor(f));
-      const h = heading[i] + (heading[i + 1] - heading[i]) * (f - i);
+      const u = f - i;
+      const x = pts[i].x + (pts[i + 1].x - pts[i].x) * u;
+      const y = pts[i].y + (pts[i + 1].y - pts[i].y) * u;
+      const h = heading[i] + (heading[i + 1] - heading[i]) * u;
       // The art is drawn nose up, so add a quarter turn.
-      const rot = `rotate(${((h * 180) / Math.PI + 90).toFixed(2)})`;
-      mover.setAttribute("transform", `translate(${a.x.toFixed(2)} ${a.y.toFixed(2)})`);
-      spins.forEach((el) => el.setAttribute("transform", rot));
+      const rot = `rotate(${((h * 180) / Math.PI + 90).toFixed(2)}deg)`;
+      const q = (v: number) => (v * 0.25).toFixed(3) + "cqw";
+      return [`translate(${q(x)}, ${q(y)}) ${rot}`, `translate(${q(x + 1.4)}, ${q(y + 2.4)}) ${rot}`];
     };
 
     // Ride: the keke drives toward the pickup and stops just short of it.
-    // Delivery: the rider loops along the whole route, fading out at the
-    // drop-off and back in at the market rather than jumping between them.
+    // Delivery: the rider loops along the whole route, waits at the drop-off,
+    // then fades out and back in at the market rather than jumping between them.
     const dur = ride ? 7000 : 14000;
     const end = ride ? 0.94 : 1;
-    const rest = 1200;
-    let start = 0;
-    let raf = 0;
-    let timers: number[] = [];
-    let visible = false;
+    const rest = ride ? 0 : 1200;
+    const cycle = dur + rest;
     const ease = (x: number) => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
-
-    const stop = () => {
-      cancelAnimationFrame(raf);
-      timers.forEach(clearTimeout);
-      timers = [];
-      mover.classList.remove("away");
-    };
-
-    const frame = (now: number) => {
-      if (!start) start = now;
-      const k = Math.min(1, (now - start) / dur);
-      place(ease(k) * end);
-      if (k < 1) raf = requestAnimationFrame(frame);
-      else if (!ride) {
-        // Fade out (0.3 s in CSS) just before the restart, then back in at the start.
-        timers = [
-          window.setTimeout(() => mover.classList.add("away"), rest - 350),
-          window.setTimeout(() => {
-            start = 0;
-            place(0);
-            mover.classList.remove("away");
-            if (visible) raf = requestAnimationFrame(frame);
-          }, rest),
-        ];
-      }
-    };
+    let anims: Animation[] = [];
 
     const play = () => {
-      stop();
-      start = 0;
-      if (reduce) return place(end * 0.7);
-      place(0);
-      raf = requestAnimationFrame(frame);
+      anims.forEach((a) => a.cancel());
+      anims = [];
+      if (reduce) {
+        [body.style.transform, shade.style.transform] = at(end * 0.7);
+        return;
+      }
+      // About one key per frame at 40 fps: close enough together that the
+      // straight steps between them follow the road and the turns.
+      const keys = Math.ceil(dur / 25);
+      const bodyKeys: Keyframe[] = [];
+      const shadeKeys: Keyframe[] = [];
+      for (let j = 0; j <= keys; j++) {
+        const [b, sh] = at(ease(j / keys) * end);
+        const offset = (dur * j) / keys / cycle;
+        bodyKeys.push({ transform: b, offset });
+        shadeKeys.push({ transform: sh, offset });
+      }
+      if (rest) {
+        bodyKeys.push({ ...bodyKeys[keys], offset: 1 });
+        shadeKeys.push({ ...shadeKeys[keys], offset: 1 });
+      }
+      const timing: KeyframeAnimationOptions = ride
+        ? { duration: cycle, fill: "forwards" }
+        : { duration: cycle, iterations: Infinity };
+      anims = [body.animate(bodyKeys, timing), shade.animate(shadeKeys, timing)];
+      if (!ride) {
+        // 350 ms before each restart, fade out over 0.3 s; then fade back in
+        // over 0.3 s as the next lap starts.
+        const o = (ms: number) => ms / cycle;
+        anims.push(
+          mover.animate(
+            [
+              { opacity: 1, offset: 0, easing: "ease" },
+              { opacity: 0, offset: o(300) },
+              { opacity: 0, offset: o(350), easing: "ease" },
+              { opacity: 1, offset: o(650) },
+              { opacity: 1, offset: 1 },
+            ],
+            { duration: cycle, iterations: Infinity, delay: cycle - 350 },
+          ),
+        );
+      }
+      const t0 = document.timeline.currentTime;
+      if (t0 !== null) anims.forEach((a) => (a.startTime = t0));
     };
 
     // Off screen, the small looping details (pin pulse, cursor, progress
-    // bar) pause too, so they cost nothing while you read elsewhere.
-    new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting;
+    // bar) and the delivery rider pause too, so they cost nothing while you
+    // read elsewhere.
+    new IntersectionObserver((entries) => {
+      const visible = entries[entries.length - 1].isIntersecting;
       scr.classList.toggle("off", !visible);
-      if (!ride) visible ? play() : stop();
+      if (ride) return;
+      if (visible) play();
+      else anims.forEach((a) => a.pause());
     }).observe(scr);
 
     // The ride screen restarts the keke each time step 3 comes up.
@@ -470,7 +506,8 @@ const riderArms =
 </script>
 
 <style>
-  .scr.off * {
+  .scr.off *,
+  .scr.off *::before {
     animation-play-state: paused !important;
   }
 
@@ -486,8 +523,34 @@ const riderArms =
     line-height: 1.25;
   }
 
-  /* Map and camera */
-  .map {
+  /* Map and camera. The camera box is the 400 x 1000 map at the screen's
+     width (1 map unit = 0.25cqw), and the shots below are in map units
+     times 0.25cqw. */
+  .cam {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 250cqw;
+    transform-origin: 0 0;
+    transition: transform 1.3s cubic-bezier(0.6, 0, 0.2, 1);
+    transform: translate(-48.25cqw, -14.5cqw) scale(1.5);
+  }
+
+  :global([data-step="2"]) [data-mode="ride"] .cam {
+    transform: translate(0, -24cqw) scale(1);
+  }
+
+  :global([data-step="3"]) [data-mode="ride"] .cam {
+    transform: translate(-18cqw, -21cqw) scale(1.36);
+  }
+
+  [data-mode="delivery"] .cam {
+    transform: translate(-2cqw, -13cqw) scale(1.02);
+  }
+
+  .streets,
+  .overlay {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -495,21 +558,10 @@ const riderArms =
     font-family: var(--font);
   }
 
-  .cam {
-    transition: transform 1.3s cubic-bezier(0.6, 0, 0.2, 1);
-    transform: translate(-193px, -58px) scale(1.5);
-  }
-
-  :global([data-step="2"]) [data-mode="ride"] .cam {
-    transform: translate(0, -96px) scale(1);
-  }
-
-  :global([data-step="3"]) [data-mode="ride"] .cam {
-    transform: translate(-72px, -84px) scale(1.36);
-  }
-
-  [data-mode="delivery"] .cam {
-    transform: translate(-8px, -52px) scale(1.02);
+  /* Its own layer, so the pin pulse and route drawing never repaint the
+     street map under it. */
+  .overlay {
+    will-change: transform;
   }
 
   .route-case {
@@ -625,11 +677,21 @@ const riderArms =
      screen, a white outline so they read over the route line and the gold
      roads, and a soft shadow that stays put while the vehicle turns. */
   .mover {
+    position: absolute;
+    left: 0;
+    top: 0;
     transition: opacity 0.3s;
   }
 
-  .mover.away {
-    opacity: 0;
+  /* Each sprite is centred on the vehicle's point: 72 map units square. */
+  .sprite {
+    position: absolute;
+    left: -9cqw;
+    top: -9cqw;
+    width: 18cqw;
+    height: 18cqw;
+    max-width: none;
+    overflow: visible;
   }
 
   .keke {
@@ -704,6 +766,7 @@ const riderArms =
     align-items: center;
     justify-content: space-between;
     padding: 3.6cqw 7.5cqw 0;
+    background: linear-gradient(color-mix(in srgb, var(--paper) 85%, transparent) 55%, transparent);
     font-size: 3.9cqw;
     font-weight: 700;
     letter-spacing: -0.01em;
@@ -1186,17 +1249,26 @@ const riderArms =
     background: #1e2329;
   }
 
+  /* The bar fills from the left on a loop. A sliding transform rather than
+     a moving background, so the compositor runs it without repainting. */
   .progress .now i {
-    background: linear-gradient(90deg, #1e2329 0 50%, transparent 50%) 0 0 / 200% 100%;
+    background: none;
+  }
+
+  .progress .now i::before {
+    content: "";
+    display: block;
+    height: 100%;
+    background: #1e2329;
     animation: load 2.6s ease-in-out infinite;
   }
 
   @keyframes load {
     from {
-      background-position: 100% 0;
+      transform: translateX(-100%);
     }
     to {
-      background-position: 0 0;
+      transform: none;
     }
   }
 
