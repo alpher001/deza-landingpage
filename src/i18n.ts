@@ -16,6 +16,8 @@ export const copy = {
       ogAlt: "Kekes on a busy Kano street at golden hour",
     },
     nav: {
+      mainLabel: "Main",
+      footerLabel: "Footer",
       ride: "Ride",
       delivery: "Delivery",
       safety: "Safety",
@@ -26,10 +28,11 @@ export const copy = {
       switchHref: "/ha/",
     },
     hero: {
+      modesLabel: "Ride or delivery",
       eyebrow: "Keke napep and delivery in Kano",
       title: ["Moving", "Kano", "forward."],
       modes: [
-        { label: "Ride", lead: "Call a keke napep from where you stand. See the fare before you ride, then watch your driver come to you." },
+        { label: "Ride", lead: "Call a keke napep (Adaidaita Sahu) from where you stand. See the fare before you ride, then watch your driver come to you." },
         { label: "Delivery", lead: "Send packages and goods anywhere in Kano with a dispatch rider you can follow to the door. Coming soon." },
       ],
       cta: "Join the waitlist",
@@ -159,7 +162,7 @@ export const copy = {
         },
         {
           q: "Can I book Adaidaita Sahu on Deza?",
-          a: "Yes. Deza Ride books the keke napep, which many people in Kano call Adaidaita Sahu. Say where you're going, see the fare, and follow the keke to your pickup.",
+          a: "Yes, once Deza opens. Deza Ride books the keke napep, which many people in Kano call Adaidaita Sahu. Say where you're going, see the fare, and follow the keke to your pickup.",
         },
         {
           q: "How much is a keke napep ride?",
@@ -171,11 +174,11 @@ export const copy = {
         },
         {
           q: "Can Deza deliver to my customers?",
-          a: "Yes. If you sell on WhatsApp or Instagram, a Deza dispatch rider picks up from your shop or house and delivers to your customers anywhere in Kano. Send them the tracking link so they know when their goods are coming.",
+          a: "Yes, once delivery opens. If you sell on WhatsApp or Instagram, a Deza dispatch rider picks up from your shop or house and delivers to your customers anywhere in Kano. Send them the tracking link so they know when their goods are coming.",
         },
         {
           q: "How do I join Deza as a driver or dispatch rider?",
-          a: "Join the waitlist and choose 'Drive'. Keke owners, keke drivers and dispatch riders can all register. We'll call you before launch to get you set up.",
+          a: "Join the waitlist and choose 'Drive or deliver'. Keke owners, keke drivers and dispatch riders can all register. We'll call you before launch to get you set up.",
         },
       ],
     },
@@ -187,10 +190,11 @@ export const copy = {
     waitlist: {
       phone: "Phone number (WhatsApp)",
       phonePlaceholder: "0803 000 0000",
+      phoneError: "Enter your WhatsApp number, like 0803 000 0000.",
       area: "Your area in Kano",
       areaPlaceholder: "e.g. Sabon Gari",
       role: "I want to",
-      roles: { ride: "Ride", send: "Send packages", drive: "Drive" },
+      roles: { ride: "Ride", send: "Send packages", drive: "Drive or deliver" },
       submit: "Join the waitlist",
       privacy: "We only use your number to tell you about Deza.",
       success: "You're on the list. We'll message you on launch day.",
@@ -206,12 +210,14 @@ export const copy = {
   },
   ha: {
     meta: {
-      title: "Hawan keke napep da aika kaya a Kano | Deza",
+      title: "Hawan keke napep (Adaidaita Sahu) da aika kaya a Kano | Deza",
       description:
         "Deza kamfanin sufuri ne na Kano. Kira keke napep, wato Adaidaita Sahu, ka ga kuɗin tun farko. Nan ba da jimawa ba, aika kaya ta hannun dispatch rider.",
       ogAlt: "Keke napep a titin Kano mai cunkoso da yamma",
     },
     nav: {
+      mainLabel: "Babban menu",
+      footerLabel: "Ƙasan shafi",
       ride: "Hawa",
       delivery: "Aika kaya",
       safety: "Tsaro",
@@ -222,6 +228,7 @@ export const copy = {
       switchHref: "/",
     },
     hero: {
+      modesLabel: "Hawa ko aika kaya",
       eyebrow: "Keke napep da aika kaya a Kano",
       title: ["Muna ciyar", "da Kano", "gaba."],
       modes: [
@@ -355,7 +362,7 @@ export const copy = {
         },
         {
           q: "Zan iya kiran Adaidaita Sahu a Deza?",
-          a: "Eh. Deza Ride na kawo maka Adaidaita Sahu, wato keke napep, har inda kake. Faɗi inda za ka, ka ga kuɗin tun farko, ka bi keken a taswira.",
+          a: "Eh, idan Deza ta buɗe. Deza Ride na kawo maka Adaidaita Sahu, wato keke napep, har inda kake. Faɗi inda za ka, ka ga kuɗin tun farko, ka bi keken a taswira.",
         },
         {
           q: "Nawa ne kuɗin hawan keke napep?",
@@ -367,11 +374,11 @@ export const copy = {
         },
         {
           q: "Deza za ta kai kayan da na sayar?",
-          a: "Eh. Idan kana sayarwa a WhatsApp ko Instagram, dispatch rider na Deza zai ɗauki kayan daga shagonka ko gidanka, ya kai wa abokan cinikinka ko'ina a Kano. Ka tura musu link don su san lokacin da kayansu za su iso.",
+          a: "Eh, idan aika kaya ya buɗe. Idan kana sayarwa a WhatsApp ko Instagram, dispatch rider na Deza zai ɗauki kayan daga shagonka ko gidanka, ya kai wa abokan cinikinka ko'ina a Kano. Ka tura musu link don su san lokacin da kayansu za su iso.",
         },
         {
           q: "Ta yaya zan zama direban Deza ko dispatch rider?",
-          a: "Shiga jerin jira ka zaɓi 'Tuƙa keke'. Masu keke napep, direbobi da dispatch riders duk za su iya yin rajista, kuma za mu kira ka kafin buɗewa don mu shirya ka.",
+          a: "Shiga jerin jira ka zaɓi 'Tuƙi ko kai kaya'. Masu keke napep, direbobi da dispatch riders duk za su iya yin rajista, kuma za mu kira ka kafin buɗewa don mu shirya ka.",
         },
       ],
     },
@@ -383,10 +390,11 @@ export const copy = {
     waitlist: {
       phone: "Lambar waya (WhatsApp)",
       phonePlaceholder: "0803 000 0000",
+      phoneError: "Saka lambar WhatsApp ɗinka, kamar 0803 000 0000.",
       area: "Unguwarka a Kano",
       areaPlaceholder: "misali Sabon Gari",
       role: "Ina so in",
-      roles: { ride: "Hau keke", send: "Aika kaya", drive: "Tuƙa keke" },
+      roles: { ride: "Hau keke", send: "Aika kaya", drive: "Tuƙi ko kai kaya" },
       submit: "Shiga jerin jira",
       privacy: "Muna amfani da lambarka ne kawai don sanar da kai game da Deza.",
       success: "Kana cikin jerin. Za mu tura maka saƙo a ranar buɗewa.",
