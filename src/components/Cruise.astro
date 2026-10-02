@@ -1,8 +1,12 @@
 ---
-// A keke and a courier cruising across the page as you scroll, past the names
-// of Kano neighbourhoods. Shows only once both cut-outs are in
+// A keke and a dispatch rider driving along a Kano road, past the outlined
+// names of the city's neighbourhoods. Shows only once both cut-outs are in
 // src/assets/cutouts/ (keke.png and courier.png, transparent, facing right).
 // They are served as sharp AVIF/WebP sized to the road.
+//
+// The motion is JavaScript (requestAnimationFrame), not CSS scroll timelines:
+// those don't run on iPhones before iOS 26 or in some in-app browsers, which
+// left the keke parked mid-road and the motorbike half off the screen.
 import { getImage } from "astro:assets";
 import type { ImageMetadata } from "astro";
 
@@ -14,38 +18,41 @@ const { places } = Astro.props;
 const files = import.meta.glob<{ default: ImageMetadata }>("../assets/cutouts/*.png", { eager: true });
 const pick = (n: string) => Object.entries(files).find(([p]) => p.endsWith(`/${n}.png`))?.[1].default;
 
-async function cut(img: ImageMetadata | undefined) {
+async function cut(img: ImageMetadata | undefined, sizes: string) {
   if (!img) return null;
-  const ws = [400, 640, 900, 1200].filter((w) => w <= img.width);
+  const ws = [256, 384, 512, 768].filter((w) => w <= img.width);
   const set = async (format: "avif" | "webp", quality: number) =>
     (await Promise.all(ws.map((width) => getImage({ src: img, width, format, quality })))).map((x, i) => `${x.src} ${ws[i]}w`).join(", ");
-  const src = (await getImage({ src: img, width: 640, format: "webp", quality: 85 })).src;
-  return { avif: await set("avif", 66), webp: await set("webp", 85), src, w: img.width, h: img.height };
+  const src = (await getImage({ src: img, width: 512, format: "webp", quality: 85 })).src;
+  return { avif: await set("avif", 66), webp: await set("webp", 85), src, w: img.width, h: img.height, sizes };
 }
 
-const keke = await cut(pick("keke"));
-const courier = await cut(pick("courier"));
-const sizes = "(max-width: 750px) 220px, min(28.4vw, 400px)";
+// Rendered widths, from the heights set in the CSS below (--h and --rh).
+const keke = await cut(pick("keke"), "(max-width: 676px) 126px, min(18.5vw, 270px)");
+const courier = await cut(pick("courier"), "(max-width: 676px) 98px, min(14.4vw, 210px)");
 ---
 
 {
   keke && courier && (
-    <section class="cruise" aria-hidden="true">
-      <div class="names">
-        {[...places, ...places].map((p) => (
+    <section class="cruise" aria-hidden="true" data-cruise style={`--ka:${(keke.w / keke.h).toFixed(4)};--ra:${(courier.w / courier.h).toFixed(4)}`}>
+      <div class="names" data-names>
+        {places.map((p) => (
           <span>{p}</span>
         ))}
       </div>
-      <div class="road">
+      <div class="road" data-road>
         {[
+          ["rider", courier],
           ["keke", keke],
-          ["courier", courier],
         ].map(([k, c]: any) => (
-          <picture>
-            <source type="image/avif" srcset={c.avif} sizes={sizes} />
-            <source type="image/webp" srcset={c.webp} sizes={sizes} />
-            <img class={`v ${k}`} src={c.src} width={c.w} height={c.h} alt="" loading="lazy" decoding="async" />
-          </picture>
+          <div class={`car ${k}`} data-car={k}>
+            <i class="shade" />
+            <picture>
+              <source type="image/avif" srcset={c.avif} sizes={c.sizes} />
+              <source type="image/webp" srcset={c.webp} sizes={c.sizes} />
+              <img src={c.src} width={c.w} height={c.h} alt="" draggable="false" loading="lazy" decoding="async" />
+            </picture>
+          </div>
         ))}
       </div>
     </section>
@@ -54,110 +61,285 @@ const sizes = "(max-width: 750px) 220px, min(28.4vw, 400px)";
 
 <style>
   .cruise {
+    /* Keke height. The rider is drawn at 94% of it: at true scale a seated
+       rider in a helmet stands about as tall as a keke's canopy, and he rides
+       in the far lane. The keke still reads bigger: it is a quarter longer. */
+    --h: clamp(88px, 13vw, 190px);
+    --rh: calc(var(--h) * 0.94);
+    --kw: calc(var(--h) * var(--ka));
+    --rw: calc(var(--rh) * var(--ra));
+    /* The road, seen from the kerb: near lane below the centre line, far
+       lane above it. */
+    --strip: clamp(22px, 2.4vw, 30px);
+    --near: calc(var(--strip) * 0.14);
+    --far: calc(var(--strip) * 0.76);
+
     position: relative;
     overflow: hidden;
-    padding-block: clamp(24px, 4vw, 48px) 0;
+    overflow: clip;
+    isolation: isolate;
     background: var(--paper);
+    /* Decoration only: nothing here can be picked, dragged or selected. */
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .names {
     display: flex;
-    gap: 0.6em;
+    gap: 0.5em;
     width: max-content;
+    padding-inline: var(--gutter);
     font-family: var(--display);
     font-weight: 700;
-    font-size: clamp(56px, 11vw, 168px);
+    font-size: clamp(46px, 9vw, 132px);
     line-height: 1;
     letter-spacing: -0.04em;
     color: transparent;
-    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--ink) 16%, transparent);
+    -webkit-text-stroke: 1.25px color-mix(in srgb, var(--ink) 17%, transparent);
     white-space: nowrap;
   }
 
   .road {
     position: relative;
-    height: clamp(150px, 20vw, 280px);
-    margin-top: calc(clamp(56px, 11vw, 168px) * -0.55);
-    border-bottom: clamp(10px, 1.4vw, 18px) solid var(--ink);
+    height: calc(var(--h) * 0.9 + var(--strip));
+    margin-top: calc(var(--h) * -0.4);
   }
 
-  /* Lane markings */
+  /* Asphalt */
+  .road::before {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: var(--strip);
+    background: var(--ink);
+  }
+
+  /* Centre line between the two lanes */
   .road::after {
+    --dash: clamp(14px, 1.9vw, 26px);
     content: "";
     position: absolute;
     left: 0;
     right: 0;
-    bottom: calc(clamp(10px, 1.4vw, 18px) * -0.6);
-    height: 2px;
-    background: repeating-linear-gradient(90deg, var(--gold) 0 28px, transparent 28px 56px);
+    bottom: calc(var(--strip) * 0.49);
+    height: clamp(2px, 0.2vw, 3px);
+    background: repeating-linear-gradient(90deg, var(--gold) 0 var(--dash), transparent var(--dash) calc(var(--dash) * 2.2));
   }
 
-  .v {
+  /* Still layout (motion off, or before the script runs): the two side by
+     side, the rider a little behind in the far lane. */
+  .car {
     position: absolute;
-    bottom: -2px;
-    width: auto;
-    filter: drop-shadow(0 10px 8px rgb(16 19 23 / 0.25));
+    z-index: 2;
+    left: calc(50% + var(--h) * 0.18);
+    /* Both cut-outs keep 1.9% of clear space under the tyres. */
+    bottom: calc(var(--near) - var(--h) * 0.019);
+    width: var(--kw);
+    height: var(--h);
   }
 
-  .keke {
+  .rider {
+    z-index: 1;
+    left: calc(50% - var(--h) * 0.18 - var(--rw));
+    bottom: calc(var(--far) - var(--rh) * 0.019);
+    width: var(--rw);
+    height: var(--rh);
+  }
+
+  .car img {
+    width: 100%;
     height: 100%;
-    left: 52%;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
   }
 
-  .courier {
-    height: 82%;
-    left: 18%;
+  /* Soft contact shadow on the asphalt, under the wheels. */
+  .shade {
+    position: absolute;
+    left: 3%;
+    right: 3%;
+    bottom: calc(1.9% - var(--strip) * 0.16);
+    height: calc(var(--strip) * 0.34);
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(0 0 0 / 0.7), rgb(0 0 0 / 0.36) 55%, rgb(0 0 0 / 0));
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .names,
-      .v {
-        animation-timing-function: linear;
-        animation-fill-mode: both;
-        animation-timeline: view();
-      }
-
-      .names {
-        animation-name: names;
-      }
-
-      .keke {
-        left: 0;
-        animation-name: drive-keke;
-      }
-
-      .courier {
-        left: 0;
-        animation-name: drive-courier;
-      }
-    }
+  /* With motion on, the script places both vehicles and drives them. */
+  .live .car {
+    left: 0;
   }
 
-  @keyframes names {
-    from {
-      transform: translateX(-4%);
-    }
-    to {
-      transform: translateX(-30%);
-    }
-  }
-
-  @keyframes drive-keke {
-    from {
-      transform: translateX(-60vw);
-    }
-    to {
-      transform: translateX(105vw);
-    }
-  }
-
-  @keyframes drive-courier {
-    from {
-      transform: translateX(-95vw);
-    }
-    to {
-      transform: translateX(70vw);
-    }
+  .live .car,
+  .live .names {
+    will-change: transform;
   }
 </style>
+
+<script>
+  // Per frame this writes two transforms, one per vehicle, plus the names'
+  // transform only while the page is scrolling. Nothing else changes, so
+  // there is no layout or paint, only compositing.
+  const band = document.querySelector<HTMLElement>("[data-cruise]");
+  if (band) drive(band);
+
+  function drive(band: HTMLElement) {
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    const road = band.querySelector<HTMLElement>("[data-road]")!;
+    const names = band.querySelector<HTMLElement>("[data-names]")!;
+    const car = (name: string) => ({ el: band.querySelector<HTMLElement>(`[data-car=${name}]`)!, x: 0, w: 0, pace: 1, on: false });
+    const keke = car("keke");
+    const rider = car("rider");
+    const rand = (a: number, b: number) => a + Math.random() * (b - a);
+    const TAU = Math.PI * 2;
+
+    let W = 0; // road width
+    let H = 0; // keke height: the unit for speeds and the road shiver
+    let t = 0; // seconds of motion so far (stands still while paused)
+    let trip = 0; // keke trips so far
+    let riderTrip = 0; // the keke trip the rider last followed
+    let gate = 0; // where the keke is when the rider sets off behind it
+    let backAt = 0; // when the next keke turns in
+    let lastY = NaN; // scroll position the names were last placed for
+
+    const measure = () => {
+      W = road.clientWidth;
+      H = keke.el.offsetHeight;
+      keke.w = keke.el.offsetWidth;
+      rider.w = rider.el.offsetWidth;
+      lastY = NaN;
+    };
+
+    // Keke cruising speed in px/s, counted in keke heights so the pace looks
+    // alike on a phone and a laptop, but never slower than 8.5 s to cross.
+    const kekeSpeed = () => Math.max(0.85 * H, (W + keke.w) / 8.5);
+
+    // A keke turns in from the left. Pick this trip's speeds, then work out
+    // where the keke should be when the rider sets off behind it, so that he
+    // overtakes it in the middle stretch of the road and never off screen.
+    const newTrip = (x: number) => {
+      trip++;
+      keke.on = true;
+      keke.x = x;
+      keke.pace = rand(0.93, 1.05);
+      rider.pace = rand(1.8, 2.0);
+      const r = rider.pace / keke.pace;
+      const meet = rand(0.52, 0.76) * W - keke.w / 2;
+      gate = ((r - 1) * meet - (keke.w + rider.w) / 2) / r;
+    };
+
+    const place = (c: typeof keke, y = 0) => {
+      c.el.style.transform = `translate3d(${c.x.toFixed(2)}px,${y.toFixed(2)}px,0)`;
+    };
+
+    // The names slide the other way as the band scrolls up the screen.
+    const parallax = () => {
+      if (scrollY === lastY) return;
+      lastY = scrollY;
+      const r = band.getBoundingClientRect();
+      const vh = innerHeight;
+      const p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
+      names.style.transform = `translate3d(${(-p * 0.42 * (vh + r.height)).toFixed(1)}px,0,0)`;
+    };
+
+    // First frame: the keke's nose just in from the left, so the first thing
+    // seen is it driving in, with the rider turning in behind it soon after.
+    // It only starts moving once the band reaches the screen.
+    const start = () => {
+      measure();
+      t = 0;
+      trip = riderTrip = 0;
+      rider.on = false;
+      rider.x = -rider.w - 2;
+      newTrip(-keke.w * 0.35);
+      band.classList.add("live");
+      place(keke);
+      place(rider);
+      parallax();
+    };
+
+    const step = (dt: number) => {
+      t += dt;
+      const v = kekeSpeed();
+
+      if (!keke.on && t >= backAt) newTrip(-keke.w - 2);
+      if (!rider.on && riderTrip < trip && keke.on && keke.x >= gate) {
+        riderTrip = trip;
+        rider.on = true;
+        rider.x = -rider.w - 2;
+      }
+
+      // Speeds drift a little, like a hand on the throttle. The rider opens
+      // up as he pulls out alongside the keke and eases off once past it.
+      // Each body shivers on the road: a slow sway plus a fine tremor,
+      // different for each, under a pixel on a phone.
+      const a = H * 0.006;
+      if (keke.on) {
+        keke.x += v * keke.pace * (1 + 0.045 * Math.sin(1.3 * t + 0.4) + 0.025 * Math.sin(2.9 * t + 1.7)) * dt;
+        place(keke, a * (0.6 * Math.sin(TAU * 2.3 * t) + 0.3 * Math.sin(TAU * 5.9 * t + 1.1) + 0.12 * Math.sin(TAU * 11.3 * t + 2.3)));
+        if (keke.x > W + 2) {
+          keke.on = false;
+          backAt = t + rand(0.3, 0.8);
+        }
+      }
+      if (rider.on) {
+        const gap = (keke.x + keke.w / 2 - (rider.x + rider.w / 2)) / H;
+        const push = keke.on ? 0.32 * Math.exp(-(((gap - 0.6) / 1.4) ** 2)) : 0;
+        rider.x += v * rider.pace * (1 + push + 0.035 * Math.sin(1.9 * t + 2.1)) * dt;
+        place(rider, a * 0.7 * (0.55 * Math.sin(TAU * 2.9 * t + 0.8) + 0.35 * Math.sin(TAU * 7.3 * t + 2.6) + 0.1 * Math.sin(TAU * 13.1 * t)));
+        if (rider.x > W + 2) rider.on = false;
+      }
+    };
+
+    let raf = 0;
+    let last = 0;
+    let onScreen = false;
+    const frame = (now: number) => {
+      raf = requestAnimationFrame(frame);
+      const dt = Math.min(0.05, (now - last) / 1000 || 0);
+      last = now;
+      parallax();
+      step(dt);
+    };
+    // Runs only while the band is on screen, the tab is showing and motion
+    // is allowed.
+    const run = () => {
+      const go = onScreen && !document.hidden && !still.matches && band.classList.contains("live");
+      if (go && !raf) {
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      } else if (!go && raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+    };
+
+    // Reduced motion: no driving and no parallax; the CSS lays out a still.
+    const setUp = () => {
+      if (still.matches) {
+        band.classList.remove("live");
+        [keke.el, rider.el, names].forEach((el) => (el.style.transform = ""));
+      } else start();
+      run();
+    };
+
+    // A vehicle waiting off the road sits outside the band's clip, where lazy
+    // loading never sees it, so it would turn in as an empty box. Fetch both
+    // cut-outs once the page itself has loaded (about 25 kB together).
+    const fetchCars = () => band.querySelectorAll("img").forEach((i) => (i.loading = "eager"));
+    if (document.readyState === "complete") fetchCars();
+    else addEventListener("load", fetchCars, { once: true });
+
+    new IntersectionObserver(([e]) => {
+      onScreen = e.isIntersecting;
+      run();
+    }).observe(band);
+    new ResizeObserver(measure).observe(road);
+    document.addEventListener("visibilitychange", run);
+    setUp();
+    still.addEventListener?.("change", setUp);
+  }
+</script>
