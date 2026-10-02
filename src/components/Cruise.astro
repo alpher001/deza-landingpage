@@ -202,8 +202,7 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
     left: 0;
   }
 
-  .live .car,
-  .live .names {
+  .live .car {
     will-change: transform;
   }
 </style>
@@ -214,8 +213,7 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
   // ever, stepped 60 times a second and handed to the browser as transform
   // keyframes ten times a second. The road shiver is a looping animation of
   // its own on each body. So the browser drives the vehicles off the main
-  // thread; the script wakes once per trip, plus for the names while the band
-  // is on screen and the page scrolls.
+  // thread; the script wakes once per trip. The area names stand still.
   const band = document.querySelector<HTMLElement>("[data-cruise]");
   if (band && "animate" in band) drive(band);
 
@@ -239,7 +237,6 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
   function drive(band: HTMLElement) {
     const still = matchMedia("(prefers-reduced-motion: reduce)");
     const road = band.querySelector<HTMLElement>("[data-road]")!;
-    const names = band.querySelector<HTMLElement>("[data-names]")!;
     const car = (name: string): Car => {
       const el = band.querySelector<HTMLElement>(`[data-car=${name}]`)!;
       return { el, body: [...el.querySelectorAll<HTMLElement>(".shade, picture")], w: 0, shiver: [] };
@@ -253,7 +250,6 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
 
     let W = 0; // road width
     let H = 0; // keke height: the unit for speeds and the road shiver
-    let lastY = NaN; // scroll position the names were last placed for
     let snaps: State[] = []; // every step of the trip under way
     let onScreen = false;
 
@@ -266,7 +262,6 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
       H = keke.el.offsetHeight;
       keke.w = keke.el.offsetWidth;
       rider.w = rider.el.offsetWidth;
-      lastY = NaN;
     };
 
     // Keke cruising speed in px/s, counted in keke heights so the pace looks
@@ -374,24 +369,6 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
       }
     };
 
-    // The names slide the other way as the band scrolls up the screen.
-    const parallax = () => {
-      if (scrollY === lastY) return;
-      lastY = scrollY;
-      const r = band.getBoundingClientRect();
-      const vh = innerHeight;
-      const p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
-      names.style.transform = `translate3d(${(-p * 0.42 * (vh + r.height)).toFixed(1)}px,0,0)`;
-    };
-    let queued = 0;
-    const onScroll = () => {
-      if (queued || !onScreen || !live()) return;
-      queued = requestAnimationFrame(() => {
-        queued = 0;
-        parallax();
-      });
-    };
-
     // First frame: the keke's nose just in from the left, so the first thing
     // seen is it driving in, with the rider turning in behind it soon after.
     // It only starts moving once the band reaches the screen.
@@ -402,7 +379,6 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
       const base: State = { t: 0, kx: 0, kon: false, rx: 0, ron: false, followed: false, kp: 1, rp: 1, gate: 0, wait: 0, offAt: NaN };
       send(newTrip(base, -keke.w * 0.35));
       shiver();
-      parallax();
     };
 
     // Moves only while the band is on screen, the tab is showing and motion
@@ -415,14 +391,13 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
       }
     };
 
-    // Reduced motion: no driving and no parallax; the CSS lays out a still.
+    // Reduced motion: no driving; the CSS lays out a still.
     const setUp = () => {
       if (still.matches) {
         band.classList.remove("live");
         anims().forEach((a) => a.cancel());
         keke.anim = rider.anim = undefined;
         keke.shiver = rider.shiver = [];
-        names.style.transform = "";
       } else start();
       run();
     };
@@ -440,7 +415,6 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
       if (!s.kon) s.kx = Math.max(s.kx, W + 2);
       send(s);
       shiver();
-      parallax();
     };
 
     // A vehicle waiting off the road sits outside the band's clip, where lazy
@@ -452,14 +426,9 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
 
     new IntersectionObserver((entries) => {
       onScreen = entries[entries.length - 1].isIntersecting;
-      if (onScreen && live()) {
-        lastY = NaN;
-        parallax();
-      }
       run();
     }).observe(band);
     new ResizeObserver(resize).observe(road);
-    addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("visibilitychange", run);
     setUp();
     still.addEventListener?.("change", setUp);
