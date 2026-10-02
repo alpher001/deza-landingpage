@@ -126,7 +126,6 @@ export const copy = {
       ],
       bizTitle: "Selling on WhatsApp or Instagram?",
       bizBody: "Deza Delivery is for Kano shops and online sellers too. Send goods to your customers and share the live tracking link with them.",
-      cta: "Get delivery updates",
       photoAlt: "A dispatch rider handing a package to a woman at her gate",
     },
     safety: {
@@ -137,7 +136,6 @@ export const copy = {
         { title: "Share your trip", body: "Send your live trip to family with one tap." },
         { title: "Fair, fixed prices", body: "The price you see is the price you pay. Cash or transfer." },
       ],
-      photoAlt: "A keke waiting under a streetlight at night with a passenger in the back",
     },
     earn: {
       kicker: "Drive with Deza",
@@ -145,7 +143,6 @@ export const copy = {
       body: "For keke owners and drivers, and for dispatch riders when Deza Delivery opens. Less waiting at the junction for your next trip.",
       points: ["Trips come to you", "See your earnings every day", "Support in Hausa"],
       cta: "Register to drive or deliver",
-      photoAlt: "A keke driver sitting in his keke in morning light",
     },
     faq: {
       kicker: "Questions",
@@ -324,7 +321,6 @@ export const copy = {
       ],
       bizTitle: "Kana sayarwa a WhatsApp ko Instagram?",
       bizBody: "An gina Deza Delivery don shaguna da 'yan kasuwar Kano ma. Aika wa abokan cinikinka kaya, ka tura musu link don su bi kayan kai tsaye.",
-      cta: "Samu labarin aika kaya",
       photoAlt: "Dispatch rider yana miƙa wa wata mace kaya a ƙofar gidanta",
     },
     safety: {
@@ -335,7 +331,6 @@ export const copy = {
         { title: "Raba tafiyarka", body: "Tura tafiyarka kai tsaye ga iyalinka da taɓawa ɗaya." },
         { title: "Farashi mai adalci", body: "Kuɗin da ka gani, shi za ka biya. Tsabar kuɗi ko tura kuɗi." },
       ],
-      photoAlt: "Keke yana jira ƙarƙashin fitila da dare, fasinja a baya",
     },
     earn: {
       kicker: "Yi aiki da Deza",
@@ -343,7 +338,6 @@ export const copy = {
       body: "Ga masu keke napep da direbobi, da dispatch riders idan Deza Delivery ta buɗe. Ba sai ka daɗe a tasha kana jiran fasinja ko kaya ba.",
       points: ["Fasinjoji za su zo maka", "Ka ga kuɗin da ka samu kullum", "Taimako da Hausa"],
       cta: "Yi rajista don tuƙi ko kai kaya",
-      photoAlt: "Direban keke napep zaune a cikin kekensa da safe",
     },
     faq: {
       kicker: "Tambayoyi",

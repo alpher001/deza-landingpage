@@ -1,6 +1,6 @@
 # Deza landing page
 
-The public site for Deza, a Kano mobility company: keke napep rides first, parcel delivery next. English at `/`, Hausa at `/ha/`.
+The public site for Deza, a Kano mobility company: keke napep rides first, package delivery by dispatch rider next. English at `/`, Hausa at `/ha/`.
 
 Built with [Astro](https://astro.build): plain HTML and CSS, a small script for the scroll effects and the waitlist form, Unbounded for headlines and Inter for text (both have the Hausa letters ɓ ɗ ƙ ƴ).
 
@@ -19,7 +19,7 @@ Node 22.12 or newer.
 - `src/i18n.ts`: every word on the page, English and Hausa side by side. Edit copy here.
 - `src/components/Page.astro`: the page layout and styles.
 - `src/components/Photo.astro` and `src/lib/pictures.ts`: photos. Full-quality originals live in `src/assets/` (`photos/`, `cutouts/`, `posters/`); the build turns each into AVIF and WebP at several widths, and each screen downloads only the size it needs. `scripts/prune.mjs` then drops the unused originals from `dist/`. Prompts are in the project's `visuals/` folder.
-- `src/components/ScreenUI.astro`: the Deza app screens (ride booking in three steps, and parcel tracking), styled after the rider app in the monorepo and drawn over a Kano street map.
+- `src/components/ScreenUI.astro`: the Deza app screens (ride booking in three steps, and package tracking), styled after the rider app in the monorepo and drawn over a Kano street map.
 - `scripts/make-map.mjs`: draws that street map into `src/generated/kano-map.json`. Run `node scripts/make-map.mjs` after changing roads or routes. The streets are drawn for the page, not traced from a real map.
 - `src/components/Cruise.astro`: the keke and courier that drive across the page, from `src/assets/cutouts/keke.png` and `courier.png` (transparent, facing right).
 - Videos (no sound, each cut to loop on itself):
@@ -50,7 +50,7 @@ The form posts JSON (`phone`, `area`, `role`, `lang`) to the URL in `PUBLIC_WAIT
 
 - [ ] Hausa copy checked by a native speaker (revised 2026-10-01, still not reviewed by one).
 - [ ] Claims: riders are checked before driving, trip sharing, cash or transfer, Hausa support.
-- [ ] Phone screen sample values are illustrative: Amina, Sabon Gari Market to Zoo Road, ₦600, Musa Ibrahim, KN 482 KY; parcel from Kantin Kwari to Bompai, Aminu, KN 117 DZ, code 4827.
+- [ ] Phone screen sample values are illustrative: Amina, Sabon Gari Market to Zoo Road, ₦600, Musa Ibrahim, KN 482 KY; package from Kantin Kwari to Bompai, Aminu, KN 117 DZ, code 4827.
 - [ ] Delivery claims: delivery code at handover, what can be sent, pickups for shops.
 - [ ] Deza Wallet: keep the one-line mention ("one Deza balance") or remove it.
 - [ ] Brand fonts (Unbounded and Inter) approved.
