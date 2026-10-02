@@ -1,5 +1,8 @@
-// All page copy, in English and Hausa. The Hausa was revised on 2026-10-01 and
+// All page copy, in English and Hausa. The Hausa was revised on 2026-10-02 and
 // still needs a native speaker's read before launch (see README).
+// Words people in Kano use: "keke napep" (also "Adaidaita Sahu"), "send
+// packages" or "send goods", "dispatch rider". Not "parcel" or "courier".
+// Keke napep operators are "drivers", so "rider" always means a dispatch rider.
 // Names, prices, plates and times inside the app screens are samples.
 
 export type Lang = "en" | "ha";
@@ -7,9 +10,9 @@ export type Lang = "en" | "ha";
 export const copy = {
   en: {
     meta: {
-      title: "Deza | Keke rides and parcel delivery in Kano",
+      title: "Keke napep rides and package delivery in Kano | Deza",
       description:
-        "Deza is Kano's new mobility app. Book a keke napep at a fixed fare, and soon send parcels anywhere in Kano with live tracking. Join the waitlist.",
+        "Deza is a Kano mobility company. Book a keke napep (Adaidaita Sahu) at a fixed fare, and soon send packages across Kano with a dispatch rider.",
       ogAlt: "Kekes on a busy Kano street at golden hour",
     },
     nav: {
@@ -23,19 +26,19 @@ export const copy = {
       switchHref: "/ha/",
     },
     hero: {
-      eyebrow: "Keke rides and delivery in Kano",
+      eyebrow: "Keke napep and delivery in Kano",
       title: ["Moving", "Kano", "forward."],
       modes: [
-        { label: "Ride", lead: "Call a keke napep from where you stand. See the fare before you ride and watch your rider come to you." },
-        { label: "Delivery", lead: "Send parcels anywhere in Kano with a courier you follow from pickup to doorstep. Coming soon." },
+        { label: "Ride", lead: "Call a keke napep from where you stand. See the fare before you ride, then watch your driver come to you." },
+        { label: "Delivery", lead: "Send packages and goods anywhere in Kano with a dispatch rider you can follow to the door. Coming soon." },
       ],
       cta: "Join the waitlist",
       soon: "Coming soon",
-      rideAlt: "A keke napep and a delivery courier riding past a Kano market",
-      deliveryAlt: "A Deza courier handing over a parcel",
+      rideAlt: "A keke napep and a dispatch rider passing a Kano market",
+      deliveryAlt: "A Deza dispatch rider handing over a package",
     },
     intro: {
-      text: "Kano moves on kekes, motorbikes and people who know the way. Deza puts that in one app, with fair prices you see first and riders you can trust.",
+      text: "Kano moves on keke napep, motorbikes and people who know the way. Deza brings them into one app, with prices you see first and people you can trust.",
     },
     lanes: {
       label: "What Deza does",
@@ -52,11 +55,11 @@ export const copy = {
         {
           name: "Deza Delivery",
           status: "Coming soon",
-          body: "Parcels, documents and market goods delivered across Kano, tracked to the door.",
+          body: "Packages, documents and market goods, picked up by a dispatch rider and followed to the door.",
           link: "How delivery works",
           href: "#delivery",
           photo: "courier-city",
-          alt: "A courier on a motorbike with a gold-banded parcel box on a busy Kano street",
+          alt: "A dispatch rider on a motorbike with a gold-banded delivery box on a busy Kano street",
         },
       ],
       pay: "Pay cash or by transfer, and keep one Deza balance for both.",
@@ -67,7 +70,7 @@ export const copy = {
       steps: [
         { title: "Say where you're going", body: "Deza finds where you are. Type your drop-off or pick a place you've been before." },
         { title: "See the price first", body: "The fare is fixed before you confirm. Pay cash or by transfer, with no surprises at the end." },
-        { title: "Watch your keke arrive", body: "See your rider's name, photo and plate number, and follow the keke to your pickup." },
+        { title: "Watch your keke arrive", body: "See your driver's name, photo and plate number, and follow the keke to your pickup." },
       ],
       photoAlt: "A hand holding a phone at the roadside, with the Deza app open",
     },
@@ -86,7 +89,7 @@ export const copy = {
       keke: "Deza Keke",
       kekeSub: "3 seats · 4 min away",
       parcel: "Deza Delivery",
-      parcelSub: "Send a parcel",
+      parcelSub: "Send a package",
       soon: "Soon",
       cash: "Cash",
       change: "Change",
@@ -100,11 +103,11 @@ export const copy = {
       call: "Call",
       chat: "Message",
       share: "Share trip",
-      dTitle: "Your parcel is on the way",
+      dTitle: "Your package is on the way",
       dEta: "Kantin Kwari to Bompai",
       dSteps: ["Picked up", "On the way", "Delivered"],
-      dCourier: "Aminu, your courier",
-      dItem: "Small parcel · Fabric",
+      dCourier: "Aminu, your rider",
+      dItem: "Small package · Fabric",
       dPlate: "KN 117 DZ",
       dCode: "Delivery code",
       dCodeHint: "Give it to Aminu at the door",
@@ -113,47 +116,69 @@ export const copy = {
       kicker: "Deza Delivery",
       status: "Coming soon",
       title: "Delivery across Kano, from the market to the door.",
-      body: "Send a parcel to anyone in Kano. A Deza courier picks it up, you follow it on the map, and it is handed over only with your delivery code.",
+      body: "Send a package to anyone in Kano. A Deza dispatch rider picks it up, you follow it on the map, and it is handed over only with your delivery code.",
       sendsTitle: "What you can send",
       sends: ["Documents and letters", "Fabric and market goods", "Food and groceries", "Phones and small electronics"],
       steps: [
         { title: "Book a pickup", body: "Say what you're sending and where it's going. You see the price first." },
-        { title: "A courier collects it", body: "Your courier comes to your door, office or shop." },
-        { title: "Handed over with a code", body: "Follow it live. The parcel is handed over only when your code matches." },
+        { title: "A dispatch rider picks it up", body: "The rider comes to your house, office or shop." },
+        { title: "Handed over with a code", body: "Follow it live. It is handed over only when your code matches." },
       ],
       bizTitle: "Selling on WhatsApp or Instagram?",
-      bizBody: "Deza Delivery is built for Kano shops and sellers too. Book pickups for your customers and send them the live tracking link.",
+      bizBody: "Deza Delivery is for Kano shops and online sellers too. Send goods to your customers and share the live tracking link with them.",
       cta: "Get delivery updates",
-      photoAlt: "A courier handing a parcel to a woman at her gate",
+      photoAlt: "A dispatch rider handing a package to a woman at her gate",
     },
     safety: {
       kicker: "Safety",
       title: "Safe rides, day and night.",
       items: [
-        { title: "Checked riders", body: "Every rider is checked before they drive with Deza. You see their name, photo and plate before you get in." },
+        { title: "Checked drivers", body: "Every driver is checked before they join Deza. You see their name, photo and plate number before you get in." },
         { title: "Share your trip", body: "Send your live trip to family with one tap." },
-        { title: "Fair, fixed prices", body: "The price you agree is the price you pay. Cash or transfer." },
+        { title: "Fair, fixed prices", body: "The price you see is the price you pay. Cash or transfer." },
       ],
       photoAlt: "A keke waiting under a streetlight at night with a passenger in the back",
     },
     earn: {
       kicker: "Drive with Deza",
       title: "More trips. Clear earnings. Every day.",
-      body: "For keke owners and riders, and for delivery couriers when Deza Delivery opens. Trips come to you, and you see every naira you earn.",
+      body: "For keke owners and drivers, and for dispatch riders when Deza Delivery opens. Less waiting at the junction for your next trip.",
       points: ["Trips come to you", "See your earnings every day", "Support in Hausa"],
-      cta: "Register to drive",
-      photoAlt: "A keke rider sitting in his keke in morning light",
+      cta: "Register to drive or deliver",
+      photoAlt: "A keke driver sitting in his keke in morning light",
     },
     faq: {
       kicker: "Questions",
       title: "Asked in Kano.",
       items: [
-        { q: "Is Deza available in Kano now?", a: "Not yet. The Deza apps are being built in Kano right now. Join the waitlist and we'll send you one WhatsApp message the day it opens." },
-        { q: "How much does a keke ride cost on Deza?", a: "You see the full fare before you confirm, and that is the price you pay. Fares depend on distance, so there is no haggling at the roadside." },
-        { q: "Does Deza do delivery in Kano?", a: "Yes, Deza Delivery comes right after rides. You'll be able to send parcels, documents and market goods across Kano, follow the courier on the map and hand over with a delivery code." },
-        { q: "Which parts of Kano will Deza cover?", a: "Deza is built for metropolitan Kano. We'll tell everyone on the waitlist which areas open first, before launch day." },
-        { q: "Can I pay with cash?", a: "Yes. Pay cash or by transfer. You choose before every trip." },
-        { q: "How do I drive or deliver with Deza?", a: "Join the waitlist and choose 'Drive'. Keke owners, keke riders and delivery couriers can register, and we'll call you before launch to get you set up." },
+        {
+          q: "Is Deza available in Kano now?",
+          a: "Not yet. Deza is being built in Kano right now. Join the waitlist and we'll send you one WhatsApp message the day it opens, with the areas that open first.",
+        },
+        {
+          q: "Is Deza for rides or delivery?",
+          a: "Both. Deza is a Kano mobility company with two services in one app: Deza Ride for keke napep rides, and Deza Delivery for sending packages with a dispatch rider. Rides open first.",
+        },
+        {
+          q: "Can I book Adaidaita Sahu on Deza?",
+          a: "Yes. Deza Ride books the keke napep, which many people in Kano call Adaidaita Sahu. Say where you're going, see the fare, and follow the keke to your pickup.",
+        },
+        {
+          q: "How much is a keke napep ride?",
+          a: "You see the full fare before you confirm, and that is the price you pay. Fares depend on distance, so there is no haggling at the roadside. Pay cash or by transfer.",
+        },
+        {
+          q: "How do I send a package in Kano?",
+          a: "With Deza Delivery, which opens soon after rides. Say what you're sending and where it's going, and see the price first. A dispatch rider picks it up from your house, shop or office, and you follow it to the door.",
+        },
+        {
+          q: "Can Deza deliver to my customers?",
+          a: "Yes. If you sell on WhatsApp or Instagram, a Deza dispatch rider picks up from your shop or house and delivers to your customers anywhere in Kano. Send them the tracking link so they know when their goods are coming.",
+        },
+        {
+          q: "How do I join Deza as a driver or dispatch rider?",
+          a: "Join the waitlist and choose 'Drive'. Keke owners, keke drivers and dispatch riders can all register. We'll call you before launch to get you set up.",
+        },
       ],
     },
     app: {
@@ -167,7 +192,7 @@ export const copy = {
       area: "Your area in Kano",
       areaPlaceholder: "e.g. Sabon Gari",
       role: "I want to",
-      roles: { ride: "Ride", send: "Send parcels", drive: "Drive" },
+      roles: { ride: "Ride", send: "Send packages", drive: "Drive" },
       submit: "Join the waitlist",
       privacy: "We only use your number to tell you about Deza.",
       success: "You're on the list. We'll message you on launch day.",
@@ -175,7 +200,7 @@ export const copy = {
       error: "That didn't go through. Please check your number and try again.",
     },
     footer: {
-      tagline: "Keke rides and delivery, made in Kano.",
+      tagline: "Keke napep and delivery, made in Kano.",
       areasTitle: "Built for Kano",
       areas: ["Sabon Gari", "Fagge", "Nassarawa", "Tarauni", "Gwale", "Dala", "Kano Municipal", "Ungogo", "Kumbotso", "Bompai"],
       rights: "Deza. Kano, Nigeria.",
@@ -183,10 +208,10 @@ export const copy = {
   },
   ha: {
     meta: {
-      title: "Deza | Hawan keke da aika kaya a Kano",
+      title: "Hawan keke napep da aika kaya a Kano | Deza",
       description:
-        "Deza sabuwar manhajar sufuri ce ta Kano. Kira keke napep a farashi tabbatacce, kuma nan ba da jimawa ba ka aika kaya ko'ina a Kano kana bin sa kai tsaye.",
-      ogAlt: "Kekuna a titin Kano mai cunkoso da yamma",
+        "Deza kamfanin sufuri ne na Kano. Kira keke napep, wato Adaidaita Sahu, ka ga kuɗin tun farko. Nan ba da jimawa ba, aika kaya ta hannun dispatch rider.",
+      ogAlt: "Keke napep a titin Kano mai cunkoso da yamma",
     },
     nav: {
       ride: "Hawa",
@@ -199,19 +224,19 @@ export const copy = {
       switchHref: "/",
     },
     hero: {
-      eyebrow: "Hawan keke da aika kaya a Kano",
+      eyebrow: "Keke napep da aika kaya a Kano",
       title: ["Muna ciyar", "da Kano", "gaba."],
       modes: [
-        { label: "Hawa", lead: "Kira keke napep daga inda kake. Ka ga kuɗin hawa kafin ka hau, ka kuma ga mai keke yana tahowa." },
-        { label: "Aika kaya", lead: "Aika kaya ko'ina a Kano tare da mai kawo kaya da kake bi daga ɗauka har zuwa ƙofa. Yana nan tafe." },
+        { label: "Hawa", lead: "Kira keke napep daga inda kake. Ka ga kuɗin hawa kafin ka hau, ka kuma ga direban yana tahowa." },
+        { label: "Aika kaya", lead: "Aika kaya ko'ina a Kano ta hannun dispatch rider, kana bin sa har ƙofa. Yana nan tafe." },
       ],
       cta: "Shiga jerin jira",
       soon: "Yana nan tafe",
-      rideAlt: "Keke napep mai ruwan ɗorawa a titin Kano",
-      deliveryAlt: "Mai kawo kaya na Deza yana miƙa kaya",
+      rideAlt: "Keke napep da dispatch rider suna wucewa ta gefen kasuwa a Kano",
+      deliveryAlt: "Dispatch rider na Deza yana miƙa kaya",
     },
     intro: {
-      text: "Kano na tafiya ne da keke, da babur, da mutanen da suka san hanya. Deza ta haɗa wannan a manhaja ɗaya, da farashi mai adalci da kake gani tun farko, da masu keke amintattu.",
+      text: "Kano na tafiya ne da keke napep, da babur, da mutanen da suka san hanya. Deza ta haɗa su a manhaja ɗaya, da farashi da kake gani tun farko, da mutane amintattu.",
     },
     lanes: {
       label: "Abin da Deza ke yi",
@@ -223,27 +248,27 @@ export const copy = {
           link: "Yadda hawa ke aiki",
           href: "#ride",
           photo: "ride-passenger",
-          alt: "Mace tana shiga keke da waya a hannunta",
+          alt: "Mace tana shiga keke napep da waya a hannunta",
         },
         {
           name: "Deza Delivery",
           status: "Yana nan tafe",
-          body: "Kaya, takardu da kayan kasuwa, ana kai su ko'ina a Kano, kana bin su har ƙofa.",
+          body: "Kaya, takardu da kayan kasuwa. Dispatch rider zai ɗauka, kana bin sa har ƙofa.",
           link: "Yadda aika kaya ke aiki",
           href: "#delivery",
           photo: "courier-city",
-          alt: "Mai kawo kaya a kan babur da akwatin kaya a titin Kano mai cunkoso",
+          alt: "Dispatch rider a kan babur da akwatin kaya a titin Kano mai cunkoso",
         },
       ],
       pay: "Ka biya da tsabar kuɗi ko ta tura kuɗi, kuma ka riƙe asusun Deza ɗaya don duka biyun.",
     },
     how: {
       kicker: "Deza Ride",
-      title: "Kira keke da taɓawa uku.",
+      title: "Kira keke napep da taɓawa uku.",
       steps: [
         { title: "Faɗi inda za ka", body: "Deza za ta gano inda kake. Rubuta inda za ka sauka, ko ka zaɓi wurin da ka taɓa zuwa." },
         { title: "Ga farashi tun farko", body: "Kuɗin a tabbace yake kafin ka amince. Biya da tsabar kuɗi ko ta tura kuɗi, babu ƙari a ƙarshe." },
-        { title: "Ka ga kekenka yana zuwa", body: "Za ka ga sunan mai keke, hotonsa da lambar keke, kuma ka bi keken har zuwa inda kake." },
+        { title: "Ka ga kekenka yana zuwa", body: "Za ka ga sunan direba, hotonsa da lambar keken, kuma ka bi shi har inda kake." },
       ],
       photoAlt: "Hannu riƙe da waya a bakin titi, manhajar Deza a buɗe",
     },
@@ -279,7 +304,7 @@ export const copy = {
       dTitle: "Kayanki suna kan hanya",
       dEta: "Daga Kantin Kwari zuwa Bompai",
       dSteps: ["An ɗauka", "Suna kan hanya", "An kai"],
-      dCourier: "Aminu, mai kawo kaya",
+      dCourier: "Aminu, dispatch rider",
       dItem: "Ƙaramin kaya · Atamfa",
       dPlate: "KN 117 DZ",
       dCode: "Lambar karɓa",
@@ -289,47 +314,69 @@ export const copy = {
       kicker: "Deza Delivery",
       status: "Yana nan tafe",
       title: "Aika kaya a duk faɗin Kano, daga kasuwa har ƙofa.",
-      body: "Aika kaya ga kowa a Kano. Mai kawo kaya na Deza zai ɗauka, za ka bi shi a taswira, kuma ba za a miƙa kayan ba sai da lambar karɓarka.",
+      body: "Kira dispatch rider daga wayarka. Zai ɗauki kayanka, za ka bi shi a taswira, kuma ba zai miƙa kayan ba sai da lambar karɓarka.",
       sendsTitle: "Abin da za ka iya aikawa",
       sends: ["Takardu da wasiƙu", "Atamfa da kayan kasuwa", "Abinci da kayan masarufi", "Waya da ƙananan kayan lantarki"],
       steps: [
         { title: "Nemi a ɗauka", body: "Faɗi abin da za ka aika da inda za a kai shi. Za ka ga farashi tun farko." },
-        { title: "Mai kawo kaya zai ɗauka", body: "Zai zo ƙofarka, ofishinka ko shagonka." },
-        { title: "A miƙa da lamba", body: "Bi shi kai tsaye. Ba za a miƙa kayan ba sai lambarka ta dace." },
+        { title: "Dispatch rider zai ɗauka", body: "Zai zo gidanka, ofishinka ko shagonka." },
+        { title: "A miƙa da lamba", body: "Bi shi a taswira. Ba zai miƙa kayan ba sai lambarka ta dace." },
       ],
       bizTitle: "Kana sayarwa a WhatsApp ko Instagram?",
-      bizBody: "An gina Deza Delivery don shaguna da 'yan kasuwar Kano ma. Nemi a ɗauki kaya zuwa ga abokan cinikinka, ka tura musu hanyar bin kayan kai tsaye.",
+      bizBody: "An gina Deza Delivery don shaguna da 'yan kasuwar Kano ma. Aika wa abokan cinikinka kaya, ka tura musu link don su bi kayan kai tsaye.",
       cta: "Samu labarin aika kaya",
-      photoAlt: "Mai kawo kaya yana miƙa wa wata mace kaya a ƙofar gidanta",
+      photoAlt: "Dispatch rider yana miƙa wa wata mace kaya a ƙofar gidanta",
     },
     safety: {
       kicker: "Tsaro",
       title: "Tafiya lafiya, dare da rana.",
       items: [
-        { title: "Masu keke da aka tantance", body: "Ana tantance kowane mai keke kafin ya fara aiki da Deza. Za ka ga sunansa, hotonsa da lambar keke kafin ka shiga." },
+        { title: "Direbobin da aka tantance", body: "Ana tantance kowane direba kafin ya fara aiki da Deza. Za ka ga sunansa, hotonsa da lambar keke kafin ka shiga." },
         { title: "Raba tafiyarka", body: "Tura tafiyarka kai tsaye ga iyalinka da taɓawa ɗaya." },
-        { title: "Farashi mai adalci", body: "Kuɗin da ka amince da shi, shi za ka biya. Tsabar kuɗi ko tura kuɗi." },
+        { title: "Farashi mai adalci", body: "Kuɗin da ka gani, shi za ka biya. Tsabar kuɗi ko tura kuɗi." },
       ],
       photoAlt: "Keke yana jira ƙarƙashin fitila da dare, fasinja a baya",
     },
     earn: {
       kicker: "Yi aiki da Deza",
       title: "Ƙarin fasinjoji. Kuɗi a bayyane. Kullum.",
-      body: "Ga masu keke da masu tuƙa keke, da masu kawo kaya idan Deza Delivery ta buɗe. Fasinjoji za su zo maka, kuma za ka ga kowace naira da ka samu.",
+      body: "Ga masu keke napep da direbobi, da dispatch riders idan Deza Delivery ta buɗe. Ba sai ka daɗe a tasha kana jiran fasinja ko kaya ba.",
       points: ["Fasinjoji za su zo maka", "Ka ga kuɗin da ka samu kullum", "Taimako da Hausa"],
-      cta: "Yi rajista don tuƙi",
-      photoAlt: "Mai keke zaune a cikin kekensa da safe",
+      cta: "Yi rajista don tuƙi ko kai kaya",
+      photoAlt: "Direban keke napep zaune a cikin kekensa da safe",
     },
     faq: {
       kicker: "Tambayoyi",
       title: "Tambayoyin mutanen Kano.",
       items: [
-        { q: "Shin Deza ta fara aiki a Kano?", a: "Tukuna. Ana gina manhajojin Deza a Kano yanzu haka. Shiga jerin jira, za mu tura maka saƙon WhatsApp ɗaya a ranar da ta buɗe." },
-        { q: "Nawa ne kuɗin hawan keke a Deza?", a: "Za ka ga cikakken kuɗin kafin ka amince, kuma shi za ka biya. Kuɗin ya dogara da nisan tafiya, don haka babu ciniki a bakin titi." },
-        { q: "Deza na kai kaya a Kano?", a: "Eh, Deza Delivery na zuwa nan da nan bayan hawa. Za ka iya aika kaya, takardu da kayan kasuwa a Kano, ka bi mai kawo kayan a taswira, a kuma miƙa da lambar karɓa." },
-        { q: "A wane yanki na Kano Deza za ta yi aiki?", a: "An gina Deza don cikin birnin Kano. Za mu sanar da duk wanda ke cikin jerin jira wuraren da za a fara da su kafin ranar buɗewa." },
-        { q: "Zan iya biya da tsabar kuɗi?", a: "Eh. Biya da tsabar kuɗi ko ta tura kuɗi. Kai ne za ka zaɓa kafin kowace tafiya." },
-        { q: "Ta yaya zan yi tuƙi ko kai kaya da Deza?", a: "Shiga jerin jira ka zaɓi 'Tuƙa keke'. Masu keke, masu tuƙa keke da masu kawo kaya duk za su iya yin rajista, kuma za mu kira ka kafin buɗewa don mu shirya ka." },
+        {
+          q: "Shin Deza ta fara aiki a Kano?",
+          a: "Tukuna. Ana gina Deza a Kano yanzu haka. Shiga jerin jira, za mu tura maka saƙon WhatsApp ɗaya a ranar da ta buɗe, mu kuma faɗa maka unguwannin da za a fara da su.",
+        },
+        {
+          q: "Me Deza ke yi, hawa ko aika kaya?",
+          a: "Duka biyun. Deza kamfanin sufuri ne na Kano mai ayyuka biyu a manhaja ɗaya: Deza Ride don hawan keke napep, da Deza Delivery don aika kaya ta hannun dispatch rider. Hawa ne zai fara.",
+        },
+        {
+          q: "Zan iya kiran Adaidaita Sahu a Deza?",
+          a: "Eh. Deza Ride na kawo maka Adaidaita Sahu, wato keke napep, har inda kake. Faɗi inda za ka, ka ga kuɗin tun farko, ka bi keken a taswira.",
+        },
+        {
+          q: "Nawa ne kuɗin hawan keke napep?",
+          a: "Za ka ga cikakken kuɗin kafin ka amince, kuma shi za ka biya. Kuɗin ya dogara da nisan tafiya, don haka babu ciniki a bakin titi. Biya da tsabar kuɗi ko ta tura kuɗi.",
+        },
+        {
+          q: "Ta yaya zan aika kaya a Kano?",
+          a: "Da Deza Delivery, wadda za ta buɗe jim kaɗan bayan hawa. Faɗi abin da za ka aika da inda za a kai shi, ka ga farashi tun farko. Dispatch rider zai ɗauka daga gidanka, shagonka ko ofishinka, ka bi shi har ƙofa.",
+        },
+        {
+          q: "Deza za ta kai kayan da na sayar?",
+          a: "Eh. Idan kana sayarwa a WhatsApp ko Instagram, dispatch rider na Deza zai ɗauki kayan daga shagonka ko gidanka, ya kai wa abokan cinikinka ko'ina a Kano. Ka tura musu link don su san lokacin da kayansu za su iso.",
+        },
+        {
+          q: "Ta yaya zan zama direban Deza ko dispatch rider?",
+          a: "Shiga jerin jira ka zaɓi 'Tuƙa keke'. Masu keke napep, direbobi da dispatch riders duk za su iya yin rajista, kuma za mu kira ka kafin buɗewa don mu shirya ka.",
+        },
       ],
     },
     app: {
@@ -351,7 +398,7 @@ export const copy = {
       error: "Bai shiga ba. Duba lambarka ka sake gwadawa.",
     },
     footer: {
-      tagline: "Hawan keke da aika kaya, daga Kano.",
+      tagline: "Keke napep da aika kaya, daga Kano.",
       areasTitle: "An gina don Kano",
       areas: ["Sabon Gari", "Fagge", "Nassarawa", "Tarauni", "Gwale", "Dala", "Kano Municipal", "Ungogo", "Kumbotso", "Bompai"],
       rights: "Deza. Kano, Najeriya.",
