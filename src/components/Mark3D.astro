@@ -1,0 +1,75 @@
+---
+// The Deza mark as a solid gold 3D piece that turns as you scroll and leans
+// toward the pointer. three.js loads only when this comes near the screen.
+// Until then, and for people who turn motion off or have no WebGL, the flat
+// gold mark shows instead.
+import fs from "node:fs";
+import path from "node:path";
+
+interface Props {
+  size?: number;
+}
+
+const { size = 220 } = Astro.props;
+const svg = fs.readFileSync(path.join(process.cwd(), "public/brand/mark.svg"), "utf8");
+const view = svg.match(/viewBox="([^"]+)"/)![1];
+const d = svg.match(/<path[^>]*\sd="([^"]+)"/)![1];
+---
+
+<div class="mark3d" style={`--s:${size}px`} data-mark3d data-d={d} data-view={view} aria-hidden="true">
+  <svg class="flat" viewBox={view}><path d={d} fill="currentColor" fill-rule="evenodd"></path></svg>
+</div>
+
+<script>
+  const host = document.querySelector<HTMLElement>("[data-mark3d]");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const gl = (() => {
+    try {
+      return !!document.createElement("canvas").getContext("webgl2");
+    } catch {
+      return false;
+    }
+  })();
+
+  if (host && !reduce && gl) {
+    const io = new IntersectionObserver(
+      async ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        const { mount } = await import("../scripts/mark3d");
+        mount(host);
+        host.classList.add("live");
+      },
+      { rootMargin: "300px" },
+    );
+    io.observe(host);
+  }
+</script>
+
+<style>
+  .mark3d {
+    position: relative;
+    width: var(--s);
+    height: var(--s);
+    color: var(--gold);
+  }
+
+  .flat {
+    position: absolute;
+    inset: 18%;
+    width: 64%;
+    height: 64%;
+    transition: opacity 0.4s;
+  }
+
+  .mark3d :global(canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .live .flat {
+    opacity: 0;
+  }
+</style>

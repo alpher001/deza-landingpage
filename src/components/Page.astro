@@ -8,6 +8,7 @@ import StoreBadges from "./StoreBadges.astro";
 import ScreenUI from "./ScreenUI.astro";
 import KanoMapDefs from "./KanoMapDefs.astro";
 import Cruise from "./Cruise.astro";
+import Mark3D from "./Mark3D.astro";
 import Icon from "./Icon.astro";
 import { copy, type Lang } from "../i18n";
 
@@ -43,7 +44,6 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       <nav aria-label="Main">
         <a href="#ride">{t.nav.ride}</a>
         <a href="#delivery">{t.nav.delivery}</a>
-        <a href="#safety">{t.nav.safety}</a>
         <a href="#earn">{t.nav.earn}</a>
       </nav>
       <div class="bar-end">
@@ -117,54 +117,26 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       </div>
     </section>
 
-    <!-- What Deza does: two products, equal weight -->
-    <section class="intro">
-      <div class="wrap">
-        <p class="statement reveal">{t.intro.text}</p>
-        <h2 class="sr-only">{t.lanes.label}</h2>
-        <div class="lanes">
-          {
-            t.lanes.items.map((l, i) => (
-              <a class="lane reveal" href={l.href} style={`--i:${i}`}>
-                <Photo name={l.photo} alt={l.alt} class="lane-photo" position={i === 0 ? "50% 30%" : "68% 55%"} />
-                <span class="lane-shade" aria-hidden="true" />
-                <span class:list={["chip", { "chip-gold": i === 0 }]}>{l.status}</span>
-                <span class="lane-copy">
-                  <h3>{l.name}</h3>
-                  <span class="lane-body">{l.body}</span>
-                  <span class="lane-link">
-                    {l.link}
-                    <Icon name="arrow" size={16} stroke={2.25} />
-                  </span>
-                </span>
-              </a>
-            ))
-          }
-        </div>
-        <p class="pay-line reveal">
-          <Icon name="wallet" size={20} />
-          {t.lanes.pay}
-        </p>
-      </div>
-    </section>
-
-    <!-- Deza Ride: sticky phone, screen follows the steps -->
+    <!-- Deza Ride: the phone plays through booking a keke, step by step -->
     <section id="ride" class="how" data-steps data-step="1">
       <div class="wrap how-grid">
         <div class="how-copy">
           <div class="head">
-            <span class="kicker">{t.how.kicker}</span>
+            <span class="chip chip-gold">{t.how.kicker} · {t.lanes.items[0].status}</span>
             <h2>{t.how.title}</h2>
           </div>
-          <ol class="steps">
+          <ol class="steps" data-stepper>
             {
               t.how.steps.map((s, i) => (
-                <li data-step-item={i + 1}>
-                  <span class="num">{i + 1}</span>
-                  <div>
-                    <h3>{s.title}</h3>
-                    <p>{s.body}</p>
-                  </div>
+                <li>
+                  <button type="button" data-step-btn={i + 1} aria-pressed={i === 0 ? "true" : "false"}>
+                    <span class="num">{i + 1}</span>
+                    <span class="step-text">
+                      <span class="step-title">{s.title}</span>
+                      <span class="step-body">{s.body}</span>
+                    </span>
+                    <i class="bar" aria-hidden="true" />
+                  </button>
                 </li>
               ))
             }
@@ -179,91 +151,76 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           </div>
         </div>
       </div>
+
+      <ul id="safety" class="wrap trust">
+        {
+          t.safety.items.map((s, i) => (
+            <li>
+              <Icon name={(["shield", "share", "tag"] as const)[i]} size={22} />
+              <div>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
     </section>
 
     <!-- Deza Delivery -->
     <section id="delivery" class="delivery">
-      <div class="wrap">
-        <div class="head reveal">
-          <span class="kicker dark">
-            {t.delivery.kicker}
-            <span class="chip chip-gold soon-chip">{t.delivery.status}</span>
-          </span>
-          <h2>{t.delivery.title}</h2>
-          <p class="body">{t.delivery.body}</p>
+      <div class="wrap d-grid">
+        <div class="d-copy">
+          <div class="head">
+            <span class="chip chip-ink">{t.delivery.kicker} · {t.delivery.status}</span>
+            <h2>{t.delivery.title}</h2>
+            <p class="body">{t.delivery.body}</p>
+          </div>
+
+          <ol class="d-steps">
+            {
+              t.delivery.steps.map((s, i) => (
+                <li>
+                  <span class="d-num">{i + 1}</span>
+                  <div>
+                    <h3>{s.title}</h3>
+                    <p>{s.body}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+
+          <ul class="sends" aria-label={t.delivery.sendsTitle}>
+            {t.delivery.sends.map((s, i) => (
+              <li>
+                <Icon name={(["doc", "bag", "store", "phone"] as const)[i]} size={16} />
+                {s}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <div class="d-grid">
-          <div class="d-visual reveal">
-            <Photo name={doorstepPhoto} alt={t.delivery.photoAlt} class="d-photo" position="50% 45%" />
-            <div class="device">
-              <div class="device-screen"><ScreenUI t={t.screen} mode="delivery" /></div>
-            </div>
+        <div class="d-visual">
+          <Photo name={doorstepPhoto} alt={t.delivery.photoAlt} class="d-photo" position="55% 45%" />
+          <div class="device">
+            <div class="device-screen"><ScreenUI t={t.screen} mode="delivery" /></div>
           </div>
+        </div>
+      </div>
 
-          <div class="d-copy">
-            <ol class="d-steps">
-              {
-                t.delivery.steps.map((s, i) => (
-                  <li class="reveal" style={`--i:${i}`}>
-                    <span class="d-num">0{i + 1}</span>
-                    <div>
-                      <h3>{s.title}</h3>
-                      <p>{s.body}</p>
-                    </div>
-                  </li>
-                ))
-              }
-            </ol>
-
-            <div class="sends reveal">
-              <h3>{t.delivery.sendsTitle}</h3>
-              <ul>
-                {t.delivery.sends.map((s, i) => (
-                  <li>
-                    <Icon name={(["doc", "bag", "store", "phone"] as const)[i]} size={18} />
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div class="biz reveal">
-              <h3>{t.delivery.bizTitle}</h3>
-              <p>{t.delivery.bizBody}</p>
-              <a class="btn btn-gold" href="#join" data-role="send">{t.delivery.cta}<Icon name="arrow" size={18} stroke={2.25} /></a>
-            </div>
+      <div class="wrap">
+        <div class="biz">
+          <div>
+            <h3>{t.delivery.bizTitle}</h3>
+            <p>{t.delivery.bizBody}</p>
           </div>
+          <a class="btn btn-gold" href="#join" data-role="send">{t.delivery.cta}<Icon name="arrow" size={18} stroke={2.25} /></a>
         </div>
       </div>
     </section>
 
     <Cruise places={t.footer.areas} />
-
-    <!-- Safety, at night -->
-    <section id="safety" class="safety">
-      <div class="parallax">
-        <Photo name="night-ride" alt={t.safety.photoAlt} class="safety-photo" position="50% 60%" />
-      </div>
-      <div class="safety-shade" aria-hidden="true"></div>
-      <div class="wrap safety-inner">
-        <div class="head reveal">
-          <span class="kicker">{t.safety.kicker}</span>
-          <h2>{t.safety.title}</h2>
-        </div>
-        <ul class="safety-list">
-          {
-            t.safety.items.map((s, i) => (
-              <li class="reveal" style={`--i:${i}`}>
-                <Icon name={(["shield", "share", "tag"] as const)[i]} size={24} />
-                <h3>{s.title}</h3>
-                <p>{s.body}</p>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-    </section>
 
     <!-- Earn -->
     <section id="earn" class="earn">
@@ -272,7 +229,6 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           <Photo name="driver-portrait" alt={t.earn.photoAlt} class="earn-photo" position="50% 35%" />
         </div>
         <div class="earn-copy reveal">
-          <span class="kicker dark">{t.earn.kicker}</span>
           <h2>{t.earn.title}</h2>
           <p class="body">{t.earn.body}</p>
           <ul class="ticks">
@@ -294,13 +250,12 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     <section id="faq" class="faq">
       <div class="wrap faq-grid">
         <div class="head">
-          <span class="kicker dark">{t.faq.kicker}</span>
           <h2>{t.faq.title}</h2>
         </div>
         <div class="qs">
           {
             t.faq.items.map((f, i) => (
-              <details open={i === 0}>
+              <details>
                 <summary>
                   {f.q}
                   <i aria-hidden="true" />
@@ -319,7 +274,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       <div class="join-shade" aria-hidden="true"></div>
       <div class="wrap join-grid">
         <div class="join-copy reveal">
-          <span class="kicker">{t.app.kicker}</span>
+          <Mark3D size={200} />
           <h2>{t.app.title}</h2>
           <p class="body">{t.app.body}</p>
           <StoreBadges label={t.hero.soon} />
@@ -436,22 +391,27 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     }
   }
 
-  // Ride: the screen follows whichever step is in the middle of the screen.
+  // Ride: the phone plays the three steps in turn. Each step's bar fills
+  // while it shows; tapping a step jumps to it. It only runs while the
+  // section is on screen, and steps by tap only when motion is turned off.
   const how = document.querySelector<HTMLElement>("[data-steps]");
-  const items = [...document.querySelectorAll<HTMLElement>("[data-step-item]")];
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting && how) {
-          how.dataset.step = (e.target as HTMLElement).dataset.stepItem;
-          items.forEach((it) => it.classList.toggle("active", it === e.target));
-        }
-      }
-    },
-    { rootMargin: "-45% 0px -45% 0px" },
-  );
-  items.forEach((it) => io.observe(it));
-  items[0]?.classList.add("active");
+  const stepBtns = [...document.querySelectorAll<HTMLButtonElement>("[data-step-btn]")];
+  if (how && stepBtns.length) {
+    const show = (n: number) => {
+      how.dataset.step = String(n);
+      stepBtns.forEach((b, k) => b.setAttribute("aria-pressed", String(k + 1 === n)));
+    };
+    stepBtns.forEach((b, k) => {
+      b.addEventListener("click", () => {
+        how.classList.add("picked");
+        show(k + 1);
+      });
+      b.querySelector(".bar")?.addEventListener("animationend", () => {
+        if (!how.classList.contains("picked")) show((k + 1) % stepBtns.length + 1);
+      });
+    });
+    new IntersectionObserver(([e]) => how.classList.toggle("running", e.isIntersecting && !reduce), { threshold: 0.35 }).observe(how);
+  }
 
   // Buttons like "Register to drive" pre-select the matching option.
   document.querySelectorAll<HTMLAnchorElement>("a[data-role]").forEach((a) => {
@@ -586,7 +546,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     inset: 0 0 auto;
     z-index: 30;
     color: var(--paper);
-    background: linear-gradient(to bottom, rgb(16 19 23 / 0.5), transparent);
+    background: linear-gradient(to bottom, rgb(var(--ink-rgb) / 0.5), transparent);
     transition:
       background-color 250ms,
       box-shadow 250ms;
@@ -709,8 +669,8 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(0deg, rgb(16 19 23 / 0.92) 0%, rgb(16 19 23 / 0.55) 38%, rgb(16 19 23 / 0) 68%),
-      linear-gradient(90deg, rgb(16 19 23 / 0.55) 0%, transparent 55%);
+      linear-gradient(0deg, rgb(var(--ink-rgb) / 0.92) 0%, rgb(var(--ink-rgb) / 0.55) 38%, rgb(var(--ink-rgb) / 0) 68%),
+      linear-gradient(90deg, rgb(var(--ink-rgb) / 0.55) 0%, transparent 55%);
   }
 
   .hero-inner {
@@ -787,7 +747,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     gap: 4px;
     padding: 4px;
     border-radius: var(--r-pill);
-    background: rgb(16 19 23 / 0.5);
+    background: rgb(var(--ink-rgb) / 0.5);
     box-shadow: inset 0 0 0 1px var(--paper-12);
     backdrop-filter: blur(10px);
   }
@@ -893,8 +853,8 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
   .has-video .hero-shade {
     background:
-      linear-gradient(180deg, rgb(16 19 23 / 0.75) 0%, rgb(16 19 23 / 0.15) 34%, rgb(16 19 23 / 0) 55%, rgb(16 19 23 / 0.85) 100%),
-      linear-gradient(90deg, rgb(16 19 23 / 0.35) 0%, transparent 45%);
+      linear-gradient(180deg, rgb(var(--ink-rgb) / 0.75) 0%, rgb(var(--ink-rgb) / 0.15) 34%, rgb(var(--ink-rgb) / 0) 55%, rgb(var(--ink-rgb) / 0.85) 100%),
+      linear-gradient(90deg, rgb(var(--ink-rgb) / 0.35) 0%, transparent 45%);
   }
 
   .has-video .hero-inner {
@@ -925,185 +885,126 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     justify-content: flex-end;
   }
 
-  /* Intro and the two products */
-  .intro {
-    padding-block: clamp(80px, 11vw, 160px);
-  }
-
-  .statement {
-    font-family: var(--display);
-    font-weight: 500;
-    font-size: clamp(26px, 3.6vw, 48px);
-    line-height: 1.2;
-    letter-spacing: -0.03em;
-    max-width: 1000px;
-  }
-
-  .lanes {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--lg);
-    margin-top: clamp(48px, 7vw, 96px);
-  }
-
-  .lane {
-    position: relative;
-    display: block;
-    aspect-ratio: 5 / 6;
-    border-radius: var(--r-lg);
-    overflow: hidden;
-    color: var(--paper);
-    text-decoration: none;
-    isolation: isolate;
-  }
-
-  .lane :global(.lane-photo) {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-
-  .lane:hover :global(.lane-photo) {
-    transform: scale(1.04);
-  }
-
-  .lane-shade {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(0deg, rgb(16 19 23 / 0.88) 0%, rgb(16 19 23 / 0.35) 42%, transparent 62%);
-  }
-
-  .lane .chip {
-    position: absolute;
-    top: 18px;
-    left: 18px;
-  }
-
-  .lane-copy {
-    position: absolute;
-    inset: auto 0 0;
-    display: grid;
-    gap: 10px;
-    padding: clamp(20px, 3vw, 36px);
-  }
-
-  .lane h3 {
-    font-size: clamp(28px, 3.2vw, 44px);
-  }
-
-  .lane-body {
-    max-width: 36ch;
-    color: var(--paper-70);
-  }
-
-  .lane-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 4px;
-    font-weight: 700;
-    font-size: 15px;
-  }
-
-  .lane-link :global(svg) {
-    transition: transform 200ms;
-  }
-
-  .lane:hover .lane-link :global(svg) {
-    transform: translateX(4px);
-  }
-
-  .pay-line {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: var(--xl);
-    color: var(--ink-70);
-    font-size: 16px;
-  }
-
-  .pay-line :global(svg) {
-    flex: none;
-    color: var(--ink);
-  }
-
   /* Deza Ride */
   .how {
     background: var(--ink);
     color: var(--paper);
-    padding-block: clamp(88px, 11vw, 160px);
+    padding-block: clamp(80px, 9vw, 128px) clamp(56px, 6vw, 88px);
   }
 
   .how-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: clamp(32px, 6vw, 96px);
-    align-items: start;
+    align-items: center;
   }
 
   .how-copy {
+    display: grid;
+    gap: var(--xl);
     min-width: 0;
   }
 
   .steps {
     list-style: none;
-    margin: var(--xxl) 0 0;
+    margin: 0;
     padding: 0;
-  }
-
-  .steps li {
     display: grid;
-    grid-template-columns: 52px 1fr;
+    gap: 6px;
+  }
+
+  .steps button {
+    position: relative;
+    display: grid;
+    grid-template-columns: 40px 1fr;
     gap: var(--md);
-    padding-block: clamp(48px, 18vh, 180px) var(--lg);
-    opacity: 0.35;
-    transition: opacity 400ms;
+    width: 100%;
+    padding: 18px 18px 20px;
+    border: 0;
+    border-radius: var(--r-lg);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    transition: background-color 300ms;
   }
 
-  .steps li:first-child {
-    padding-top: var(--lg);
-  }
-
-  .steps li:global(.active) {
-    opacity: 1;
+  .steps button[aria-pressed="true"] {
+    background: var(--paper-6);
   }
 
   .num {
     display: grid;
     place-items: center;
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     box-shadow: inset 0 0 0 1.5px var(--paper-55);
     font-family: var(--display);
     font-weight: 700;
+    font-size: 15px;
     transition:
       background-color 300ms,
       color 300ms;
   }
 
-  .steps li:global(.active) .num {
+  [aria-pressed="true"] .num {
     background: var(--gold);
     color: var(--ink);
     box-shadow: none;
   }
 
-  .steps h3 {
-    font-size: clamp(22px, 2.2vw, 30px);
-    margin-bottom: 8px;
+  .step-text {
+    display: grid;
+    gap: 6px;
   }
 
-  .steps p {
+  .step-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(19px, 1.7vw, 23px);
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+
+  /* Every step stays readable; only the open one shows its detail. */
+  .step-body {
     color: var(--paper-70);
-    font-size: 17px;
-    max-width: 40ch;
+    font-size: 16px;
+    display: none;
+  }
+
+  [aria-pressed="true"] .step-body {
+    display: block;
+    animation: up 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  /* The bar under the open step is its timer. */
+  .bar {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 0;
+  }
+
+  .how.running:not(.picked) [aria-pressed="true"] .bar {
+    opacity: 1;
+    animation: fill var(--dur, 6s) linear forwards;
+  }
+
+  .steps li:last-child .bar {
+    --dur: 8s;
   }
 
   .how-visual {
-    position: sticky;
-    top: 92px;
+    min-width: 0;
   }
 
   .phone-shot {
@@ -1129,18 +1030,57 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     height: 64.6%;
   }
 
+  .trust {
+    list-style: none;
+    margin-block: clamp(56px, 7vw, 96px) 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--lg);
+  }
+
+  .trust li {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 14px;
+    padding-top: var(--lg);
+    border-top: 1px solid var(--paper-12);
+  }
+
+  .trust :global(svg) {
+    color: var(--gold);
+    margin-top: 2px;
+  }
+
+  .trust h3 {
+    font-family: var(--font);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+
+  .trust p {
+    color: var(--paper-70);
+    font-size: 15px;
+  }
+
   /* Deza Delivery */
   .delivery {
-    padding-block: clamp(88px, 11vw, 160px);
+    padding-block: clamp(80px, 9vw, 128px);
     overflow: hidden;
   }
 
-  .delivery .kicker {
-    gap: 12px;
+  .chip-ink {
+    background: var(--ink);
+    color: var(--paper);
   }
 
-  .soon-chip {
-    letter-spacing: 0.02em;
+  .head .chip {
+    justify-self: start;
+  }
+
+  .delivery h2 {
+    font-size: clamp(30px, 3.6vw, 52px);
   }
 
   .delivery .body {
@@ -1149,20 +1089,85 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
   .d-grid {
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
+    grid-template-columns: 1fr 1fr;
     gap: clamp(40px, 6vw, 96px);
-    align-items: start;
-    margin-top: clamp(40px, 6vw, 80px);
+    align-items: center;
+  }
+
+  .d-copy {
+    display: grid;
+    gap: var(--xl);
+    min-width: 0;
+  }
+
+  .d-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 18px;
+  }
+
+  .d-steps li {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 14px;
+  }
+
+  .d-num {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--gold);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .d-steps h3 {
+    font-family: var(--font);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 2px;
+  }
+
+  .d-steps p {
+    color: var(--ink-70);
+    font-size: 15px;
+  }
+
+  .sends {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .sends li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 13px;
+    border-radius: var(--r-pill);
+    background: var(--ink-6);
+    font-size: 14px;
+    font-weight: 600;
   }
 
   .d-visual {
     position: relative;
-    padding-bottom: 12%;
+    padding-bottom: 10%;
+    min-width: 0;
   }
 
   .d-visual :global(.d-photo) {
     aspect-ratio: 4 / 5;
-    width: 82%;
+    width: 80%;
     border-radius: var(--r-lg);
   }
 
@@ -1178,8 +1183,8 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     background: #0d0f12;
     box-shadow:
       inset 0 0 0 1.5px #3a3f46,
-      0 40px 80px -24px rgb(16 19 23 / 0.55),
-      0 12px 24px -12px rgb(16 19 23 / 0.4);
+      0 40px 80px -24px rgb(var(--ink-rgb) / 0.55),
+      0 12px 24px -12px rgb(var(--ink-rgb) / 0.4);
   }
 
   .device::before,
@@ -1213,177 +1218,28 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     border-radius: inherit;
   }
 
-  .d-copy {
-    display: grid;
-    gap: var(--xl);
-    min-width: 0;
-  }
-
-  .d-steps {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-  }
-
-  .d-steps li {
-    display: grid;
-    grid-template-columns: 48px 1fr;
-    gap: var(--md);
-    padding-block: 20px;
-    border-top: 1px solid var(--ink-10);
-  }
-
-  .d-steps li:first-child {
-    border-top: 0;
-    padding-top: 0;
-  }
-
-  .d-num {
-    font-family: var(--display);
-    font-weight: 600;
-    font-size: 15px;
-    color: var(--ink-55);
-    padding-top: 4px;
-  }
-
-  .d-steps h3 {
-    font-size: 21px;
-    margin-bottom: 6px;
-  }
-
-  .d-steps p,
-  .biz p {
-    color: var(--ink-70);
-    font-size: 16px;
-  }
-
-  .sends h3,
-  .biz h3 {
-    font-size: 18px;
-    margin-bottom: 14px;
-  }
-
-  .sends ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  .biz {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .sends li {
-    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 9px 14px;
-    border-radius: var(--r-pill);
-    background: var(--ink-6);
-    font-size: 15px;
-    font-weight: 600;
-  }
-
-  .biz {
-    display: grid;
-    gap: 6px;
-    justify-items: start;
-    padding: var(--lg);
+    justify-content: space-between;
+    gap: var(--lg);
+    margin-top: clamp(48px, 6vw, 80px);
+    padding: clamp(24px, 3vw, 36px);
     border-radius: var(--r-lg);
     background: var(--ink);
     color: var(--paper);
   }
 
   .biz h3 {
-    margin-bottom: 4px;
+    font-size: 20px;
+    margin-bottom: 6px;
   }
 
   .biz p {
     color: var(--paper-70);
-    margin-bottom: 12px;
-  }
-
-  /* Safety */
-  .safety {
-    position: relative;
-    color: var(--paper);
-    overflow: hidden;
-    isolation: isolate;
-    padding-block: clamp(120px, 16vw, 220px) clamp(64px, 8vw, 112px);
-  }
-
-  .parallax {
-    position: absolute;
-    inset: -12% 0;
-    z-index: -2;
-  }
-
-  .parallax :global(.safety-photo) {
-    width: 100%;
-    height: 100%;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .parallax {
-        animation-name: pan;
-        animation-timing-function: linear;
-        animation-fill-mode: both;
-        animation-timeline: view();
-      }
-    }
-  }
-
-  @keyframes pan {
-    from {
-      transform: translateY(-8%);
-    }
-    to {
-      transform: translateY(8%);
-    }
-  }
-
-  .safety-shade {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(0deg, rgb(16 19 23 / 0.95) 15%, rgb(16 19 23 / 0.4) 60%, rgb(16 19 23 / 0.2));
-  }
-
-  .safety-inner {
-    display: grid;
-    gap: var(--xxl);
-  }
-
-  .safety-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--xl);
-  }
-
-  .safety-list li {
-    display: grid;
-    gap: 10px;
-    align-content: start;
-    padding-top: var(--lg);
-    border-top: 1px solid var(--paper-12);
-  }
-
-  .safety-list :global(svg) {
-    color: var(--gold);
-    margin-bottom: 6px;
-  }
-
-  .safety-list h3 {
-    font-size: 20px;
-  }
-
-  .safety-list p {
-    color: var(--paper-70);
-    font-size: 16px;
+    font-size: 15px;
+    max-width: 56ch;
   }
 
   /* Earn */
@@ -1530,7 +1386,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(90deg, rgb(16 19 23 / 0.92) 0%, rgb(16 19 23 / 0.75) 45%, rgb(16 19 23 / 0.35) 100%);
+    background: linear-gradient(90deg, rgb(var(--ink-rgb) / 0.92) 0%, rgb(var(--ink-rgb) / 0.75) 45%, rgb(var(--ink-rgb) / 0.35) 100%);
   }
 
   .join-grid {
@@ -1729,11 +1585,11 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       margin-left: auto;
     }
 
-    .safety-list,
     .earn-grid,
     .join-grid,
     .d-grid,
-    .faq-grid {
+    .faq-grid,
+    .trust {
       grid-template-columns: 1fr;
     }
 
@@ -1770,7 +1626,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     }
 
     .modes button {
-      min-height: 40px;
+      min-height: 44px;
       padding: 0 16px;
       font-size: 14px;
     }
@@ -1839,37 +1695,42 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       width: 100%;
     }
 
-    .lanes {
-      grid-template-columns: 1fr;
-      gap: var(--md);
-    }
-
-    .lane {
-      aspect-ratio: 4 / 5;
-    }
-
-    .pay-line {
-      align-items: flex-start;
-      font-size: 15px;
-    }
-
+    /* Ride: phone first, the steps right under it. */
     .how-grid {
       grid-template-columns: 1fr;
+      gap: var(--lg);
     }
 
-    /* On phones the phone sits on top and sticks while the steps scroll under it. */
+    .how-copy {
+      display: contents;
+    }
+
+    .how-copy .head {
+      order: 1;
+    }
+
     .how-visual {
-      order: -1;
-      top: 60px;
-      z-index: 2;
-      margin-inline: calc(var(--gutter) * -1);
-      padding: 8px var(--gutter) 16px;
-      background: var(--ink);
+      order: 2;
+    }
+
+    .steps {
+      order: 3;
+    }
+
+    .steps button {
+      padding: 14px 14px 16px;
+      grid-template-columns: 36px 1fr;
+      gap: 12px;
+    }
+
+    .bar {
+      left: 14px;
+      right: 14px;
     }
 
     /* Crop in on the phone so the app screen is big enough to read. */
     .phone-shot {
-      --ph: min(52svh, 440px);
+      --ph: min(56svh, 460px);
       height: var(--ph);
       aspect-ratio: auto;
       max-width: 420px;
@@ -1885,19 +1746,28 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       transform: translate(-50%, -55.5%);
     }
 
-    .steps {
-      margin-top: var(--lg);
+    .trust {
+      gap: 0;
     }
 
-    .steps li {
-      grid-template-columns: 40px 1fr;
-      padding-block: 16vh var(--md);
+    .trust li {
+      padding-block: 18px;
     }
 
-    .num {
-      width: 36px;
-      height: 36px;
-      font-size: 15px;
+    .d-visual {
+      order: -1;
+    }
+
+    .d-grid {
+      gap: var(--xl);
+    }
+
+    .d-copy {
+      display: contents;
+    }
+
+    .d-copy .head {
+      order: -2;
     }
 
     .d-visual :global(.d-photo) {
@@ -1908,16 +1778,16 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       width: 50%;
     }
 
-    .d-steps li {
-      grid-template-columns: 36px 1fr;
+    .biz .btn {
+      width: 100%;
     }
 
-    .safety-list {
-      gap: var(--lg);
+    .earn-media :global(.earn-photo) {
+      aspect-ratio: 4 / 3;
     }
 
     .join-shade {
-      background: linear-gradient(0deg, rgb(16 19 23 / 0.95) 30%, rgb(16 19 23 / 0.55));
+      background: linear-gradient(0deg, rgb(var(--ink-rgb) / 0.95) 30%, rgb(var(--ink-rgb) / 0.55));
     }
 
     .form {
@@ -1931,6 +1801,10 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
     .foot-top {
       grid-template-columns: 1fr;
+    }
+
+    .foot-nav a {
+      padding-block: 6px;
     }
   }
 </style>

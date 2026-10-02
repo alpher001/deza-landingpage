@@ -5,6 +5,7 @@
   --ink: #1e2329; /* Midnight Ink */
   --paper: #faf6ec; /* off-white */
   --gold: #ffc629; /* Keke Gold: action, never text on paper */
+  --ink-rgb: 30 35 41; /* --ink as channels, for see-through shades */
 
   --ink-70: color-mix(in srgb, var(--ink) 70%, transparent);
   --ink-55: color-mix(in srgb, var(--ink) 55%, transparent);
