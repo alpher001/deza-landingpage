@@ -4,9 +4,11 @@
 // src/assets/cutouts/ (keke.png and courier.png, transparent, facing right).
 // They are served as sharp AVIF/WebP sized to the road.
 //
-// The motion is JavaScript (requestAnimationFrame), not CSS scroll timelines:
-// those don't run on iPhones before iOS 26 or in some in-app browsers, which
-// left the keke parked mid-road and the motorbike half off the screen.
+// The motion is worked out in JavaScript, not CSS scroll timelines: those
+// don't run on iPhones before iOS 26 or in some in-app browsers, which left
+// the keke parked mid-road and the motorbike half off the screen. Each trip is
+// worked out once, then handed to the browser as a Web Animation, so the
+// driving runs on the compositor instead of the main thread.
 import { getImage } from "astro:assets";
 import type { ImageMetadata } from "astro";
 
@@ -167,6 +169,13 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
     height: var(--rh);
   }
 
+  /* A box of its own, so the road shiver can move it. */
+  .car picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
   .car img {
     width: 100%;
     height: 100%;
@@ -200,30 +209,57 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
 </style>
 
 <script>
-  // Per frame this writes two transforms, one per vehicle, plus the names'
-  // transform only while the page is scrolling. Nothing else changes, so
-  // there is no layout or paint, only compositing.
+  // Each keke trip, with the rider following it, is worked out in one go as
+  // the keke turns in: the same pace, throttle drift and overtaking gate as
+  // ever, stepped 60 times a second and handed to the browser as transform
+  // keyframes ten times a second. The road shiver is a looping animation of
+  // its own on each body. So the browser drives the vehicles off the main
+  // thread; the script wakes once per trip, plus for the names while the band
+  // is on screen and the page scrolls.
   const band = document.querySelector<HTMLElement>("[data-cruise]");
-  if (band) drive(band);
+  if (band && "animate" in band) drive(band);
+
+  type Car = { el: HTMLElement; body: HTMLElement[]; w: number; anim?: Animation; shiver: Animation[] };
+
+  // One moment of a trip.
+  type State = {
+    t: number; // seconds of motion so far (stands still while paused)
+    kx: number; // keke position
+    kon: boolean; // keke on the road
+    rx: number; // rider position
+    ron: boolean; // rider on the road
+    followed: boolean; // the rider has set off behind this keke
+    kp: number; // this trip's keke pace
+    rp: number; // this trip's rider pace
+    gate: number; // where the keke is when the rider sets off behind it
+    wait: number; // pause after the keke leaves before the next turns in
+    offAt: number; // when the keke left the road
+  };
 
   function drive(band: HTMLElement) {
     const still = matchMedia("(prefers-reduced-motion: reduce)");
     const road = band.querySelector<HTMLElement>("[data-road]")!;
     const names = band.querySelector<HTMLElement>("[data-names]")!;
-    const car = (name: string) => ({ el: band.querySelector<HTMLElement>(`[data-car=${name}]`)!, x: 0, w: 0, pace: 1, on: false });
+    const car = (name: string): Car => {
+      const el = band.querySelector<HTMLElement>(`[data-car=${name}]`)!;
+      return { el, body: [...el.querySelectorAll<HTMLElement>(".shade, picture")], w: 0, shiver: [] };
+    };
     const keke = car("keke");
     const rider = car("rider");
     const rand = (a: number, b: number) => a + Math.random() * (b - a);
     const TAU = Math.PI * 2;
+    const STEP = 1 / 60; // simulation step, seconds
+    const KEY = 6; // steps per keyframe: ten a second
 
     let W = 0; // road width
     let H = 0; // keke height: the unit for speeds and the road shiver
-    let t = 0; // seconds of motion so far (stands still while paused)
-    let trip = 0; // keke trips so far
-    let riderTrip = 0; // the keke trip the rider last followed
-    let gate = 0; // where the keke is when the rider sets off behind it
-    let backAt = 0; // when the next keke turns in
     let lastY = NaN; // scroll position the names were last placed for
+    let snaps: State[] = []; // every step of the trip under way
+    let onScreen = false;
+
+    const live = () => band.classList.contains("live");
+    const go = () => onScreen && !document.hidden && !still.matches && live();
+    const anims = () => [keke.anim, rider.anim, ...keke.shiver, ...rider.shiver].filter((a): a is Animation => !!a);
 
     const measure = () => {
       W = road.clientWidth;
@@ -240,19 +276,102 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
     // A keke turns in from the left. Pick this trip's speeds, then work out
     // where the keke should be when the rider sets off behind it, so that he
     // overtakes it in the middle stretch of the road and never off screen.
-    const newTrip = (x: number) => {
-      trip++;
-      keke.on = true;
-      keke.x = x;
-      keke.pace = rand(0.93, 1.05);
-      rider.pace = rand(1.8, 2.0);
-      const r = rider.pace / keke.pace;
+    const newTrip = (s: State, x: number): State => {
+      const kp = rand(0.93, 1.05);
+      const rp = rand(1.8, 2.0);
+      const r = rp / kp;
       const meet = rand(0.52, 0.76) * W - keke.w / 2;
-      gate = ((r - 1) * meet - (keke.w + rider.w) / 2) / r;
+      const gate = ((r - 1) * meet - (keke.w + rider.w) / 2) / r;
+      return { ...s, kx: x, kon: true, rx: -rider.w - 2, ron: false, followed: false, kp, rp, gate, wait: rand(0.3, 0.8), offAt: NaN };
     };
 
-    const place = (c: typeof keke, y = 0) => {
-      c.el.style.transform = `translate3d(${c.x.toFixed(2)}px,${y.toFixed(2)}px,0)`;
+    // Runs a trip from `from` until both have left the road and the pause
+    // before the next keke is over. Returns every step and the keyframes.
+    const simulate = (from: State) => {
+      const s = { ...from };
+      const v = kekeSpeed();
+      const steps = [{ ...s }];
+      const at = [0];
+      const kxs = [s.kx];
+      const rxs = [s.rx];
+      let n = 0;
+      // Two minutes at most, so a road of no width can't spin forever.
+      while (n < 7200 && !(!s.kon && !s.ron && s.t >= s.offAt + s.wait)) {
+        n++;
+        s.t += STEP;
+        const t = s.t;
+        if (!s.ron && !s.followed && s.kon && s.kx >= s.gate) {
+          s.followed = s.ron = true;
+          s.rx = -rider.w - 2;
+        }
+        // Speeds drift a little, like a hand on the throttle. The rider opens
+        // up as he pulls out alongside the keke and eases off once past it.
+        if (s.kon) {
+          s.kx += v * s.kp * (1 + 0.045 * Math.sin(1.3 * t + 0.4) + 0.025 * Math.sin(2.9 * t + 1.7)) * STEP;
+          if (s.kx > W + 2) {
+            s.kon = false;
+            s.offAt = t;
+          }
+        }
+        if (s.ron) {
+          const gap = (s.kx + keke.w / 2 - (s.rx + rider.w / 2)) / H;
+          const push = s.kon ? 0.32 * Math.exp(-(((gap - 0.6) / 1.4) ** 2)) : 0;
+          s.rx += v * s.rp * (1 + push + 0.035 * Math.sin(1.9 * t + 2.1)) * STEP;
+          if (s.rx > W + 2) s.ron = false;
+        }
+        steps.push({ ...s });
+        if (n % KEY === 0) at.push(n), kxs.push(s.kx), rxs.push(s.rx);
+      }
+      if (n % KEY) at.push(n), kxs.push(s.kx), rxs.push(s.rx);
+      const frames = (xs: number[]) => xs.map((x, i) => ({ transform: `translate3d(${x.toFixed(2)}px,0,0)`, offset: n ? at[i] / n : 0 }));
+      return { steps, n, keke: frames(kxs), rider: frames(rxs) };
+    };
+
+    // Hand a trip to the browser. The keke's animation ending starts the next.
+    const send = (from: State) => {
+      const trip = simulate(from);
+      snaps = trip.steps;
+      const opts: KeyframeAnimationOptions = { duration: Math.max(1, trip.n * STEP * 1000), easing: "linear", fill: "forwards" };
+      const hold = !go();
+      for (const [c, frames] of [
+        [keke, trip.keke],
+        [rider, trip.rider],
+      ] as const) {
+        const a = c.el.animate(frames, opts);
+        if (hold) a.pause();
+        c.anim?.cancel();
+        c.anim = a;
+      }
+      const a = keke.anim!;
+      a.onfinish = () => {
+        if (keke.anim === a) send(newTrip(snaps[snaps.length - 1], -keke.w - 2));
+      };
+    };
+
+    // Each body shivers on the road: a slow sway plus a fine tremor,
+    // different for each, under a pixel on a phone. Every frequency is a
+    // whole number of tenths of a hertz, so a 10 s loop repeats seamlessly.
+    const shiver = () => {
+      const a = H * 0.006;
+      const ys = {
+        keke: (t: number) => a * (0.6 * Math.sin(TAU * 2.3 * t) + 0.3 * Math.sin(TAU * 5.9 * t + 1.1) + 0.12 * Math.sin(TAU * 11.3 * t + 2.3)),
+        rider: (t: number) => a * 0.7 * (0.55 * Math.sin(TAU * 2.9 * t + 0.8) + 0.35 * Math.sin(TAU * 7.3 * t + 2.6) + 0.1 * Math.sin(TAU * 13.1 * t)),
+      };
+      const LOOP = 10;
+      const N = 300;
+      const hold = !go();
+      for (const [c, y] of [
+        [keke, ys.keke],
+        [rider, ys.rider],
+      ] as const) {
+        const frames = Array.from({ length: N + 1 }, (_, i) => ({ transform: `translate3d(0,${y((i % N) * (LOOP / N)).toFixed(2)}px,0)` }));
+        c.shiver.forEach((s) => s.cancel());
+        c.shiver = c.body.map((el) => {
+          const s = el.animate(frames, { duration: LOOP * 1000, iterations: Infinity, easing: "linear" });
+          if (hold) s.pause();
+          return s;
+        });
+      }
     };
 
     // The names slide the other way as the band scrolls up the screen.
@@ -264,76 +383,35 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
       const p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
       names.style.transform = `translate3d(${(-p * 0.42 * (vh + r.height)).toFixed(1)}px,0,0)`;
     };
+    let queued = 0;
+    const onScroll = () => {
+      if (queued || !onScreen || !live()) return;
+      queued = requestAnimationFrame(() => {
+        queued = 0;
+        parallax();
+      });
+    };
 
     // First frame: the keke's nose just in from the left, so the first thing
     // seen is it driving in, with the rider turning in behind it soon after.
     // It only starts moving once the band reaches the screen.
     const start = () => {
       measure();
-      t = 0;
-      trip = riderTrip = 0;
-      rider.on = false;
-      rider.x = -rider.w - 2;
-      newTrip(-keke.w * 0.35);
+      if (!H) return;
       band.classList.add("live");
-      place(keke);
-      place(rider);
+      const base: State = { t: 0, kx: 0, kon: false, rx: 0, ron: false, followed: false, kp: 1, rp: 1, gate: 0, wait: 0, offAt: NaN };
+      send(newTrip(base, -keke.w * 0.35));
+      shiver();
       parallax();
     };
 
-    const step = (dt: number) => {
-      t += dt;
-      const v = kekeSpeed();
-
-      if (!keke.on && t >= backAt) newTrip(-keke.w - 2);
-      if (!rider.on && riderTrip < trip && keke.on && keke.x >= gate) {
-        riderTrip = trip;
-        rider.on = true;
-        rider.x = -rider.w - 2;
-      }
-
-      // Speeds drift a little, like a hand on the throttle. The rider opens
-      // up as he pulls out alongside the keke and eases off once past it.
-      // Each body shivers on the road: a slow sway plus a fine tremor,
-      // different for each, under a pixel on a phone.
-      const a = H * 0.006;
-      if (keke.on) {
-        keke.x += v * keke.pace * (1 + 0.045 * Math.sin(1.3 * t + 0.4) + 0.025 * Math.sin(2.9 * t + 1.7)) * dt;
-        place(keke, a * (0.6 * Math.sin(TAU * 2.3 * t) + 0.3 * Math.sin(TAU * 5.9 * t + 1.1) + 0.12 * Math.sin(TAU * 11.3 * t + 2.3)));
-        if (keke.x > W + 2) {
-          keke.on = false;
-          backAt = t + rand(0.3, 0.8);
-        }
-      }
-      if (rider.on) {
-        const gap = (keke.x + keke.w / 2 - (rider.x + rider.w / 2)) / H;
-        const push = keke.on ? 0.32 * Math.exp(-(((gap - 0.6) / 1.4) ** 2)) : 0;
-        rider.x += v * rider.pace * (1 + push + 0.035 * Math.sin(1.9 * t + 2.1)) * dt;
-        place(rider, a * 0.7 * (0.55 * Math.sin(TAU * 2.9 * t + 0.8) + 0.35 * Math.sin(TAU * 7.3 * t + 2.6) + 0.1 * Math.sin(TAU * 13.1 * t)));
-        if (rider.x > W + 2) rider.on = false;
-      }
-    };
-
-    let raf = 0;
-    let last = 0;
-    let onScreen = false;
-    const frame = (now: number) => {
-      raf = requestAnimationFrame(frame);
-      const dt = Math.min(0.05, (now - last) / 1000 || 0);
-      last = now;
-      parallax();
-      step(dt);
-    };
-    // Runs only while the band is on screen, the tab is showing and motion
-    // is allowed.
+    // Moves only while the band is on screen, the tab is showing and motion
+    // is allowed; otherwise everything holds where it is.
     const run = () => {
-      const go = onScreen && !document.hidden && !still.matches && band.classList.contains("live");
-      if (go && !raf) {
-        last = performance.now();
-        raf = requestAnimationFrame(frame);
-      } else if (!go && raf) {
-        cancelAnimationFrame(raf);
-        raf = 0;
+      const on = go();
+      for (const a of anims()) {
+        if (on && a.playState === "paused") a.play();
+        else if (!on && a.playState === "running") a.pause();
       }
     };
 
@@ -341,9 +419,28 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
     const setUp = () => {
       if (still.matches) {
         band.classList.remove("live");
-        [keke.el, rider.el, names].forEach((el) => (el.style.transform = ""));
+        anims().forEach((a) => a.cancel());
+        keke.anim = rider.anim = undefined;
+        keke.shiver = rider.shiver = [];
+        names.style.transform = "";
       } else start();
       run();
+    };
+
+    // A new road size carries on from where the trip had got to, at the pace
+    // for the new size.
+    const resize = () => {
+      const was = [W, H, keke.w, rider.w].join();
+      measure();
+      if (still.matches || [W, H, keke.w, rider.w].join() === was) return;
+      if (!live() || !keke.anim) return setUp();
+      const ms = Number(keke.anim.currentTime) || 0;
+      const s = { ...snaps[Math.min(snaps.length - 1, Math.max(0, Math.round(ms / 1000 / STEP)))] };
+      if (!s.ron) s.rx = s.followed ? Math.max(s.rx, W + 2) : -rider.w - 2;
+      if (!s.kon) s.kx = Math.max(s.kx, W + 2);
+      send(s);
+      shiver();
+      parallax();
     };
 
     // A vehicle waiting off the road sits outside the band's clip, where lazy
@@ -353,13 +450,19 @@ const courier = await cut(pick("courier"), "(max-width: 720px) 78px, min(14.4vw,
     if (document.readyState === "complete") fetchCars();
     else addEventListener("load", fetchCars, { once: true });
 
-    new IntersectionObserver(([e]) => {
-      onScreen = e.isIntersecting;
+    new IntersectionObserver((entries) => {
+      onScreen = entries[entries.length - 1].isIntersecting;
+      if (onScreen && live()) {
+        lastY = NaN;
+        parallax();
+      }
       run();
     }).observe(band);
-    new ResizeObserver(measure).observe(road);
+    new ResizeObserver(resize).observe(road);
+    addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("visibilitychange", run);
     setUp();
     still.addEventListener?.("change", setUp);
   }
 </script>
+
