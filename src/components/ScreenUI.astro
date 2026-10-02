@@ -451,8 +451,11 @@ const riderArms =
       raf = requestAnimationFrame(frame);
     };
 
+    // Off screen, the small looping details (pin pulse, cursor, progress
+    // bar) pause too, so they cost nothing while you read elsewhere.
     new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
+      scr.classList.toggle("off", !visible);
       if (!ride) visible ? play() : stop();
     }).observe(scr);
 
@@ -467,6 +470,10 @@ const riderArms =
 </script>
 
 <style>
+  .scr.off * {
+    animation-play-state: paused !important;
+  }
+
   .scr {
     container-type: inline-size;
     position: absolute;

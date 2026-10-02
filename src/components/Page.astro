@@ -287,7 +287,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     <section id="join" class="join">
       <div class="join-media">
         <Photo name="posters/city" alt="" class="join-photo" position="50% 85%" sizes="100vw" widths={[640, 960, 1280]} />
-        {cityVideo && <video class="bg-video" muted loop playsinline preload="none" aria-hidden="true" data-av1="/video/city-av1.mp4" data-mp4={cityVideo} data-start="0.6" />}
+        {cityVideo && <video class="bg-video" muted loop playsinline preload="none" aria-hidden="true" data-av1="/video/city-av1.mp4" data-mp4={cityVideo} />}
       </div>
       <div class="join-shade" aria-hidden="true"></div>
       <div class="wrap join-grid">
@@ -1528,6 +1528,11 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     inset: 0;
   }
 
+  /* Same framing as the still, so the fade from still to film never shifts. */
+  .join-media .bg-video {
+    object-position: 50% 85%;
+  }
+
   .join-shade {
     position: absolute;
     inset: 0;
@@ -1815,6 +1820,13 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 74%, transparent 100%);
     }
 
+    /* The phone crop is narrower: frame it so the whole dispatch rider,
+       box included, stays in shot for the full loop. */
+    .has-video .hero-media :global(.hero-poster img),
+    .has-video .hero-media .bg-video {
+      object-position: 95% 50% !important;
+    }
+
     .has-video .hero-shade {
       display: none;
     }
@@ -2037,7 +2049,6 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       bottom: auto;
       aspect-ratio: 1;
     }
-
 
     .join-shade {
       background: linear-gradient(180deg, rgb(var(--ink-rgb) / 0.1) 0%, rgb(var(--ink-rgb) / 0.45) 62vw, var(--ink) 98vw);
