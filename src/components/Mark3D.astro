@@ -1,10 +1,11 @@
 ---
 // The Deza mark as a solid gold 3D piece. As it comes into view it turns in
 // from the side and settles, then sways slowly; scrolling tilts it a little
-// and, on desktop, it leans toward the pointer. three.js loads only when the
-// mark comes near the screen and draws only while it is on screen. Until
-// then, and for people who turn motion off or have no WebGL, the flat gold
-// mark shows instead, at the same size and place.
+// and, on desktop, it leans toward the pointer. three.js downloads while the
+// page is idle, is set up only when the mark comes near the screen, and draws
+// only while it is on screen. Until then, and for people who turn motion off
+// or have no WebGL2, the flat gold mark shows instead, at the same size and
+// place.
 import fs from "node:fs";
 import path from "node:path";
 
@@ -26,25 +27,33 @@ const [, , vw, vh] = view.split(/[\s,]+/).map(Number);
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const gl = (() => {
-    try {
-      return !!document.createElement("canvas").getContext("webgl2");
-    } catch {
-      return false;
-    }
-  })();
+  const hosts = document.querySelectorAll<HTMLElement>("[data-mark3d]");
 
-  if (!reduce && gl) {
-    for (const host of document.querySelectorAll<HTMLElement>("[data-mark3d]")) {
+  if (!reduce && hosts.length) {
+    // Fetch and parse three.js while the page is idle, well before the mark
+    // comes near, so mounting it does not also pay for the download.
+    let lib: Promise<typeof import("../scripts/mark3d")> | undefined;
+    const load = () =>
+      (lib ??= import("../scripts/mark3d").catch((e) => {
+        lib = undefined; // a failed download can be retried later
+        throw e;
+      }));
+    const idle = () =>
+      "requestIdleCallback" in window ? requestIdleCallback(() => load().catch(() => {}), { timeout: 4000 }) : setTimeout(() => load().catch(() => {}), 1500);
+    if (document.readyState === "complete") idle();
+    else addEventListener("load", idle, { once: true });
+
+    for (const host of hosts) {
       const io = new IntersectionObserver(
-        async ([e]) => {
-          if (!e.isIntersecting) return;
+        async (es) => {
+          // One batch can hold several changes: the last one is current.
+          if (!es[es.length - 1].isIntersecting) return;
           io.disconnect();
           try {
-            const { mount } = await import("../scripts/mark3d");
-            mount(host);
+            const { mount } = await load();
+            await mount(host);
           } catch {
-            // Offline or no GPU after all: the flat mark stays.
+            // Offline, no WebGL2 or no GPU: the flat mark stays.
           }
         },
         { rootMargin: "300px 0px" },

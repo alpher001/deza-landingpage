@@ -125,9 +125,26 @@ export interface Pose {
   scale: number;
 }
 
-/** Renderer, scene and camera for one mark. Knows nothing about motion. */
-export function stage(host: HTMLElement) {
+/** Let the browser paint and handle input before the next chunk of setup. */
+const breathe = () => new Promise<void>((r) => setTimeout(r, 0));
+
+/** Renderer, scene and camera for one mark. Knows nothing about motion.
+ * Set up in slices with a yield between each, so the page never stalls for
+ * the whole of it at once. */
+export async function stage(host: HTMLElement) {
   const [, , vw, vh] = host.dataset.view!.split(/[\s,]+/).map(Number);
+
+  // First, so a browser without WebGL2 throws here, before any other work,
+  // and the flat mark simply stays.
+  const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+  renderer.debug.checkShaderErrors = false; // skips a blocking status read per shader
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.toneMapping = NeutralToneMapping; // keeps the brand gold true
+  renderer.toneMappingExposure = 1.05;
+  renderer.outputColorSpace = SRGBColorSpace;
+  const canvas = renderer.domElement;
+  canvas.style.opacity = "0"; // mount() fades it in
+  await breathe();
 
   const depth = 20;
   const bevel = 6;
@@ -138,9 +155,11 @@ export function stage(host: HTMLElement) {
     bevelSize: 5,
     bevelOffset: -2.5, // half in, half out: the silhouette stays on the flat mark's line
     bevelSegments: 8,
-    curveSegments: 18,
+    curveSegments: 12, // as smooth as 18 at the size it is drawn, a third fewer vertices
   });
   geo.center();
+  await breathe();
+
   // Smooth across the rounded bevel and the curves, crisp at real corners.
   toCreasedNormals(geo, 44 * DEG);
   // The two faces are flat planes: one normal each, so no shading drifts
@@ -148,15 +167,11 @@ export function stage(host: HTMLElement) {
   const normal = geo.attributes.normal;
   const caps = geo.groups[0];
   for (let k = caps.start; k < caps.start + caps.count; k++) normal.setXYZ(k, 0, 0, normal.getZ(k) < 0 ? -1 : 1);
-
-  const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
-  renderer.toneMapping = NeutralToneMapping; // keeps the brand gold true
-  renderer.toneMappingExposure = 1.05;
-  renderer.outputColorSpace = SRGBColorSpace;
+  await breathe();
 
   const scene = new Scene();
   scene.environment = studio(renderer);
+  await breathe();
 
   const gold = new MeshStandardMaterial({ color: 0xffc629, metalness: 1, roughness: 0.24 });
   const mesh = new Mesh(geo, gold);
@@ -170,7 +185,11 @@ export function stage(host: HTMLElement) {
   const front = depth / 2 + bevel;
   const camera = new PerspectiveCamera(fov, vw / vh);
 
-  const canvas = renderer.domElement;
+  // Compile the gold shader off the main thread where the browser can
+  // (KHR_parallel_shader_compile), so the first draw does not wait on it.
+  await renderer.compileAsync(scene, camera);
+  await breathe();
+
   host.append(canvas);
 
   let pose: Pose = { yaw: 0, pitch: 0, scale: 1 };
@@ -235,15 +254,16 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-export function mount(host: HTMLElement) {
-  const s = stage(host);
+export async function mount(host: HTMLElement) {
+  const s = await stage(host);
   const { canvas } = s;
-  canvas.style.opacity = "0";
 
-  // "live" hides the flat mark. Off screen it can go now, and the piece will
-  // turn in from the side. If the flat mark is already being looked at, the
-  // piece starts square on, exactly over it, so the hand-over is invisible
-  // and the flat mark simply comes alive.
+  // "live" hides the flat mark, but only once the piece has drawn a frame:
+  // if the frame loop never starts, the flat mark stays. Mounted off screen,
+  // it goes on the first frame and the piece will turn in from the side. If
+  // the flat mark is already being looked at, the piece starts square on,
+  // exactly over it, so the hand-over is invisible and the flat mark simply
+  // comes alive.
   let rect = host.getBoundingClientRect();
   const offScreen = rect.top > innerHeight || rect.bottom < 0;
   const from: Pose = offScreen ? { yaw: START_YAW, pitch: START_PITCH, scale: START_SCALE } : { yaw: 0, pitch: 0, scale: 1 };
@@ -255,10 +275,9 @@ export function mount(host: HTMLElement) {
     flatGone = true;
     host.classList.add("live");
   };
-  if (offScreen) hideFlat();
 
-  // Compile the shaders and draw the first pose now, so the entrance starts
-  // on a ready frame.
+  // Draw the first pose now (shaders are already compiled), so the entrance
+  // starts on a ready frame.
   s.draw(from);
 
   const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -294,7 +313,7 @@ export function mount(host: HTMLElement) {
     // The entrance plays once, when the mark is well inside the screen.
     if (start < 0 && rect.top < innerHeight * 0.88 && rect.bottom > 0) start = clock;
     const t = start < 0 ? 0 : clock - start;
-    if (start >= 0 && t >= hold) hideFlat();
+    if (offScreen || (start >= 0 && t >= hold)) hideFlat(); // the piece has drawn by now
     const m = t - hold; // motion time
     const away = start < 0 ? 1 : arrive(m);
 
@@ -343,7 +362,7 @@ export function mount(host: HTMLElement) {
   };
 
   // Render only while the mark (with its overhang) is on screen.
-  const io = new IntersectionObserver(([e]) => run(e.isIntersecting), { rootMargin: "60px 0px" });
+  const io = new IntersectionObserver((es) => run(es[es.length - 1].isIntersecting), { rootMargin: "60px 0px" }); // one batch can hold several changes: the last is current
   io.observe(host);
   const ro = new ResizeObserver(() => s.fit());
   ro.observe(canvas);
