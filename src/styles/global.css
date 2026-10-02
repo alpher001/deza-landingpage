@@ -1,3 +1,33 @@
+/* Fonts: Inter and Unbounded, cut down to the letters this site uses
+   (English, Hausa ɓ ɗ ƙ ƴ, the naira sign) and the weights it uses, so each
+   is one small file that loads with the page. Built from the Google Fonts
+   originals with fontTools; see README. */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Unbounded";
+  src: url("/fonts/unbounded.woff2") format("woff2");
+  font-weight: 500 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Arial tuned to Inter's size, so text does not jump when Inter arrives. */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial");
+  size-adjust: 107.1%;
+  ascent-override: 90.4%;
+  descent-override: 22.5%;
+  line-gap-override: 0%;
+}
+
 /* Deza "Kano Sun" tokens. Hex values copied from deza-monorepo
    packages/ui-kit/colors.ts (approved by Almustafa). Do not add new hues;
    dimmed variants of these three are allowed. */
@@ -29,8 +59,8 @@
   --r-pill: 999px;
 
   --shadow-floating: 0 18px 40px -12px rgb(0 0 0 / 0.35);
-  --display: "Unbounded Variable", "Inter Variable", system-ui, sans-serif;
-  --font: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: "Unbounded", "Inter", system-ui, sans-serif;
+  --font: "Inter", "Inter Fallback", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --max: 1180px;
   --gutter: clamp(16px, 5vw, 48px);
 }

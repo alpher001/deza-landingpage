@@ -6,11 +6,11 @@ import Photo from "./Photo.astro";
 import Logo from "./Logo.astro";
 import StoreBadges from "./StoreBadges.astro";
 import ScreenUI from "./ScreenUI.astro";
-import KanoMapDefs from "./KanoMapDefs.astro";
 import Cruise from "./Cruise.astro";
 import Mark3D from "./Mark3D.astro";
 import Icon from "./Icon.astro";
 import { copy, type Lang } from "../i18n";
+import { findAsset, srcsets } from "../lib/pictures";
 
 interface Props {
   lang: Lang;
@@ -24,20 +24,22 @@ const home = lang === "en" ? "/" : "/ha/";
 const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
 
 const has = (p: string) => fs.existsSync(path.join(process.cwd(), "public", p));
-const firstOf = (...names: string[]) => names.find((n) => ["webp", "jpg", "jpeg", "png"].some((e) => has(`images/${n}.${e}`)));
-const stillOf = (n: string) => ["webp", "jpg"].map((e) => `/images/${n}.${e}`).find((p) => has(p.slice(1)));
+const firstOf = (...names: string[]) =>
+  names.find((n) => ["webp", "jpg", "jpeg", "png"].some((e) => fs.existsSync(path.join(process.cwd(), "src/assets/photos", `${n}.${e}`))));
 
 // Hero: a video when one is in public/video/, otherwise the two photos.
 const heroVideo = has("video/hero.mp4") ? "/video/hero.mp4" : null;
-const heroVideoMobile = has("video/hero-mobile.mp4") ? "/video/hero-mobile.mp4" : null;
-const heroPoster = stillOf("hero-still") ?? "/images/hero-keke.webp";
+// The hero still is the first thing people see, so the browser is told
+// about it in the head, before it even reads the page.
+const heroWidths = [640, 960, 1280, 1920];
+const heroStill = heroVideo ? await srcsets(findAsset("posters/hero")!, heroWidths) : null;
+const cityVideo = has("video/city.mp4") ? "/video/city.mp4" : null;
 const courierPhoto = firstOf("courier-city", "delivery-hand")!;
 const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 ---
 
 <Base lang={lang} title={t.meta.title} description={t.meta.description} ogAlt={t.meta.ogAlt} faq={t.faq.items}>
-  <KanoMapDefs />
-
+  {heroStill && <link slot="head" rel="preload" as="image" type="image/avif" imagesrcset={heroStill.avif} imagesizes="100vw" fetchpriority="high" />}
   <header class="top" data-top>
     <div class="wrap bar">
       <a class="brand" href={home} aria-label="Deza"><Logo height={19} motion="intro" /></a>
@@ -60,19 +62,26 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
         {
           heroVideo ? (
             <>
-              <video class="hero-video" autoplay muted loop playsinline preload="auto" poster={heroPoster} aria-label={t.hero.rideAlt} data-hero-video>
-                {heroVideoMobile && <source media="(max-width: 720px)" src={heroVideoMobile} type="video/mp4" />}
-                <source src={heroVideo} type="video/mp4" />
-              </video>
-              <i class="loop-fade" aria-hidden="true" />
+              <Photo name="posters/hero" alt={t.hero.rideAlt} class="hero-poster" eager sizes="100vw" widths={heroWidths} />
+              <video
+                class="bg-video"
+                muted
+                loop
+                playsinline
+                preload="none"
+                aria-hidden="true"
+                data-av1="/video/hero-av1.mp4"
+                data-mp4="/video/hero-1080.mp4"
+                data-mp4-small="/video/hero.mp4"
+              />
             </>
           ) : (
             <>
               <div class="layer l0">
-                <Photo name="hero-keke" mobile="hero-keke-mobile" alt={t.hero.rideAlt} class="hero-photo" position="68% 50%" eager />
+                <Photo name="hero-keke" mobile="hero-keke-mobile" alt={t.hero.rideAlt} class="hero-photo" position="68% 50%" eager sizes="100vw" />
               </div>
               <div class="layer l1">
-                <Photo name={courierPhoto} alt={t.hero.deliveryAlt} class="hero-photo" position="50% 40%" />
+                <Photo name={courierPhoto} alt={t.hero.deliveryAlt} class="hero-photo" position="50% 40%" sizes="100vw" />
               </div>
             </>
           )
@@ -145,7 +154,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
         <div class="how-visual">
           <div class="phone-shot">
             <div class="phone-zoom">
-              <Photo name="phone-in-hand" alt={t.how.photoAlt} class="phone-photo" />
+              <Photo name="phone-in-hand" alt={t.how.photoAlt} class="phone-photo" sizes="(max-width: 900px) 100vw, 46vw" widths={[480, 720, 1000]} />
               <div class="screen-slot"><ScreenUI t={t.screen} /></div>
             </div>
           </div>
@@ -202,7 +211,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
         </div>
 
         <div class="d-visual">
-          <Photo name={doorstepPhoto} alt={t.delivery.photoAlt} class="d-photo" position="55% 45%" />
+          <Photo name={doorstepPhoto} alt={t.delivery.photoAlt} class="d-photo" position="55% 45%" sizes="(max-width: 900px) 84vw, 36vw" widths={[480, 720, 960, 1280]} />
           <div class="device">
             <div class="device-screen"><ScreenUI t={t.screen} mode="delivery" /></div>
           </div>
@@ -226,7 +235,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     <section id="earn" class="earn">
       <div class="wrap earn-grid">
         <div class="earn-media reveal">
-          <Photo name="driver-portrait" alt={t.earn.photoAlt} class="earn-photo" position="50% 35%" />
+          <Photo name="driver-portrait" alt={t.earn.photoAlt} class="earn-photo" position="50% 35%" sizes="(max-width: 900px) 100vw, 46vw" widths={[480, 720, 960, 1280, 1600]} />
         </div>
         <div class="earn-copy reveal">
           <h2>{t.earn.title}</h2>
@@ -270,7 +279,10 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
     <!-- Join -->
     <section id="join" class="join">
-      <Photo name="hero-keke" mobile="hero-keke-mobile" alt="" class="join-photo" position="75% 50%" />
+      <div class="join-media">
+        <Photo name="posters/city" alt="" class="join-photo" position="50% 85%" sizes="100vw" widths={[640, 960, 1280]} />
+        {cityVideo && <video class="bg-video" muted loop playsinline preload="none" aria-hidden="true" data-av1="/video/city-av1.mp4" data-mp4={cityVideo} data-start="0.6" />}
+      </div>
       <div class="join-shade" aria-hidden="true"></div>
       <div class="wrap join-grid">
         <div class="join-copy reveal">
@@ -375,20 +387,38 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     }
   }
 
-  // Hero video: a short fade hides the jump when the clip loops. It pauses
-  // off screen, and does not play at all for people who turn motion off.
-  const video = document.querySelector<HTMLVideoElement>("[data-hero-video]");
-  if (video && hero) {
-    if (reduce) {
-      video.removeAttribute("autoplay");
-      video.pause();
-    } else {
-      video.addEventListener("timeupdate", () => {
-        const left = video.duration - video.currentTime;
-        hero.classList.toggle("fading", left < 0.55 || video.currentTime < 0.15);
-      });
-      new IntersectionObserver(([e]) => (e.isIntersecting ? video.play().catch(() => {}) : video.pause())).observe(hero);
-    }
+  // Background videos. The page paints with the still frame first; a video
+  // only starts downloading after the page has loaded and once it is near
+  // the screen, then fades in over its still once it is actually playing.
+  // AV1 where the device decodes it (sharper at half the size), H.264
+  // elsewhere, with a lighter H.264 file for phones.
+  // Each clip is cut to loop on itself, so there is no jump to hide. They
+  // pause off screen and stay as stills when motion is off or data is saved.
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+  const startVideos = () => {
+    const av1 = document.createElement("video").canPlayType('video/mp4; codecs="av01.0.05M.10"') === "probably";
+    const phone = matchMedia("(max-width: 720px)").matches;
+    document.querySelectorAll<HTMLVideoElement>("video[data-mp4]").forEach((v) => {
+      let loaded = false;
+      v.addEventListener("playing", () => v.classList.add("on"), { once: true });
+      new IntersectionObserver(
+        ([e]) => {
+          if (!e.isIntersecting) return v.pause();
+          if (!loaded) {
+            loaded = true;
+            const d = v.dataset;
+            // Start on the frame the still shows, so the fade-in has no ghosting.
+            v.src = ((av1 && d.av1) || (phone && d.mp4Small) || d.mp4!) + (d.start ? `#t=${d.start}` : "");
+          }
+          v.play().catch(() => {});
+        },
+        { rootMargin: "200px" },
+      ).observe(v.parentElement!);
+    });
+  };
+  if (!reduce && !saveData) {
+    if (document.readyState === "complete") startVideos();
+    else addEventListener("load", startVideos, { once: true });
   }
 
   // Ride: the phone plays the three steps in turn. Each step's bar fills
@@ -623,10 +653,23 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     z-index: -2;
   }
 
-  .hero-video {
+  /* The still frame paints first; the video fades in over it once playing. */
+  .hero-media :global(.hero-poster),
+  .bg-video {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .bg-video {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .bg-video.on {
+    opacity: 1;
   }
 
   .layer {
@@ -714,15 +757,24 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     margin-bottom: -0.08em;
   }
 
-  .load-word {
-    display: inline-block;
-    animation: word 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    animation-delay: calc(var(--d) * 110ms + 250ms);
+  /* The headline is there from the first paint. The words only settle up
+     into place, so nothing waits on an animation to become readable. */
+  @media (prefers-reduced-motion: no-preference) {
+    .load-word {
+      display: inline-block;
+      animation: word 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+      animation-delay: calc(var(--d) * 60ms);
+    }
+
+    .load {
+      animation: up 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+      animation-delay: calc(var(--d) * 40ms);
+    }
   }
 
   @keyframes word {
     from {
-      transform: translateY(105%);
+      transform: translateY(28%);
     }
   }
 
@@ -730,15 +782,9 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     color: var(--gold);
   }
 
-  .load {
-    animation: up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-    animation-delay: calc(var(--d) * 90ms + 200ms);
-  }
-
   @keyframes up {
     from {
-      opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(10px);
     }
   }
 
@@ -838,19 +884,6 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
   /* Hero with the video. Desktop: headline at the top, the rest along the
      bottom, so the keke and courier crossing the middle stay in view. */
-  .loop-fade {
-    position: absolute;
-    inset: 0;
-    background: var(--ink);
-    opacity: 0;
-    transition: opacity 0.45s ease;
-    pointer-events: none;
-  }
-
-  .hero.fading .loop-fade {
-    opacity: 0.85;
-  }
-
   .has-video .hero-shade {
     background:
       linear-gradient(180deg, rgb(var(--ink-rgb) / 0.75) 0%, rgb(var(--ink-rgb) / 0.15) 34%, rgb(var(--ink-rgb) / 0) 55%, rgb(var(--ink-rgb) / 0.85) 100%),
@@ -1376,10 +1409,15 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     padding-block: clamp(88px, 11vw, 160px);
   }
 
-  .join :global(.join-photo) {
+  .join-media {
     position: absolute;
     inset: 0;
     z-index: -2;
+  }
+
+  .join-media :global(.join-photo) {
+    position: absolute;
+    inset: 0;
   }
 
   .join-shade {
@@ -1647,6 +1685,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       position: relative;
       order: 2;
       inset: auto;
+      align-self: stretch;
       z-index: 0;
       aspect-ratio: 16 / 10;
       margin-top: 18px;
@@ -1786,8 +1825,20 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       aspect-ratio: 4 / 3;
     }
 
+    /* Phones: the city video sits as a band behind the top of the section
+       (shown whole, not zoomed in), then fades into ink behind the form. */
+    .join {
+      background: var(--ink);
+    }
+
+    .join-media {
+      bottom: auto;
+      aspect-ratio: 1;
+    }
+
+
     .join-shade {
-      background: linear-gradient(0deg, rgb(var(--ink-rgb) / 0.95) 30%, rgb(var(--ink-rgb) / 0.55));
+      background: linear-gradient(180deg, rgb(var(--ink-rgb) / 0.1) 0%, rgb(var(--ink-rgb) / 0.45) 62vw, var(--ink) 98vw);
     }
 
     .form {

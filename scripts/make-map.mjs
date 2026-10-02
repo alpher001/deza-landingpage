@@ -197,4 +197,10 @@ fs.writeFileSync(
   new URL("../src/generated/kano-map.json", import.meta.url),
   JSON.stringify({ width: W, height: H, svg, ride: d(ride), approach: d(approach), delivery: d(delivery), rideEnds: [rideStart, rideEnd], deliveryEnds: [delStart, delEnd] }),
 );
+// The map itself is a separate file, so it is cached and kept out of the
+// page's HTML; the phone screens draw it with <use href="/map.svg#kano-map">.
+fs.writeFileSync(
+  new URL("../public/map.svg", import.meta.url),
+  `<svg xmlns="http://www.w3.org/2000/svg"><symbol id="kano-map" viewBox="0 0 ${W} ${H}">${svg}</symbol></svg>`,
+);
 console.log("map written", svg.length, "chars");

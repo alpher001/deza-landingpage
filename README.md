@@ -18,11 +18,17 @@ Node 22.12 or newer.
 
 - `src/i18n.ts`: every word on the page, English and Hausa side by side. Edit copy here.
 - `src/components/Page.astro`: the page layout and styles.
-- `src/components/Photo.astro`: photo slots. Files live in `public/images/` (WebP); originals and prompts are in the project's `visuals/` folder.
+- `src/components/Photo.astro` and `src/lib/pictures.ts`: photos. Full-quality originals live in `src/assets/` (`photos/`, `cutouts/`, `posters/`); the build turns each into AVIF and WebP at several widths, and each screen downloads only the size it needs. `scripts/prune.mjs` then drops the unused originals from `dist/`. Prompts are in the project's `visuals/` folder.
 - `src/components/ScreenUI.astro`: the Deza app screens (ride booking in three steps, and parcel tracking), styled after the rider app in the monorepo and drawn over a Kano street map.
 - `scripts/make-map.mjs`: draws that street map into `src/generated/kano-map.json`. Run `node scripts/make-map.mjs` after changing roads or routes. The streets are drawn for the page, not traced from a real map.
-- `src/components/Cruise.astro`: the keke and courier that drive across the page. It appears once `public/images/cutouts/keke.webp` and `courier.webp` (transparent, facing right) exist.
-- Hero video: `public/video/hero.mp4` (720p, 2 MB, no sound) with `public/images/hero-still.webp` as its poster. On phones the headline sits above the full video frame so the keke and courier stay in view. Without the video file the hero falls back to the keke and courier photos.
+- `src/components/Cruise.astro`: the keke and courier that drive across the page, from `src/assets/cutouts/keke.png` and `courier.png` (transparent, facing right).
+- Videos (no sound, each cut to loop on itself):
+  - `public/video/hero-av1.mp4` (1080p AV1, 1.0 MB), `hero-1080.mp4` (H.264 for devices without AV1) and `hero.mp4` (720p H.264 for those phones). Cut from the original 10 s clip: 0 to 2.35 s and 5.4 to 10 s, joined by dissolves where the keke and courier hold the same spot. The 2.4 to 5.4 s stretch is dropped because of AI glitches (the wall melts, a second courier appears, the courier passes through the keke). Still: `src/assets/posters/hero.png`.
+  - `public/video/city-av1.mp4` and `city.mp4`: the rooftop clip behind the sign-up section, 2.4 to 8.3 s of the second original, dipping through ink at the loop point (a dissolve doubled the vehicles because the camera is moving). Still: `src/assets/posters/city.png`.
+  - The page paints with the stills; videos start downloading only after the page has loaded and when near the screen, and never with reduced motion or data saver on.
+- Fonts: `public/fonts/inter.woff2` and `unbounded.woff2`, cut from the Google Fonts variable originals to the letters the site uses (English, Hausa ɓ ɗ ƙ ƴ, ₦) and weights 400 to 800, with fontTools `varLib.instancer` and `pyftsubset`. Add a letter the site starts using to the subset list and rebuild them.
+- `public/map.svg`: the Kano street map, written by `scripts/make-map.mjs`, kept out of the HTML so it caches.
+- `public/_headers`: Cloudflare cache rules.
 - `src/components/Logo.astro`: Almustafa's mark and wordmark from `public/brand/`.
 - `src/components/StoreBadges.astro`: official App Store and Google Play badges from `public/badges/`.
 - `src/styles/global.css`: colours and spacing, copied from `deza-monorepo/packages/ui-kit`.

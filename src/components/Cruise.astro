@@ -1,19 +1,31 @@
 ---
 // A keke and a courier cruising across the page as you scroll, past the names
 // of Kano neighbourhoods. Shows only once both cut-outs are in
-// public/images/cutouts/ (keke.webp and courier.webp, transparent, facing right).
-import fs from "node:fs";
-import path from "node:path";
+// src/assets/cutouts/ (keke.png and courier.png, transparent, facing right).
+// They are served as sharp AVIF/WebP sized to the road.
+import { getImage } from "astro:assets";
+import type { ImageMetadata } from "astro";
 
 interface Props {
   places: readonly string[];
 }
 
 const { places } = Astro.props;
-const dir = path.join(process.cwd(), "public/images/cutouts");
-const find = (n: string) => ["webp", "png"].map((e) => `${n}.${e}`).find((f) => fs.existsSync(path.join(dir, f)));
-const keke = find("keke");
-const courier = find("courier");
+const files = import.meta.glob<{ default: ImageMetadata }>("../assets/cutouts/*.png", { eager: true });
+const pick = (n: string) => Object.entries(files).find(([p]) => p.endsWith(`/${n}.png`))?.[1].default;
+
+async function cut(img: ImageMetadata | undefined) {
+  if (!img) return null;
+  const ws = [400, 640, 900, 1200].filter((w) => w <= img.width);
+  const set = async (format: "avif" | "webp", quality: number) =>
+    (await Promise.all(ws.map((width) => getImage({ src: img, width, format, quality })))).map((x, i) => `${x.src} ${ws[i]}w`).join(", ");
+  const src = (await getImage({ src: img, width: 640, format: "webp", quality: 85 })).src;
+  return { avif: await set("avif", 66), webp: await set("webp", 85), src, w: img.width, h: img.height };
+}
+
+const keke = await cut(pick("keke"));
+const courier = await cut(pick("courier"));
+const sizes = "(max-width: 750px) 220px, min(28.4vw, 400px)";
 ---
 
 {
@@ -25,8 +37,16 @@ const courier = find("courier");
         ))}
       </div>
       <div class="road">
-        <img class="v keke" src={`/images/cutouts/${keke}`} alt="" loading="lazy" decoding="async" />
-        <img class="v courier" src={`/images/cutouts/${courier}`} alt="" loading="lazy" decoding="async" />
+        {[
+          ["keke", keke],
+          ["courier", courier],
+        ].map(([k, c]: any) => (
+          <picture>
+            <source type="image/avif" srcset={c.avif} sizes={sizes} />
+            <source type="image/webp" srcset={c.webp} sizes={sizes} />
+            <img class={`v ${k}`} src={c.src} width={c.w} height={c.h} alt="" loading="lazy" decoding="async" />
+          </picture>
+        ))}
       </div>
     </section>
   )
