@@ -126,6 +126,7 @@ export const copy = {
       ],
       bizTitle: "Selling on WhatsApp or Instagram?",
       bizBody: "Deza Delivery is for Kano shops and online sellers too. Send goods to your customers and share the live tracking link with them.",
+      cta: "Get delivery updates",
       photoAlt: "A dispatch rider handing a package to a woman at her gate",
     },
     safety: {
@@ -321,6 +322,7 @@ export const copy = {
       ],
       bizTitle: "Kana sayarwa a WhatsApp ko Instagram?",
       bizBody: "An gina Deza Delivery don shaguna da 'yan kasuwar Kano ma. Aika wa abokan cinikinka kaya, ka tura musu link don su bi kayan kai tsaye.",
+      cta: "Samu labarin aika kaya",
       photoAlt: "Dispatch rider yana miƙa wa wata mace kaya a ƙofar gidanta",
     },
     safety: {
