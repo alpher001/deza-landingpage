@@ -207,6 +207,12 @@ export const copy = {
       notOpen: "Sign-ups open very soon. Please check back in a few days.",
       error: "That didn't go through. Please check your number and try again.",
     },
+    contact: {
+      ask: "Still have a question?",
+      chat: "Chat with us on WhatsApp",
+      footer: "WhatsApp us",
+      hello: "Hello Deza, I have a question.",
+    },
     footer: {
       tagline: "Keke napep and delivery, made in Kano.",
       areasTitle: "Built for Kano",
@@ -412,6 +418,12 @@ export const copy = {
       slowDown: "An gwada sau da yawa daga wannan wayar. Jira 'yan mintuna ka sake gwadawa.",
       notOpen: "Rajista za ta buɗe nan ba da jimawa ba. Ka sake dubawa nan da 'yan kwanaki.",
       error: "Bai shiga ba. Duba lambarka ka sake gwadawa.",
+    },
+    contact: {
+      ask: "Akwai sauran tambaya?",
+      chat: "Yi mana magana a WhatsApp",
+      footer: "WhatsApp",
+      hello: "Sannu Deza, ina da tambaya.",
     },
     footer: {
       tagline: "Keke napep da aika kaya, daga Kano.",
