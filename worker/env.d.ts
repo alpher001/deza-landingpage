@@ -12,4 +12,6 @@ interface D1Database {
   prepare(query: string): D1PreparedStatement;
   batch(statements: D1PreparedStatement[]): Promise<D1Result[]>;
 }
-type PagesFunction<Env = unknown> = (context: { request: Request; env: Env }) => Response | Promise<Response>;
+interface Fetcher {
+  fetch(request: Request): Promise<Response>;
+}

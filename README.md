@@ -36,27 +36,29 @@ Node 22.12 or newer.
 - `src/pages/robots.txt.ts` and `src/pages/sitemap.xml.ts`: become `/robots.txt` and `/sitemap.xml` when the site is built. They take the address from `site` in `astro.config.mjs`.
 - `public/`: files served as they are: photos, badges, logo, favicon and app icons, `og.jpg` (the WhatsApp/Twitter preview) and `site.webmanifest`.
 
-## Deploy (Cloudflare Pages, free plan)
+## Deploy (Cloudflare Workers, free plan)
 
-1. Cloudflare dashboard > Workers & Pages > Create > **Pages** > Connect to Git, then pick `alpher001/deza-landingpage`.
-2. Framework preset Astro, build command `npm run build`, output folder `dist`. Add environment variables `NODE_VERSION` = `22` and `SITE_URL` = `https://<the domain>`.
-3. Save and deploy. The site is live at `<project>.pages.dev`, and every push to `main` redeploys it.
-4. Domain: Cloudflare > Add a site > the .ng domain > Free plan. Put the two nameservers it shows into the domain's nameserver fields at Gigyhost (turn off the registrar lock first if asked). When Cloudflare shows the domain as active, open the Pages project > Custom domains and add the domain and `www`.
+The repo deploys as one Cloudflare Worker: `wrangler.jsonc` serves `dist/` as static files and sends `/api/*` to `worker/index.ts`.
+
+1. Cloudflare dashboard > Workers & Pages > Create > Import a repository > `alpher001/deza-landingpage`.
+2. Build command `npm run build`, deploy command `npx wrangler deploy`. Add the build variable `NODE_VERSION` = `22` (and `SITE_URL` = `https://<the domain>` once known).
+3. Every push to `main` rebuilds and redeploys. The site is live at `deza-landingpage.<account>.workers.dev`.
+4. Domain: Cloudflare > Add a domain > the .ng domain > Free plan. Put the two nameservers it shows into the domain's nameserver fields at Gigyhost (turn off the registrar lock first if asked). When the domain is active, open the Worker > Settings > Domains & Routes > Add > Custom domain, for the domain and `www`.
 
 ## Waitlist
 
-`functions/api/waitlist.ts` is a Cloudflare Pages Function on the same site. It saves one row per phone number in Cloudflare D1 and creates its tables on first use.
+`worker/waitlist.ts` saves one row per phone number in Cloudflare D1 and creates its tables on first use.
 
 Switch it on:
-1. Workers & Pages > D1 > Create database, named `deza-waitlist`.
-2. Pages project > Settings > Bindings > Add > D1 database: variable name `DB`, database `deza-waitlist`. Redeploy.
-3. Optional (recommended): Turnstile > Add widget for the domain, mode "Invisible" or "Managed". Then add `PUBLIC_TURNSTILE_SITE_KEY` (site key) as a build variable and `TURNSTILE_SECRET` (secret key, encrypted) to the Pages project, and redeploy.
+1. Storage & Databases > D1 > Create database, named `deza-waitlist`. Copy its Database ID.
+2. In `wrangler.jsonc`, add `"d1_databases": [{ "binding": "DB", "database_name": "deza-waitlist", "database_id": "<the ID>" }]` and push. (A binding added only in the dashboard is removed by the next deploy, so it lives in this file.)
+3. Optional (recommended): Turnstile > Add widget for the domain. Add `PUBLIC_TURNSTILE_SITE_KEY` (site key) as a build variable and `TURNSTILE_SECRET` (secret key) as an encrypted variable on the Worker, then redeploy.
 
-Until the database is bound, the form says sign-ups open soon and saves nothing. The sign-ups are in D1 > `deza-waitlist` > `signups` (phone, area, role, lang, dates, times signed up). They can be exported from there.
+Until the database is bound, the form says sign-ups open soon and saves nothing. The sign-ups are in D1 > `deza-waitlist` > `signups` (phone, area, role, lang, dates, times signed up), and can be exported from there.
 
 Guards: phone numbers are checked and stored as `+234...`; signing up again answers "already on the list" and updates the area and choice; a hidden field catches simple bots; each network address gets 20 tries per 10 minutes (mobile networks share addresses, so the limit is generous); Turnstile, once set, blocks scripted sign-ups.
 
-Test locally: `npx wrangler pages dev dist --d1 DB` after `npm run build`.
+Test locally: `npm run build`, then `npx wrangler dev`.
 
 ## To confirm before launch
 

@@ -1,15 +1,15 @@
 // POST /api/waitlist: saves one sign-up in Cloudflare D1.
 //
-// Runs as a Cloudflare Pages Function next to the static site. It needs a D1
-// database bound as `DB` (Pages project > Settings > Bindings). Optional:
-// TURNSTILE_SECRET (with PUBLIC_TURNSTILE_SITE_KEY at build time) for the
-// invisible bot check. The tables are created on first use.
+// Called from worker/index.ts. It needs a D1 database bound as `DB` (see
+// wrangler.jsonc). Optional: TURNSTILE_SECRET (with PUBLIC_TURNSTILE_SITE_KEY
+// at build time) for the invisible bot check. The tables are created on
+// first use.
 //
 // One row per phone number: signing up again updates the area and choice and
 // answers "existing", never an error. Each network address gets 20 tries per
 // ten minutes; a hidden field catches simple bots.
 
-interface Env {
+export interface Env {
   DB?: D1Database;
   TURNSTILE_SECRET?: string;
 }
@@ -73,7 +73,8 @@ async function passesTurnstile(secret: string, token: unknown, ip: string) {
   return out.success === true;
 }
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export async function handleWaitlist(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "POST") return json({ status: "method" }, 405);
   // Not switched on yet: the page shows "sign-ups open soon".
   if (!env.DB) return json({ status: "closed" }, 503);
 
@@ -128,6 +129,4 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     .run();
 
   return json({ status: before ? "existing" : "new" });
-};
-
-export const onRequest: PagesFunction<Env> = async () => json({ status: "method" }, 405);
+}

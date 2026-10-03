@@ -1,0 +1,15 @@
+// Cloudflare Workers settings. `npx wrangler deploy` (run by Cloudflare after
+// `npm run build`) uploads dist/ as the site and worker/index.ts for /api/*.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "deza-landingpage",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  }
+  // Waitlist database: once it exists, add its binding here, e.g.
+  // "d1_databases": [{ "binding": "DB", "database_name": "deza-waitlist", "database_id": "<id>" }]
+}
