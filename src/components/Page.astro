@@ -417,20 +417,41 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
   // It slides away while you scroll down to read, and comes back as soon as
   // you scroll up a little (or tab into it), so the waitlist button is
   // always one flick away without covering the page.
+  const keyFocus = () => {
+    try {
+      return !!top?.querySelector(":focus-visible");
+    } catch {
+      return false; // Safari before 15.4 has no :focus-visible
+    }
+  };
   let lastY = scrollY;
-  const onScroll = () => {
+  let queued = false;
+  const update = () => {
+    queued = false;
     if (!top) return;
-    const y = scrollY;
+    // Clamp the bounce past the top and bottom on iPhone, which otherwise
+    // reads as a scroll the wrong way and flicks the bar in or out.
+    const y = Math.min(Math.max(scrollY, 0), document.documentElement.scrollHeight - innerHeight);
     top.classList.toggle("solid", y > 8);
-    if (y < 120 || top.contains(document.activeElement)) top.classList.remove("away");
+    if (y < 120 || keyFocus()) top.classList.remove("away");
     else if (y - lastY > 8) top.classList.add("away");
     else if (lastY - y > 8) top.classList.remove("away");
     else return;
     lastY = y;
   };
+  const onScroll = () => {
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(update);
+    }
+  };
   addEventListener("scroll", onScroll, { passive: true });
-  top?.addEventListener("focusin", () => top.classList.remove("away"));
-  onScroll();
+  // Only keyboard focus pins the bar; a tapped link keeps focus on phones and
+  // would otherwise stop the bar from ever hiding again.
+  top?.addEventListener("focusin", () => {
+    if (keyFocus()) top.classList.remove("away");
+  });
+  update();
 
   // Hero: Ride and Delivery take turns. Each tab fills while it is showing;
   // when it is full the other one takes over. Tapping a tab picks it.
@@ -761,6 +782,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     color: var(--paper);
     background: linear-gradient(to bottom, rgb(var(--ink-rgb) / 0.5), transparent);
     isolation: isolate;
+    will-change: transform;
     transition: transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
@@ -785,6 +807,16 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
   .top.solid::before {
     opacity: 1;
+  }
+
+  /* Phones: a near-solid backing with no live blur. Blurring the page behind
+     a moving bar is what made it stutter the first time it slid back in. */
+  @media (max-width: 720px) {
+    .top::before {
+      background: color-mix(in srgb, var(--ink) 97%, transparent);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   .top-bar {
@@ -2409,16 +2441,9 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       right: 12px;
     }
 
-    .sends {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px 16px;
-    }
-
     .sends li {
-      padding: 0;
-      background: none;
-      border-radius: 0;
+      padding: 7px 12px;
+      font-size: 13px;
     }
 
     .chips {
@@ -2476,7 +2501,13 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     }
 
     .foot-nav a {
+      justify-self: start;
       padding-block: 11px;
+    }
+
+    /* On a grid cell the line sits under the words, not the whole cell. */
+    .foot-nav a::after {
+      bottom: 6px;
     }
   }
 </style>
