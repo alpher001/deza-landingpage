@@ -186,13 +186,18 @@ p {
   color: var(--ink);
 }
 
-/* Pictures can't be dragged off the page or selected by accident. */
+/* Pictures and films can't be dragged off, selected, saved or downloaded. */
 img,
 video,
-picture {
+picture,
+canvas {
   -webkit-user-drag: none;
   user-select: none;
   -webkit-touch-callout: none;
+  /* Android Chrome offers "download image" on a long press whatever the CSS
+     above says. Letting the press fall through to the block behind is the
+     one thing that stops it everywhere. */
+  pointer-events: none;
 }
 
 /* Buttons: on hover the colour deepens and the arrow moves forward; a firm
