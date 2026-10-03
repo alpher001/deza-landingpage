@@ -1,0 +1,164 @@
+---
+// Shown for any address that doesn't exist (Cloudflare serves it with a 404
+// status). One page in both languages, since we can't tell which one the
+// visitor reads. A keke drives along the kerb so the page still feels alive.
+import "../styles/global.css";
+import { getImage } from "astro:assets";
+import Logo from "../components/Logo.astro";
+import keke from "../assets/cutouts/keke.png";
+
+const kekeWebp = await getImage({ src: keke, width: 360, format: "webp", quality: 85 });
+const kekeAvif = await getImage({ src: keke, width: 360, format: "avif", quality: 66 });
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1E2329" />
+    <meta name="robots" content="noindex" />
+    <title>Page not found | Deza</title>
+    <link rel="preload" href="/fonts/unbounded.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  </head>
+  <body class="nf">
+    <header class="wrap nf-top">
+      <a class="nf-brand" href="/" aria-label="Deza home"><Logo height={26} motion="intro" /></a>
+    </header>
+
+    <main class="wrap nf-main">
+      <h1>Wrong turn.</h1>
+      <p class="nf-lead">This page doesn't exist, or it has moved. The road back is right here.</p>
+      <p class="nf-ha" lang="ha">Wannan shafin babu shi. Ga hanyar komawa.</p>
+      <div class="nf-actions">
+        <a class="btn btn-gold" href="/">Back to Deza</a>
+        <a class="text-link" href="/ha/" hreflang="ha" lang="ha">Koma shafin Hausa</a>
+      </div>
+    </main>
+
+    <div class="road" aria-hidden="true">
+      <picture class="keke">
+        <source srcset={kekeAvif.src} type="image/avif" />
+        <img src={kekeWebp.src} width="180" height={Math.round((180 * keke.height) / keke.width)} alt="" draggable="false" decoding="async" />
+      </picture>
+    </div>
+  </body>
+</html>
+
+<style>
+  .nf {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: var(--ink);
+    color: var(--paper);
+    overflow: hidden;
+  }
+
+  .nf-top {
+    display: flex;
+    align-items: center;
+    height: 68px;
+  }
+
+  .nf-brand {
+    color: var(--paper);
+    text-decoration: none;
+  }
+
+  .nf-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: 48px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(48px, 9vw, 112px);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+  }
+
+  .nf-lead {
+    margin: 24px 0 0;
+    max-width: 34ch;
+    font-size: clamp(18px, 1.6vw, 21px);
+    color: var(--paper-70);
+  }
+
+  .nf-ha {
+    margin: 8px 0 0;
+    font-size: 16px;
+    color: var(--paper-55);
+  }
+
+  .nf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 28px;
+    margin-top: 36px;
+  }
+
+  .nf :focus-visible {
+    outline-color: var(--gold);
+  }
+
+  /* The kerb, with the keke driving along it. */
+  .road {
+    position: relative;
+    height: 120px;
+    border-top: 1px solid var(--paper-12);
+  }
+
+  .keke {
+    position: absolute;
+    bottom: 22px;
+    left: 0;
+    width: 150px;
+    transform: translateX(-160px);
+  }
+
+  .keke img {
+    width: 100%;
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .keke {
+      animation: kerb 9s linear 0.6s infinite;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .keke {
+      transform: translateX(24px);
+    }
+  }
+
+  @keyframes kerb {
+    from {
+      transform: translateX(-160px);
+    }
+    to {
+      transform: translateX(100vw);
+    }
+  }
+
+  @media (max-width: 720px) {
+    .keke {
+      width: 104px;
+    }
+
+    .road {
+      height: 96px;
+    }
+  }
+</style>

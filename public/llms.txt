@@ -1,0 +1,18 @@
+# Deza
+
+> Deza is a mobility company in Kano, Nigeria. Deza Ride books keke napep rides (also called Adaidaita Sahu) at a fare you see before you confirm. Deza Delivery sends packages and goods across Kano with a dispatch rider. Both are in development: rides open first, delivery soon after. People can join the waitlist on the website today.
+
+Key facts:
+
+- City: Kano, Nigeria. Areas include Sabon Gari, Fagge, Nassarawa, Tarauni, Gwale, Dala, Kano Municipal, Ungogo, Kumbotso and Bompai.
+- Languages: English and Hausa.
+- Status: not open yet. The Deza app for iPhone and Android is coming soon.
+- Fares: shown in full before you confirm; pay cash or by transfer.
+- Delivery: a dispatch rider picks up from a house, shop or office and hands over only when the receiver's code matches. Built for WhatsApp and Instagram sellers too.
+- Drivers and dispatch riders can register through the waitlist ("Drive or deliver").
+- Contact: WhatsApp +234 707 917 4330 (https://wa.me/2347079174330).
+
+## Pages
+
+- [Deza, English](https://deza.ng/): rides, delivery, safety, driving with Deza, questions and the waitlist.
+- [Deza, Hausa](https://deza.ng/ha/): the same page in Hausa.

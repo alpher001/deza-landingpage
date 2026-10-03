@@ -8,6 +8,8 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
+    // Unknown addresses get the 404 page (src/pages/404.astro), status 404.
+    "not_found_handling": "404-page",
     "run_worker_first": ["/api/*"]
   },
   // Waitlist database (Cloudflare D1). Bound here, not in the dashboard: a
