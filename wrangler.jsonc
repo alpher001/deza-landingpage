@@ -9,7 +9,8 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "run_worker_first": ["/api/*"]
-  }
-  // Waitlist database: once it exists, add its binding here, e.g.
-  // "d1_databases": [{ "binding": "DB", "database_name": "deza-waitlist", "database_id": "<id>" }]
+  },
+  // Waitlist database (Cloudflare D1). Bound here, not in the dashboard: a
+  // dashboard-only binding is removed by the next deploy.
+  "d1_databases": [{ "binding": "DB", "database_name": "deza-waitlist", "database_id": "c7041677-d48e-41de-8e4b-8c89ccf131f9" }]
 }
