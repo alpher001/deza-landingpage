@@ -21,7 +21,11 @@ const t = copy[lang];
 const home = lang === "en" ? "/" : "/ha/";
 // The waitlist endpoint is decided later. Until it is set, the form says
 // sign-ups open soon instead of pretending to save anything.
-const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "";
+// The sign-up endpoint: the Cloudflare function in functions/api/waitlist.ts.
+const waitlistUrl = import.meta.env.PUBLIC_WAITLIST_URL ?? "/api/waitlist";
+// Cloudflare Turnstile (invisible bot check). Set at build time once the
+// site key exists; without it the form still works, with the other guards.
+const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 const has = (p: string) => fs.existsSync(path.join(process.cwd(), "public", p));
 const firstOf = (...names: string[]) =>
@@ -306,12 +310,13 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
         <form
           class="form reveal"
           data-endpoint={waitlistUrl}
-          data-msg-success={t.waitlist.success}
+          data-msg-slow={t.waitlist.slowDown}
           data-msg-closed={t.waitlist.notOpen}
           data-msg-error={t.waitlist.error}
           data-msg-phone={t.waitlist.phoneError}
           novalidate
         >
+          <div class="fields">
           <label for={`wl-phone-${lang}`}>{t.waitlist.phone}</label>
           <input
             id={`wl-phone-${lang}`}
@@ -324,7 +329,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
             placeholder={t.waitlist.phonePlaceholder}
           />
           <p id={`wl-phone-err-${lang}`} class="field-err" aria-live="polite"></p>
-          <label for={`wl-area-${lang}`}>{t.waitlist.area}</label>
+          <label for={`wl-area-${lang}`}>{t.waitlist.area} <span class="opt">({t.waitlist.optional})</span></label>
           <input id={`wl-area-${lang}`} name="area" type="text" autocomplete="address-level3" placeholder={t.waitlist.areaPlaceholder} />
           <fieldset>
             <legend>{t.waitlist.role}</legend>
@@ -335,9 +340,21 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
             </div>
           </fieldset>
           <input type="hidden" name="lang" value={lang} />
+          {/* Left empty by people (it is off screen); bots fill it in. */}
+          <div class="trap" aria-hidden="true">
+            <label>Company <input type="text" name="company" tabindex="-1" autocomplete="off" /></label>
+          </div>
+          {turnstileKey && <div class="turnstile" data-sitekey={turnstileKey} data-appearance="interaction-only" data-size="flexible" />}
           <button class="btn btn-gold" type="submit">{t.waitlist.submit}</button>
           <p class="fine">{t.waitlist.privacy}</p>
           <p class="status-msg" role="status" aria-live="polite"></p>
+          </div>
+          <div class="done" hidden>
+            <span class="done-tick" aria-hidden="true"><Icon name="check" size={28} stroke={2.5} /></span>
+            <h3 class="done-title" tabindex="-1" data-new={t.waitlist.successTitle} data-old={t.waitlist.alreadyTitle}></h3>
+            <p class="done-body" data-new={t.waitlist.success} data-old={t.waitlist.already}></p>
+            <button type="button" class="text-link done-again">{t.waitlist.another}</button>
+          </div>
         </form>
       </div>
     </section>
@@ -554,11 +571,29 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     if (phoneErr) phoneErr.textContent = "";
   };
   phone?.addEventListener("input", clearPhone);
+  // Turnstile's script loads only once someone starts on the form.
+  const ts = form?.querySelector<HTMLElement>(".turnstile");
+  if (form && ts) {
+    form.addEventListener(
+      "focusin",
+      () => {
+        (window as Window & { onTs?: () => void }).onTs = () => {
+          (window as Window & { turnstile?: { render: (el: HTMLElement, o: object) => void } }).turnstile?.render(ts, { sitekey: ts.dataset.sitekey, appearance: "interaction-only", size: "flexible" });
+        };
+        const sc = document.createElement("script");
+        sc.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTs&render=explicit";
+        sc.async = true;
+        document.head.append(sc);
+      },
+      { once: true },
+    );
+  }
+
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const status = form.querySelector<HTMLElement>(".status-msg")!;
-    const button = form.querySelector<HTMLButtonElement>("button")!;
-    const { endpoint, msgSuccess, msgClosed, msgError, msgPhone } = form.dataset;
+    const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    const { endpoint, msgClosed, msgError, msgPhone, msgSlow } = form.dataset;
     const say = (msg: string, state = "") => {
       status.textContent = "";
       requestAnimationFrame(() => {
@@ -576,22 +611,53 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     clearPhone();
     if (!endpoint) return say(msgClosed ?? "");
     button.disabled = true;
+    say("");
     try {
-      const data = Object.fromEntries(new FormData(form));
+      const data: Record<string, unknown> = Object.fromEntries(new FormData(form));
       data.phone = "+234" + digits.replace(/^(\+?234|0)/, "");
+      data.token = data["cf-turnstile-response"];
+      delete data["cf-turnstile-response"];
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(data),
       });
+      // Not switched on yet (or no server behind the page, as in previews).
+      if ([404, 405, 501, 503].includes(res.status)) return say(msgClosed ?? "");
+      if (res.status === 429) return say(msgSlow ?? "", "error");
       if (!res.ok) throw new Error(String(res.status));
-      say(msgSuccess ?? "", "ok");
-      form.reset();
+      const { status: kind } = (await res.json()) as { status?: string };
+      done(kind === "existing" ? "old" : "new");
     } catch {
       say(msgError ?? "", "error");
+      (window as Window & { turnstile?: { reset: () => void } }).turnstile?.reset();
     } finally {
       button.disabled = false;
     }
+  });
+
+  // The form turns into a confirmation in the same card: a tick, one line,
+  // and a way to add a different number.
+  const doneBox = form?.querySelector<HTMLElement>(".done");
+  const done = (kind: "new" | "old") => {
+    if (!form || !doneBox) return;
+    const title = doneBox.querySelector<HTMLElement>(".done-title")!;
+    const body = doneBox.querySelector<HTMLElement>(".done-body")!;
+    title.textContent = title.dataset[kind] ?? "";
+    body.textContent = body.dataset[kind] ?? "";
+    form.classList.add("is-done");
+    doneBox.hidden = false;
+    title.focus({ preventScroll: true });
+  };
+  doneBox?.querySelector(".done-again")?.addEventListener("click", () => {
+    if (!form) return;
+    form.reset();
+    form.classList.remove("is-done");
+    doneBox.hidden = true;
+    const status = form.querySelector<HTMLElement>(".status-msg");
+    if (status) status.textContent = "";
+    (window as Window & { turnstile?: { reset: () => void } }).turnstile?.reset();
+    phone?.focus();
   });
 </script>
 
@@ -1788,6 +1854,83 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
   .form button:disabled {
     opacity: 0.6;
+  }
+
+  .fields {
+    display: contents;
+  }
+
+  .form.is-done .fields {
+    display: none;
+  }
+
+  .opt {
+    color: var(--ink-70);
+    font-weight: 500;
+  }
+
+  /* Off screen, not display:none, so simple bots still see and fill it. */
+  .trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .turnstile:empty {
+    display: none;
+  }
+
+  .done {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+    padding-block: 8px;
+  }
+
+  .done[hidden] {
+    display: none;
+  }
+
+  .done-tick {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  .motion-ok .done:not([hidden]) .done-tick {
+    animation: tick-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1.2) both;
+  }
+
+  @keyframes tick-in {
+    from {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+  }
+
+  .done-title {
+    font-size: clamp(24px, 3vw, 32px);
+    outline: none;
+  }
+
+  .done-body {
+    color: var(--ink-70);
+  }
+
+  .done-again {
+    margin-top: 4px;
+    background: none;
+    border: 0;
+    padding-inline: 0;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
   }
 
   .fine {

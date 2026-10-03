@@ -36,15 +36,27 @@ Node 22.12 or newer.
 - `src/pages/robots.txt.ts` and `src/pages/sitemap.xml.ts`: become `/robots.txt` and `/sitemap.xml` when the site is built. They take the address from `site` in `astro.config.mjs`.
 - `public/`: files served as they are: photos, badges, logo, favicon and app icons, `og.jpg` (the WhatsApp/Twitter preview) and `site.webmanifest`.
 
-## Deploy (Cloudflare)
+## Deploy (Cloudflare Pages, free plan)
 
-1. Cloudflare dashboard, Workers & Pages, Create, connect this GitHub repo.
-2. Build command `npm run build`, output folder `dist`.
-3. Add the custom domain once the .ng domain's nameservers point to Cloudflare.
+1. Cloudflare dashboard > Workers & Pages > Create > **Pages** > Connect to Git, then pick `alpher001/deza-landingpage`.
+2. Framework preset Astro, build command `npm run build`, output folder `dist`. Add environment variables `NODE_VERSION` = `22` and `SITE_URL` = `https://<the domain>`.
+3. Save and deploy. The site is live at `<project>.pages.dev`, and every push to `main` redeploys it.
+4. Domain: Cloudflare > Add a site > the .ng domain > Free plan. Put the two nameservers it shows into the domain's nameserver fields at Gigyhost (turn off the registrar lock first if asked). When Cloudflare shows the domain as active, open the Pages project > Custom domains and add the domain and `www`.
 
 ## Waitlist
 
-The form posts JSON (`phone`, `area`, `role`, `lang`) to the URL in `PUBLIC_WAITLIST_URL`. While that is unset the form says sign-ups open soon and saves nothing. Storage is decided later.
+`functions/api/waitlist.ts` is a Cloudflare Pages Function on the same site. It saves one row per phone number in Cloudflare D1 and creates its tables on first use.
+
+Switch it on:
+1. Workers & Pages > D1 > Create database, named `deza-waitlist`.
+2. Pages project > Settings > Bindings > Add > D1 database: variable name `DB`, database `deza-waitlist`. Redeploy.
+3. Optional (recommended): Turnstile > Add widget for the domain, mode "Invisible" or "Managed". Then add `PUBLIC_TURNSTILE_SITE_KEY` (site key) as a build variable and `TURNSTILE_SECRET` (secret key, encrypted) to the Pages project, and redeploy.
+
+Until the database is bound, the form says sign-ups open soon and saves nothing. The sign-ups are in D1 > `deza-waitlist` > `signups` (phone, area, role, lang, dates, times signed up). They can be exported from there.
+
+Guards: phone numbers are checked and stored as `+234...`; signing up again answers "already on the list" and updates the area and choice; a hidden field catches simple bots; each network address gets 20 tries per 10 minutes (mobile networks share addresses, so the limit is generous); Turnstile, once set, blocks scripted sign-ups.
+
+Test locally: `npx wrangler pages dev dist --d1 DB` after `npm run build`.
 
 ## To confirm before launch
 
