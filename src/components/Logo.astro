@@ -90,22 +90,23 @@ const letters = bounds.map((b, i) => subs.filter((s) => minX(s) < b && minX(s) >
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    /* Intro: the mark drives in, the letters rise one by one. */
+    /* Intro: the mark drives in, the letters rise one by one. Paced so the
+       move is seen: it starts after the page paints and takes about 2.5 s. */
     .m-intro .mark svg {
-      animation: drive 0.9s cubic-bezier(0.2, 0.9, 0.2, 1.08) 0.05s both;
+      animation: drive 1.6s cubic-bezier(0.2, 0.9, 0.2, 1.06) 0.4s both;
     }
 
     .m-intro .streak {
-      animation: streak 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.05s both;
+      animation: streak 1.7s cubic-bezier(0.2, 0.7, 0.2, 1) 0.4s both;
     }
 
     .m-intro .streak.s2 {
-      animation-delay: 0.12s;
+      animation-delay: 0.6s;
     }
 
     .m-intro .word path {
-      animation: letter 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-      animation-delay: calc(0.3s + var(--i) * 0.06s);
+      animation: letter 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      animation-delay: calc(1s + var(--i) * 0.12s);
     }
 
     .m-intro:hover .mark svg {
@@ -123,20 +124,20 @@ const letters = bounds.map((b, i) => subs.filter((s) => minX(s) < b && minX(s) >
     }
 
     .m-scroll.is-in .mark svg {
-      animation: drive 1s cubic-bezier(0.2, 0.9, 0.2, 1.04) both;
+      animation: drive 1.6s cubic-bezier(0.2, 0.9, 0.2, 1.04) both;
     }
 
     .m-scroll.is-in .streak {
-      animation: streak 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      animation: streak 1.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
     }
 
     .m-scroll.is-in .streak.s2 {
-      animation-delay: 0.08s;
+      animation-delay: 0.2s;
     }
 
     .m-scroll.is-in .word path {
-      animation: letter 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-      animation-delay: calc(0.3s + var(--i) * 0.07s);
+      animation: letter 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      animation-delay: calc(0.6s + var(--i) * 0.12s);
     }
   }
 
