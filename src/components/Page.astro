@@ -470,7 +470,9 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
             // Start on the frame the still shows, so the fade-in has no ghosting.
             v.src = ((av1 && d.av1) || (phone && d.mp4Small) || d.mp4!) + (d.start ? `#t=${d.start}` : "");
           }
-          v.play().catch(() => {});
+          // Low Power Mode on iPhones refuses to start a film on its own;
+          // the first tap anywhere starts it.
+          v.play().catch(() => addEventListener("touchend", () => v.play().catch(() => {}), { once: true, passive: true }));
         },
         { rootMargin: "200px" },
       ).observe(v.parentElement!);
