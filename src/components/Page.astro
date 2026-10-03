@@ -451,8 +451,10 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
   // Each clip is cut to loop on itself, so there is no jump to hide. They
   // pause off screen and stay as stills when motion is off or data is saved.
   const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
-  // Stills only on saved data or a slow network (2G/3G): the films are extra.
-  const saveData = conn?.saveData || /(^|-)(2g|3g)$/.test(conn?.effectiveType ?? "");
+  // Stills only when data saving is on or the network is 2G: the films are
+  // extra. (Not 3G: browsers and in-app views report 3G for many ordinary
+  // connections, which left the hero as a still.)
+  const saveData = conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? "");
   const startVideos = () => {
     const av1 = document.createElement("video").canPlayType('video/mp4; codecs="av01.0.05M.10"') === "probably";
     const phone = matchMedia("(max-width: 720px)").matches;
