@@ -61,6 +61,18 @@ const jsonLd = {
 <html lang={lang}>
   <head>
     <meta charset="utf-8" />
+    <!-- Language switch: when the other language opens at your saved place,
+         hold the first paint until that place is set, so the top never shows.
+         Chrome and Edge wait for the marker at the end of the page; other
+         browsers keep the page hidden for that moment instead. -->
+    <script is:inline>
+      try {
+        if (sessionStorage.getItem("deza-place")) {
+          if ("blocking" in HTMLLinkElement.prototype) document.write('<link rel="expect" href="#place-set" blocking="render">');
+          else document.documentElement.classList.add("placing");
+        }
+      } catch {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#1E2329" />
     <title>{title}</title>

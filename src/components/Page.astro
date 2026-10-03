@@ -406,6 +406,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
           scrollTo({ top: scrollY + r.top + saved.f * r.height, behavior: "instant" });
         }
       } catch {}
+      document.documentElement.classList.remove("placing");
       document.addEventListener("click", (e) => {
         const a = e.target.closest && e.target.closest("a[hreflang]");
         if (!a) return;
@@ -419,6 +420,7 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       });
     })();
   </script>
+  <div id="place-set" hidden></div>
 </Base>
 
 <script>
@@ -439,6 +441,26 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       { rootMargin: "0px 0px -10% 0px" },
     );
     document.querySelectorAll(".reveal, [data-inview]").forEach((el) => seen.observe(el));
+  }
+
+  // Pictures, films and store badges: no "save image / open image" menu on
+  // a long press (Android ignores the CSS that stops it on iPhone).
+  addEventListener("contextmenu", (e) => {
+    if ((e.target as Element).closest?.("img, video, picture, canvas, svg")) e.preventDefault();
+  });
+
+  // Apps such as X open links in their own browser, which can blow up text
+  // to the phone's font size. Measure that and undo it inside the app screen
+  // pictures, which are drawings of a phone, not reading text.
+  const screen = document.querySelector(".device-screen");
+  if (screen) {
+    const probe = document.createElement("span");
+    probe.textContent = "M";
+    probe.style.cssText = "position:absolute;visibility:hidden;font:100px/1 sans-serif;white-space:nowrap";
+    screen.append(probe);
+    const zoom = probe.getBoundingClientRect().height / 100;
+    probe.remove();
+    if (zoom > 1.04) document.documentElement.style.setProperty("--tz", zoom.toFixed(3));
   }
 
   // Header turns solid once you scroll past the top.
