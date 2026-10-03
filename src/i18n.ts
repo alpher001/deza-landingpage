@@ -13,7 +13,7 @@ export const copy = {
       title: "Keke napep rides and package delivery in Kano | Deza",
       description:
         "Deza is a Kano mobility company. Book a keke napep (Adaidaita Sahu) at a fixed fare, and soon send packages across Kano with a dispatch rider.",
-      ogAlt: "Kekes on a busy Kano street at golden hour",
+      ogAlt: "Deza, Moving Kano forward: a keke napep and a dispatch rider on a Kano street",
     },
     nav: {
       mainLabel: "Main",
@@ -225,7 +225,7 @@ export const copy = {
       title: "Hawan keke napep (Adaidaita Sahu) da aika kaya a Kano | Deza",
       description:
         "Deza kamfanin sufuri ne na Kano. Kira keke napep, wato Adaidaita Sahu, ka ga kuɗin tun farko. Nan ba da jimawa ba, aika kaya ta hannun dispatch rider.",
-      ogAlt: "Keke napep a titin Kano mai cunkoso da yamma",
+      ogAlt: "Deza, Muna ciyar da Kano gaba: keke napep da dispatch rider a titin Kano",
     },
     nav: {
       mainLabel: "Babban menu",
