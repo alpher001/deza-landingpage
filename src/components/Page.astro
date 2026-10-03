@@ -387,8 +387,22 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
 
   // Header turns solid once you scroll past the top.
   const top = document.querySelector<HTMLElement>("[data-top]");
-  const onScroll = () => top?.classList.toggle("solid", scrollY > 40);
+  // It slides away while you scroll down to read, and comes back as soon as
+  // you scroll up a little (or tab into it), so the waitlist button is
+  // always one flick away without covering the page.
+  let lastY = scrollY;
+  const onScroll = () => {
+    if (!top) return;
+    const y = scrollY;
+    top.classList.toggle("solid", y > 40);
+    if (y < 120 || top.contains(document.activeElement)) top.classList.remove("away");
+    else if (y - lastY > 8) top.classList.add("away");
+    else if (lastY - y > 8) top.classList.remove("away");
+    else return;
+    lastY = y;
+  };
   addEventListener("scroll", onScroll, { passive: true });
+  top?.addEventListener("focusin", () => top.classList.remove("away"));
   onScroll();
 
   // Hero: Ride and Delivery take turns. Each tab fills while it is showing;
@@ -672,7 +686,12 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
     background: linear-gradient(to bottom, rgb(var(--ink-rgb) / 0.5), transparent);
     transition:
       background-color 250ms,
-      box-shadow 250ms;
+      box-shadow 250ms,
+      transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .top.away {
+    transform: translateY(-100%);
   }
 
   .top.solid {
