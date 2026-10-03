@@ -390,6 +390,35 @@ const doorstepPhoto = firstOf("courier-doorstep", "delivery-hand")!;
       <p class="rights">© {new Date().getFullYear()} {t.footer.rights}</p>
     </div>
   </footer>
+
+  <!-- Switching language keeps your place: the link notes which block you are
+       in and how far down it, and the other page opens at the same spot. Runs
+       inline, before the first paint, so the page never flashes at the top. -->
+  <script is:inline>
+    (() => {
+      const blocks = () => [...document.querySelectorAll("main > *, .foot")];
+      try {
+        const saved = JSON.parse(sessionStorage.getItem("deza-place") || "null");
+        sessionStorage.removeItem("deza-place");
+        const b = saved && blocks()[saved.i];
+        if (b) {
+          const r = b.getBoundingClientRect();
+          scrollTo({ top: scrollY + r.top + saved.f * r.height, behavior: "instant" });
+        }
+      } catch {}
+      document.addEventListener("click", (e) => {
+        const a = e.target.closest && e.target.closest("a[hreflang]");
+        if (!a) return;
+        const list = blocks();
+        const i = list.findIndex((b) => b.getBoundingClientRect().bottom > 0);
+        if (i < 0) return;
+        const r = list[i].getBoundingClientRect();
+        try {
+          sessionStorage.setItem("deza-place", JSON.stringify({ i, f: Math.max(0, -r.top) / r.height }));
+        } catch {}
+      });
+    })();
+  </script>
 </Base>
 
 <script>
