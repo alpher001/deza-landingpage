@@ -217,7 +217,7 @@ export const copy = {
       tagline: "Keke napep and delivery, made in Kano.",
       areasTitle: "Built for Kano",
       areas: ["Sabon Gari", "Fagge", "Nassarawa", "Tarauni", "Gwale", "Dala", "Kano Municipal", "Ungogo", "Kumbotso", "Bompai"],
-      rights: "Deza. Kano, Nigeria.",
+      rights: "Deza. BUK Road, Kano Municipal, Kano, Nigeria.",
     },
   },
   ha: {
@@ -429,7 +429,7 @@ export const copy = {
       tagline: "Keke napep da aika kaya, daga Kano.",
       areasTitle: "An gina don Kano",
       areas: ["Sabon Gari", "Fagge", "Nassarawa", "Tarauni", "Gwale", "Dala", "Kano Municipal", "Ungogo", "Kumbotso", "Bompai"],
-      rights: "Deza. Kano, Najeriya.",
+      rights: "Deza. BUK Road, Kano Municipal, Kano, Nigeria.",
     },
   },
 } as const;
